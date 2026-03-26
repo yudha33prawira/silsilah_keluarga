@@ -12,6 +12,22 @@ body {
   margin: 0;
 }
 
+/* JUDUL */
+h2 {
+  margin: 10px;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  color: blue;
+}
+
 /* TREE */
 .tree {
   display: flex;
@@ -28,7 +44,6 @@ body {
   position: relative;
 }
 
-/* GARIS TURUN */
 .couple::after {
   content: '';
   position: absolute;
@@ -51,7 +66,6 @@ body {
   position: relative;
 }
 
-/* GARIS ANAK */
 .children::before {
   content: '';
   position: absolute;
@@ -68,13 +82,44 @@ body {
   border-radius: 12px;
   padding: 15px;
   background: white;
-  cursor: pointer;
+  transition: 0.2s;
+}
+
+.person:hover {
+  transform: scale(1.05);
 }
 
 .person img {
   width: 90px;
   height: 90px;
   border-radius: 50%;
+  cursor: pointer;
+}
+
+.name {
+  margin-top: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* POPUP */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background: white;
+  width: 90%;
+  max-width: 300px;
+  margin: 80px auto;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 /* RESPONSIVE */
@@ -88,29 +133,57 @@ body {
 
 <body>
 
-<h2 id="judul"></h2>
+<h2 id="judul">Silsilah</h2>
+
+<div class="breadcrumb" id="breadcrumb"></div>
+
+<button onclick="history.back()">⬅ Kembali</button>
 
 <div class="tree" id="tree"></div>
 
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+
+    <button id="btnDetail">Lihat Detail</button><br><br>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
+
 <script>
+let globalData = [];
+
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
+  globalData = data;
+  init(data);
+});
+
+function init(data) {
 
   const root = data.find(p => p.id === id);
-  if (!root) return;
+
+  if (!root) {
+    document.getElementById("judul").innerText = "Data tidak ditemukan";
+    return;
+  }
 
   document.getElementById("judul").innerText =
-    "Silsilah " + root.nama;
+    "Silsilah Keluarga " + root.nama;
+
+  buildBreadcrumb(root, data);
 
   const tree = document.getElementById("tree");
 
   // ===== ROOT + PASANGAN =====
   const pasangan = data.find(x =>
-    x.nama.toLowerCase() === root.pasangan.toLowerCase()
+    x.nama.toLowerCase().trim() === root.pasangan.toLowerCase().trim()
   );
 
   const couple = document.createElement("div");
@@ -150,24 +223,93 @@ fetch('data.json?v=' + new Date().getTime())
   });
 
   tree.appendChild(childBox);
+}
 
-});
 
-// CARD
+// ===== BREADCRUMB =====
+function buildBreadcrumb(person, data) {
+
+  const container = document.getElementById("breadcrumb");
+
+  let path = [];
+  let current = person;
+  const visited = new Set();
+
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    path.unshift(current);
+
+    current = data.find(x =>
+      x.nama === current.ayah || x.nama === current.ibu
+    );
+  }
+
+  path.forEach((p, i) => {
+
+    const span = document.createElement("span");
+    span.innerText = p.nama;
+
+    span.onclick = () => {
+      window.location.href = "detail.html?id=" + p.id;
+    };
+
+    container.appendChild(span);
+
+    if (i < path.length - 1) {
+      container.appendChild(document.createTextNode(" > "));
+    }
+  });
+}
+
+
+// ===== CARD =====
 function createPerson(p) {
+
   const div = document.createElement("div");
   div.className = "person";
 
   div.innerHTML = `
-    <img src="${p.foto}">
-    <div>${p.nama}</div>
+    <img src="${p.foto}" onclick="openPopup('${p.id}')">
+    <div class="name" onclick="goDetail('${p.id}')">${p.nama}</div>
   `;
 
-  div.onclick = () => {
-    window.location.href = "detail.html?id=" + p.id;
-  };
-
   return div;
+}
+
+
+// ===== POPUP =====
+function openPopup(id) {
+
+  const p = globalData.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById("popup").style.display = "block";
+
+  document.getElementById("nama").innerText = p.nama;
+
+  document.getElementById("info").innerHTML =
+    `Lahir: ${p.tanggal_lahir}<br>
+     Alamat: ${p.alamat_lahir}<br>
+     Domisili: ${p.domisili}<br>
+     Pasangan: ${p.pasangan}<br>
+     Anak: ${p.jumlah_anak}<br>
+     Status: ${p.status}<br>
+     WA: ${p.wa}<br>
+     Pekerjaan: ${p.pekerjaan}`;
+
+  document.getElementById("btnDetail").onclick = () => {
+    goDetail(p.id);
+  };
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+
+// ===== NAVIGASI =====
+function goDetail(id) {
+  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
