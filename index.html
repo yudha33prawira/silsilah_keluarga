@@ -67,6 +67,7 @@ body {
   padding: 15px;
   background: white;
   color: black;
+  transition: transform 0.2s;
 }
 
 .person:hover {
@@ -119,6 +120,7 @@ body {
   margin: 100px auto;
   width: 300px;
   border-radius: 10px;
+  text-align: center;
 }
 
 /* POPUP DETAIL */
@@ -305,20 +307,16 @@ function searchName(e) {
   if (e && e.key && e.key !== "Enter") return;
 
   let input = document.getElementById("searchInput").value.toLowerCase();
-  let cards = document.querySelectorAll(".person-card");
+  if (!input) return;
 
-  let firstMatch = null;
-  cards.forEach(card => {
-    let name = card.getAttribute("data-name");
-    if (name.includes(input) && input !== "") {
-      card.style.background = "yellow";
-      if (!firstMatch) firstMatch = card;
-    } else {
-      card.style.background = "";
-    }
-  });
+  let person = globalData.find(p => p.nama.toLowerCase().includes(input));
 
-  if (firstMatch) firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (person) {
+    // langsung buka halaman detail orang itu
+    window.location.href = "detail.html?id=" + person.id;
+  } else {
+    alert("Nama tidak ditemukan!");
+  }
 }
 </script>
 
