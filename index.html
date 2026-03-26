@@ -96,7 +96,7 @@ body {
   cursor: default;
 }
 
-/* ===== SEARCH ===== */
+/* SEARCH */
 .search-btn {
   padding: 8px 15px;
   margin: 10px;
@@ -121,7 +121,7 @@ body {
   border-radius: 10px;
 }
 
-/* ===== POPUP ===== */
+/* POPUP DETAIL */
 .popup {
   display: none;
   position: fixed;
@@ -161,8 +161,9 @@ body {
 <div id="searchPopup" class="search-popup">
   <div class="search-box">
     <h3>Cari Nama</h3>
-    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName()">
+    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName(event)">
     <br><br>
+    <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
   </div>
 </div>
@@ -188,7 +189,6 @@ fetch('data.json?v=' + new Date().getTime())
 });
 
 function init(data) {
-
   const tree = document.getElementById("tree");
   const root = data.find(p => p.nama === "Ngadiman");
 
@@ -198,13 +198,9 @@ function init(data) {
   }
 
   let pasanganList = [];
-
   if (root.pasangan) {
     let list = root.pasangan.split("|").map(x => x.trim());
-
-    pasanganList = data.filter(x =>
-      list.includes(x.nama)
-    );
+    pasanganList = data.filter(x => list.includes(x.nama));
   }
 
   if (pasanganList.length === 0) {
@@ -216,19 +212,15 @@ function init(data) {
   }
 }
 
+// BLOK KELUARGA
 function createFamilyBlock(tree, root, pasangan, data) {
-
   const block = document.createElement("div");
   block.className = "family-block";
 
   const couple = document.createElement("div");
   couple.className = "couple";
-
   couple.appendChild(createPerson(root));
-
-  if (pasangan) {
-    couple.appendChild(createPerson(pasangan));
-  }
+  if (pasangan) couple.appendChild(createPerson(pasangan));
 
   block.appendChild(couple);
 
@@ -238,14 +230,9 @@ function createFamilyBlock(tree, root, pasangan, data) {
   );
 
   if (children.length > 0) {
-
     const childBox = document.createElement("div");
     childBox.className = "children";
-
-    children.forEach(p => {
-      childBox.appendChild(createPerson(p));
-    });
-
+    children.forEach(p => childBox.appendChild(createPerson(p)));
     block.appendChild(childBox);
   }
 
@@ -253,90 +240,46 @@ function createFamilyBlock(tree, root, pasangan, data) {
 }
 
 function punyaAnak(p) {
-  return globalData.some(x =>
-    x.ayah === p.nama || x.ibu === p.nama
-  );
+  return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
 }
 
 function createPerson(p) {
-
   const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
   div.className = isMeninggal ? "person meninggal person-card" : "person person-card";
-
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!hasChild ? 'disabled' : ''}">
-      ${p.nama}
-    </div>
+    <div class="name ${!hasChild ? 'disabled' : ''}">${p.nama}</div>
   `;
-
   div.setAttribute("data-name", p.nama.toLowerCase());
 
-  if (hasChild) {
-    div.querySelector('.name').onclick = () => goDetail(p.id);
-  }
+  if (hasChild) div.querySelector('.name').onclick = () => goDetail(p.id);
 
   return div;
 }
 
-/* ===== SEARCH ===== */
-function openSearch() {
-  document.getElementById("searchPopup").style.display = "block";
-}
-
-function closeSearch() {
-  document.getElementById("searchPopup").style.display = "none";
-}
-
-function searchName() {
-  let input = document.getElementById("searchInput").value.toLowerCase();
-  let cards = document.querySelectorAll(".person-card");
-
-  let firstMatch = null;
-
-  cards.forEach(card => {
-    let name = card.getAttribute("data-name");
-
-    if (name.includes(input) && input !== "") {
-      card.style.background = "yellow";
-
-      if (!firstMatch) firstMatch = card;
-    } else {
-      card.style.background = "";
-    }
-  });
-
-  if (firstMatch) {
-    firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-}
-
-/* ===== POPUP ===== */
+// POPUP DETAIL
 function openPopup(id) {
-
   const p = globalData.find(x => x.id === id);
   if (!p) return;
 
   const hasChild = punyaAnak(p);
-
   document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = p.nama;
-
-  document.getElementById("info").innerHTML =
-    `Lahir: ${p.tanggal_lahir}<br>
-     Alamat: ${p.alamat_lahir}<br>
-     Domisili: ${p.domisili}<br>
-     Pasangan: ${p.pasangan}<br>
-     Anak: ${p.jumlah_anak}<br>
-     Status: ${p.status}<br>
-     WA: ${p.wa}<br>
-     Pekerjaan: ${p.pekerjaan}`;
+  document.getElementById("info").innerHTML = `
+    Lahir: ${p.tanggal_lahir}<br>
+    Alamat: ${p.alamat_lahir}<br>
+    Domisili: ${p.domisili}<br>
+    Pasangan: ${p.pasangan}<br>
+    Anak: ${p.jumlah_anak}<br>
+    Status: ${p.status}<br>
+    WA: ${p.wa}<br>
+    Pekerjaan: ${p.pekerjaan}
+  `;
 
   const btn = document.getElementById("btnDetail");
-
   if (hasChild) {
     btn.style.display = "inline-block";
     btn.onclick = () => goDetail(p.id);
@@ -345,12 +288,37 @@ function openPopup(id) {
   }
 }
 
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
+function closePopup() { document.getElementById("popup").style.display = "none"; }
+function goDetail(id) { window.location.href = "detail.html?id=" + id; }
+
+// POPUP SEARCH
+function openSearch() {
+  document.getElementById("searchPopup").style.display = "block";
+  document.getElementById("searchInput").focus();
 }
 
-function goDetail(id) {
-  window.location.href = "detail.html?id=" + id;
+function closeSearch() {
+  document.getElementById("searchPopup").style.display = "none";
+}
+
+function searchName(e) {
+  if (e && e.key && e.key !== "Enter") return;
+
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  let cards = document.querySelectorAll(".person-card");
+
+  let firstMatch = null;
+  cards.forEach(card => {
+    let name = card.getAttribute("data-name");
+    if (name.includes(input) && input !== "") {
+      card.style.background = "yellow";
+      if (!firstMatch) firstMatch = card;
+    } else {
+      card.style.background = "";
+    }
+  });
+
+  if (firstMatch) firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 </script>
 
