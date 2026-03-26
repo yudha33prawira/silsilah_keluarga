@@ -10,65 +10,63 @@ body {
   text-align: center;
 }
 
+/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* ROW */
 .row {
   display: flex;
   justify-content: center;
-  align-items: center;
+  flex-wrap: wrap;
 }
 
-/* Garis dari orang tua ke tengah */
+/* Garis vertikal */
 .v-line {
   width: 2px;
-  height: 35px;
+  height: 30px;
   background: black;
-  margin-bottom: 10px;
 }
 
-/* ===== GARIS OTOMATIS KE ANAK ===== */
-.row.children {
+/* Garis anak */
+.children {
   position: relative;
+  margin-top: 10px;
 }
 
-/* garis horizontal */
-.row.children::before {
+.children::before {
   content: '';
   position: absolute;
   top: -10px;
-  left: 5%;
-  right: 5%;
+  left: 10%;
+  right: 10%;
   height: 2px;
   background: black;
 }
 
-/* garis ke tiap anak */
-.row.children .person {
-  position: relative;
-}
-
-.row.children .person::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  width: 2px;
-  height: 20px;
-  background: black;
-}
-
-/* Card orang */
+/* Garis ke anak */
 .person {
-  border: 1px solid #000;
+  position: relative;
+  border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
   margin: 10px;
   width: 110px;
   cursor: pointer;
+  background: white;
+}
+
+.person::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: black;
 }
 
 .person img {
@@ -94,7 +92,6 @@ body {
   margin: 100px auto;
   padding: 20px;
   border-radius: 10px;
-  text-align: center;
 }
 </style>
 </head>
@@ -103,57 +100,7 @@ body {
 
 <h2>Silsilah Keluarga Ngadiman</h2>
 
-<div class="tree">
-
-  <!-- ORANG TUA -->
-  <div class="row">
-
-    <div class="person"
-    onclick="showDetail('Ngadiman','Gen1\nAyah\nLahir: 1960\nAlamat Lahir: Purworjo\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Titik\nKeturunan: 4\nStatus Saat Ini : Meninggal\nWA: -----\nPekerjaan: ----')">
-      <img src="images/ngadiman.jpg">
-      <div>Ngadiman</div>
-    </div>
-
-    <div class="person"
-    onclick="showDetail('Titik','Gen1\nIbu\nLahir: 1965\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Ngadiman\nKeturunan: 4\nStatus Saat Ini: Masih Hidup\nWA: +62 812-1629-4218\nPekerjaan: ----')">
-      <img src="images/titik.jpg">
-      <div>Titik</div>
-    </div>
-
-  </div>
-
-  <div class="v-line"></div>
-
-  <!-- ANAK -->
-  <div class="row children">
-
-    <div class="person"
-    onclick="showDetail('Yuliarsih','Gen2\nAnak1\nLahir: 1975\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan R Oyo Sunarso\nKeturunan: 2\nStatus Saat Ini : Masih Hidup\nWA: +62 852-1862-9771\nPekerjaan: ----','yuliarsih.html')">
-      <img src="images/yuliarsih.jpg">
-      <div>Yuliarsih</div>
-    </div>
-
-    <div class="person"
-    onclick="showDetail('Agus','Gen2\nAnak2\nLahir: 1978\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan -----\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: -----\nPekerjaan: Jualan Mie Ayam','agus.html')">
-      <img src="images/agus.jpg">
-      <div>Agus</div>
-    </div>
-
-    <div class="person"
-    onclick="showDetail('Suparmo','Gen2\nAnak3\nLahir: 1980\nAlamat Lahir: Tasikmalaya\nDomisili: Depok\nHubungan: Menikah dengan Yatih\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: +62 812-9225-9609\nPekerjaan: Jualan Buah Buahan','suparmo.html')">
-      <img src="images/suparmo.jpg">
-      <div>Suparmo</div>
-    </div>
-
-    <div class="person"
-    onclick="showDetail('Eti','Gen2\nAnak4\nLahir: 1982\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Lajang\nKeturunan: -----\nStatus Saat Ini: Meninggal\nWA: -----\nPekerjaan: ----')">
-      <img src="images/eti.jpg">
-      <div>Eti</div>
-    </div>
-
-  </div>
-
-</div>
+<div class="tree" id="tree"></div>
 
 <!-- POPUP -->
 <div class="popup" id="popup">
@@ -161,55 +108,68 @@ body {
     <h3 id="nama"></h3>
     <p id="info"></p>
 
-    <button id="btnDetail">Lihat Silsilah</button><br><br>
+    <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
 </div>
 
-<div class="tree" id="tree"></div>
-
 <script>
+// ===== LOAD DATA =====
 fetch('data.json')
   .then(res => res.json())
   .then(data => {
 
     const tree = document.getElementById("tree");
 
-    // Ambil generasi 1 (orang tua)
-    const gen1 = data.filter(p => p.generasi == 1);
-    const gen2 = data.filter(p => p.generasi == 2);
+    // cari root (tidak punya orang tua)
+    const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
-    // ===== ROW ORANG TUA =====
-    const rowParent = document.createElement("div");
-    rowParent.className = "row";
-
-    gen1.forEach(p => {
-      const div = createPerson(p);
-      rowParent.appendChild(div);
+    roots.forEach(root => {
+      renderTree(root, tree, data);
     });
-
-    tree.appendChild(rowParent);
-
-    // Garis tengah
-    const vline = document.createElement("div");
-    vline.className = "v-line";
-    tree.appendChild(vline);
-
-    // ===== ROW ANAK =====
-    const rowChild = document.createElement("div");
-    rowChild.className = "row children";
-
-    gen2.forEach(p => {
-      const div = createPerson(p);
-      rowChild.appendChild(div);
-    });
-
-    tree.appendChild(rowChild);
 
   });
 
 
-// ===== FUNCTION BUAT CARD =====
+// ===== RENDER TREE =====
+function renderTree(person, container, data) {
+
+  // tampilkan orang
+  const row = document.createElement("div");
+  row.className = "row";
+
+  row.appendChild(createPerson(person));
+  container.appendChild(row);
+
+  // cari anak
+  const children = data.filter(p => p.orang_tua === person.nama);
+
+  if (children.length > 0) {
+
+    // garis turun
+    const vline = document.createElement("div");
+    vline.className = "v-line";
+    container.appendChild(vline);
+
+    // row anak
+    const childRow = document.createElement("div");
+    childRow.className = "row children";
+
+    children.forEach(child => {
+      childRow.appendChild(createPerson(child));
+    });
+
+    container.appendChild(childRow);
+
+    // lanjut ke generasi berikutnya
+    children.forEach(child => {
+      renderTree(child, container, data);
+    });
+  }
+}
+
+
+// ===== CARD =====
 function createPerson(p) {
   const div = document.createElement("div");
   div.className = "person";
@@ -222,16 +182,15 @@ function createPerson(p) {
   div.onclick = () => {
     showDetail(
       p.nama,
-      `Gen${p.generasi}
-Lahir: ${p.tanggal_lahir}
-Alamat Lahir: ${p.alamat_lahir}
+      `Lahir: ${p.tanggal_lahir}
+Alamat: ${p.alamat_lahir}
 Domisili: ${p.domisili}
 Pasangan: ${p.pasangan}
-Keturunan: ${p.jumlah_anak}
+Anak: ${p.jumlah_anak}
 Status: ${p.status}
 WA: ${p.wa}
 Pekerjaan: ${p.pekerjaan}`,
-      p.link_detail
+      p.id
     );
   };
 
@@ -240,17 +199,17 @@ Pekerjaan: ${p.pekerjaan}`,
 
 
 // ===== POPUP =====
-function showDetail(nama, info, link) {
+function showDetail(nama, info, id) {
   document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = nama;
   document.getElementById("info").innerHTML = info.replace(/\n/g, "<br>");
 
   const btn = document.getElementById("btnDetail");
 
-  if (link) {
+  if (id) {
     btn.style.display = "inline-block";
     btn.onclick = function() {
-      window.location.href = link;
+      window.location.href = "detail.html?id=" + id;
     };
   } else {
     btn.style.display = "none";
@@ -261,7 +220,6 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 </script>
-  
 
 </body>
 </html>
