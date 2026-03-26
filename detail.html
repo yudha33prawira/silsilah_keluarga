@@ -45,12 +45,28 @@ h2 { margin-bottom: 10px; }
   margin-top: 10px;
 }
 
+/* GRID ANAK */
+.row.children {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  justify-items: center;
+  max-width: 300px;
+}
+
+@media (max-width: 480px) {
+  .row.children {
+    grid-template-columns: 1fr;
+    max-width: 200px;
+  }
+}
+
 .children::before {
   content: '';
   position: absolute;
   top: -10px;
-  left: 10%;
-  right: 10%;
+  left: 20%;
+  right: 20%;
   height: 2px;
   background: black;
 }
@@ -59,9 +75,16 @@ h2 { margin-bottom: 10px; }
   border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
-  margin: 10px;
+  margin: 5px;
   background: white;
   min-width: 120px;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.person:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .person img {
@@ -127,13 +150,21 @@ h2 { margin-bottom: 10px; }
 </div>
 
 <script>
+let globalData = [];
+
 // ===== AMBIL ID =====
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
+// ===== LOAD DATA SEKALI =====
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
+  globalData = data;
+  init(data);
+});
+
+function init(data) {
 
   const root = data.find(p => p.id === id);
 
@@ -149,19 +180,19 @@ fetch('data.json?v=' + new Date().getTime())
 
   const tree = document.getElementById("tree");
 
-  // ===== ROOT =====
+  // ROOT
   const row1 = document.createElement("div");
   row1.className = "row";
   row1.appendChild(createPerson(root, data, true));
   tree.appendChild(row1);
 
-  // ===== GARIS =====
+  // GARIS
   const vline = document.createElement("div");
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ===== ANAK (AYAH + IBU + PASANGAN) =====
-  const pasanganNama = root.pasangan;
+  // ANAK
+  const pasanganNama = root.pasangan || "";
 
   const children = data.filter(x =>
     x.ayah === root.nama ||
@@ -170,7 +201,6 @@ fetch('data.json?v=' + new Date().getTime())
     x.ibu === pasanganNama
   );
 
-  // ===== HAPUS DUPLIKAT =====
   const unique = [];
   const used = new Set();
 
@@ -185,13 +215,11 @@ fetch('data.json?v=' + new Date().getTime())
   row2.className = "row children";
 
   unique.forEach(p => {
-    row2.appendChild(createPerson(p, data, false));
+    row2.appendChild(createPerson(p, data));
   });
 
   tree.appendChild(row2);
-
-});
-
+}
 
 // ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
@@ -200,8 +228,10 @@ function buildBreadcrumb(person, data) {
 
   let path = [];
   let current = person;
+  const visited = new Set();
 
-  while (current) {
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
     path.unshift(current);
 
     current = data.find(x =>
@@ -226,15 +256,13 @@ function buildBreadcrumb(person, data) {
   });
 }
 
-
 // ===== CARD =====
 function createPerson(p, data, isRoot = false) {
 
   const div = document.createElement("div");
   div.className = "person";
 
-  // ===== ROOT → tampil pasangan =====
-  if (isRoot && p.pasangan && p.pasangan !== "-") {
+  if (isRoot && p.pasangan) {
 
     const pasangan = data.find(x =>
       x.nama.toLowerCase().trim() === p.pasangan.toLowerCase().trim()
@@ -258,8 +286,7 @@ function createPerson(p, data, isRoot = false) {
   return div;
 }
 
-
-// ===== TEMPLATE PERSON =====
+// TEMPLATE
 function personHTML(p) {
   return `
     <div>
@@ -269,30 +296,29 @@ function personHTML(p) {
   `;
 }
 
-
 // ===== POPUP =====
 function openPopup(id) {
 
-  fetch('data.json?v=' + new Date().getTime())
-  .then(res => res.json())
-  .then(data => {
+  const p = globalData.find(x => x.id === id);
 
-    const p = data.find(x => x.id === id);
+  if (!p) return;
 
-    showDetail(
-      p.nama,
-      `Lahir: ${p.tanggal_lahir}
+  showDetail(
+    p.nama,
+    formatDetail(p),
+    p.id
+  );
+}
+
+function formatDetail(p) {
+  return `Lahir: ${p.tanggal_lahir}
 Alamat: ${p.alamat_lahir}
 Domisili: ${p.domisili}
 Pasangan: ${p.pasangan}
 Anak: ${p.jumlah_anak}
 Status: ${p.status}
 WA: ${p.wa}
-Pekerjaan: ${p.pekerjaan}`,
-      p.id
-    );
-
-  });
+Pekerjaan: ${p.pekerjaan}`;
 }
 
 function showDetail(nama, info, id) {
@@ -300,9 +326,7 @@ function showDetail(nama, info, id) {
   document.getElementById("nama").innerText = nama;
   document.getElementById("info").innerHTML = info.replace(/\n/g, "<br>");
 
-  const btn = document.getElementById("btnDetail");
-
-  btn.onclick = function() {
+  document.getElementById("btnDetail").onclick = function() {
     window.location.href = "detail.html?id=" + id;
   };
 }
@@ -311,8 +335,7 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-
-// ===== NAVIGASI =====
+// NAVIGASI
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
