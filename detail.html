@@ -6,42 +6,16 @@
 <title>Detail Silsilah</title>
 
 <style>
-body {
-  font-family: Arial;
-  text-align: center;
-  margin: 0;
-}
-
+body { font-family: Arial; text-align: center; margin: 0; }
 h2 { margin: 10px; }
 
-.breadcrumb {
-  margin-bottom: 15px;
-  font-size: 14px;
-}
+.breadcrumb { margin-bottom: 15px; font-size: 14px; }
+.breadcrumb span { cursor: pointer; color: blue; }
 
-.breadcrumb span {
-  cursor: pointer;
-  color: blue;
-}
+.tree { display: flex; flex-direction: column; align-items: center; padding: 15px; }
+.family-block { margin-bottom: 40px; }
 
-.tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-}
-
-.family-block {
-  margin-bottom: 40px;
-}
-
-.couple {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  position: relative;
-}
-
+.couple { display: flex; gap: 20px; justify-content: center; position: relative; }
 .couple::after {
   content: '';
   position: absolute;
@@ -78,15 +52,10 @@ h2 { margin: 10px; }
   border-radius: 12px;
   padding: 15px;
   background: white;
-  color: black;
 }
 
 .person.meninggal {
   background: black;
-  color: white;
-}
-
-.person.meninggal .name {
   color: white;
 }
 
@@ -97,16 +66,8 @@ h2 { margin: 10px; }
   cursor: pointer;
 }
 
-.name {
-  margin-top: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.name.disabled {
-  color: gray;
-  cursor: default;
-}
+.name { margin-top: 8px; font-weight: bold; cursor: pointer; }
+.name.disabled { color: gray; cursor: default; }
 
 .popup {
   display: none;
@@ -125,12 +86,6 @@ h2 { margin: 10px; }
   margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
-}
-
-@media (max-width: 600px) {
-  .children {
-    grid-template-columns: 1fr;
-  }
 }
 </style>
 </head>
@@ -154,13 +109,15 @@ h2 { margin: 10px; }
 
 <script>
 let globalData = [];
-
-const id = new URLSearchParams(window.location.search).get('id');
+let id = new URLSearchParams(window.location.search).get('id');
 
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
   globalData = data;
+
+  if (!id) id = data[0].id; // fallback biar tetap muncul
+
   init(data);
 });
 
@@ -180,14 +137,13 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // 🔥 SUPPORT "A|B|C"
   let pasanganList = [];
 
   if (root.pasangan) {
     let list = root.pasangan.split("|").map(x => x.trim());
 
     pasanganList = data.filter(x =>
-      list.includes(x.nama)
+      list.some(nama => x.nama.toLowerCase() === nama.toLowerCase())
     );
   }
 
@@ -200,8 +156,6 @@ function init(data) {
   }
 }
 
-
-// ===== BLOK KELUARGA =====
 function createFamilyBlock(tree, root, pasangan) {
 
   const block = document.createElement("div");
@@ -218,7 +172,6 @@ function createFamilyBlock(tree, root, pasangan) {
 
   block.appendChild(couple);
 
-  // 🔥 ANAK SESUAI PASANGAN
   const children = globalData.filter(x =>
     (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
     (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
@@ -239,16 +192,12 @@ function createFamilyBlock(tree, root, pasangan) {
   tree.appendChild(block);
 }
 
-
-// ===== CEK PUNYA ANAK =====
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
   );
 }
 
-
-// ===== CARD =====
 function createPerson(p) {
 
   const hasChild = punyaAnak(p);
@@ -271,56 +220,30 @@ function createPerson(p) {
   return div;
 }
 
-
-// ===== POPUP =====
 function openPopup(id) {
-
   const p = globalData.find(x => x.id === id);
   if (!p) return;
-
-  const hasChild = punyaAnak(p);
 
   document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = p.nama;
 
   document.getElementById("info").innerHTML =
-    `Lahir: ${p.tanggal_lahir}<br>
-     Alamat: ${p.alamat_lahir}<br>
-     Domisili: ${p.domisili}<br>
-     Pasangan: ${p.pasangan}<br>
-     Anak: ${p.jumlah_anak}<br>
-     Status: ${p.status}<br>
-     WA: ${p.wa}<br>
-     Pekerjaan: ${p.pekerjaan}`;
-
-  const btn = document.getElementById("btnDetail");
-
-  if (hasChild) {
-    btn.style.display = "inline-block";
-    btn.onclick = () => goDetail(p.id);
-  } else {
-    btn.style.display = "none";
-  }
+    `Status: ${p.status}<br>Pasangan: ${p.pasangan}`;
 }
 
 function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-
-// ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
 
   const container = document.getElementById("breadcrumb");
 
   let path = [];
   let current = person;
-  const visited = new Set();
 
-  while (current && !visited.has(current.id)) {
-    visited.add(current.id);
+  while (current) {
     path.unshift(current);
-
     current = data.find(x =>
       x.nama === current.ayah || x.nama === current.ibu
     );
@@ -343,8 +266,6 @@ function buildBreadcrumb(person, data) {
   });
 }
 
-
-// ===== NAVIGASI =====
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
