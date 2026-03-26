@@ -28,10 +28,12 @@ h2 { margin: 10px; }
 /* TREE */
 .tree {
   width: 100%;
+  max-width: 900px;
+  margin: auto;
   padding: 10px;
-  box-sizing: border-box;
 }
 
+/* ROW */
 .row {
   display: flex;
   justify-content: center;
@@ -52,14 +54,19 @@ h2 { margin: 10px; }
   width: 100%;
 }
 
-/* GRID RESPONSIVE OTOMATIS */
+/* GRID (FIX: MAX 2 KOLOM) */
 .row.children {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 1fr;
   gap: 15px;
   width: 100%;
-  padding: 0 10px;
-  box-sizing: border-box;
+}
+
+/* TABLET & PC → 2 KOLOM */
+@media (min-width: 600px) {
+  .row.children {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* GARIS HORIZONTAL */
@@ -73,16 +80,14 @@ h2 { margin: 10px; }
   background: black;
 }
 
-/* CARD */
+/* CARD (FULL WIDTH BIAR BESAR) */
 .person {
   width: 100%;
-  max-width: 180px;
-  padding: 15px;
+  padding: 18px;
   border: 1px solid black;
   border-radius: 12px;
   background: white;
   text-align: center;
-  margin: auto;
   transition: 0.2s;
 }
 
@@ -91,10 +96,10 @@ h2 { margin: 10px; }
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-/* FOTO */
+/* FOTO BESAR */
 .person img {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -128,35 +133,14 @@ h2 { margin: 10px; }
 .popup-content {
   background: white;
   width: 90%;
-  max-width: 300px;
+  max-width: 320px;
   margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
 }
 
-.back { margin-bottom: 10px; }
-
-/* RESPONSIVE BESAR */
-@media (min-width: 768px) {
-  .person {
-    max-width: 200px;
-  }
-
-  .person img {
-    width: 100px;
-    height: 100px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .person {
-    max-width: 220px;
-  }
-
-  .person img {
-    width: 110px;
-    height: 110px;
-  }
+.back {
+  margin-bottom: 10px;
 }
 </style>
 </head>
