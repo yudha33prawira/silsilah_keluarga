@@ -20,16 +20,14 @@ body {
   padding: 15px;
 }
 
-/* COUPLE (AYAH IBU) */
+/* COUPLE */
 .couple {
   display: flex;
   gap: 20px;
   justify-content: center;
-  align-items: center;
   position: relative;
 }
 
-/* GARIS TURUN DARI TENGAH */
 .couple::after {
   content: '';
   position: absolute;
@@ -52,7 +50,6 @@ body {
   position: relative;
 }
 
-/* GARIS KE ANAK */
 .children::before {
   content: '';
   position: absolute;
@@ -69,7 +66,6 @@ body {
   border-radius: 12px;
   padding: 15px;
   background: white;
-  cursor: pointer;
   transition: 0.2s;
 }
 
@@ -77,22 +73,43 @@ body {
   transform: scale(1.05);
 }
 
-/* FOTO */
 .person img {
   width: 90px;
   height: 90px;
   border-radius: 50%;
+  cursor: pointer;
+}
+
+.name {
+  margin-top: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* POPUP */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background: white;
+  width: 90%;
+  max-width: 300px;
+  margin: 80px auto;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
   .children {
     grid-template-columns: 1fr;
-  }
-
-  .person img {
-    width: 80px;
-    height: 80px;
   }
 }
 </style>
@@ -104,22 +121,35 @@ body {
 
 <div class="tree" id="tree"></div>
 
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+
+    <button id="btnDetail">Lihat Detail</button><br><br>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
+
 <script>
+let globalData = [];
+
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
+  globalData = data;
+  init(data);
+});
+
+function init(data) {
 
   const tree = document.getElementById("tree");
 
   const ayah = data.find(p => p.nama === "Ngadiman");
   const ibu = data.find(p => p.nama === "Titik");
 
-  if (!ayah || !ibu) {
-    tree.innerHTML = "Data tidak ditemukan";
-    return;
-  }
-
-  // ===== AYAH + IBU =====
+  // COUPLE
   const couple = document.createElement("div");
   couple.className = "couple";
 
@@ -128,7 +158,7 @@ fetch('data.json?v=' + new Date().getTime())
 
   tree.appendChild(couple);
 
-  // ===== ANAK =====
+  // ANAK
   const children = data.filter(x =>
     x.ayah === ayah.nama && x.ibu === ibu.nama
   );
@@ -141,24 +171,55 @@ fetch('data.json?v=' + new Date().getTime())
   });
 
   tree.appendChild(childBox);
-
-});
+}
 
 // CARD
 function createPerson(p) {
+
   const div = document.createElement("div");
   div.className = "person";
 
   div.innerHTML = `
-    <img src="${p.foto}">
-    <div>${p.nama}</div>
+    <img src="${p.foto}" onclick="openPopup('${p.id}')">
+    <div class="name" onclick="goDetail('${p.id}')">${p.nama}</div>
   `;
 
-  div.onclick = () => {
-    window.location.href = "detail.html?id=" + p.id;
-  };
-
   return div;
+}
+
+// POPUP
+function openPopup(id) {
+  const p = globalData.find(x => x.id === id);
+  if (!p) return;
+
+  showDetail(p);
+}
+
+function showDetail(p) {
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("nama").innerText = p.nama;
+  document.getElementById("info").innerHTML =
+    `Lahir: ${p.tanggal_lahir}<br>
+     Alamat: ${p.alamat_lahir}<br>
+     Domisili: ${p.domisili}<br>
+     Pasangan: ${p.pasangan}<br>
+     Anak: ${p.jumlah_anak}<br>
+     Status: ${p.status}<br>
+     WA: ${p.wa}<br>
+     Pekerjaan: ${p.pekerjaan}`;
+
+  document.getElementById("btnDetail").onclick = () => {
+    goDetail(p.id);
+  };
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+// NAVIGASI
+function goDetail(id) {
+  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
