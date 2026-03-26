@@ -43,7 +43,7 @@ body {
 .children {
   margin-top: 50px;
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
@@ -142,6 +142,7 @@ body {
 <script>
 let globalData = [];
 
+// LOAD DATA
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
@@ -185,14 +186,12 @@ function init(data) {
   tree.appendChild(childBox);
 }
 
-
 // ===== CEK PUNYA ANAK =====
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
   );
 }
-
 
 // ===== CARD =====
 function createPerson(p) {
@@ -204,15 +203,18 @@ function createPerson(p) {
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!hasChild ? 'disabled' : ''}"
-         ${hasChild ? `onclick="goDetail('${p.id}')"` : ''}>
-         ${p.nama}
+    <div class="name ${!hasChild ? 'disabled' : ''}">
+      ${p.nama}
     </div>
   `;
 
+  // hanya klik kalau punya anak
+  if (hasChild) {
+    div.querySelector('.name').onclick = () => goDetail(p.id);
+  }
+
   return div;
 }
-
 
 // ===== POPUP =====
 function openPopup(id) {
@@ -233,15 +235,22 @@ function openPopup(id) {
      WA: ${p.wa}<br>
      Pekerjaan: ${p.pekerjaan}`;
 
-  document.getElementById("btnDetail").onclick = () => {
-    goDetail(p.id);
-  };
+  const btn = document.getElementById("btnDetail");
+
+  // CEK PUNYA ANAK
+  const hasChild = punyaAnak(p);
+
+  if (hasChild) {
+    btn.style.display = "inline-block";
+    btn.onclick = () => goDetail(p.id);
+  } else {
+    btn.style.display = "none";
+  }
 }
 
 function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
-
 
 // ===== NAVIGASI =====
 function goDetail(id) {
