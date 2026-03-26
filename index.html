@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Silsilah Keluarga</title>
 
 <style>
@@ -13,100 +14,86 @@ body {
 
 /* TREE */
 .tree {
-  width: 100%;
-  max-width: 900px;
-  margin: auto;
-  padding: 10px;
-}
-
-/* ROW */
-.row {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
 }
 
-/* GARIS */
-.v-line {
+/* COUPLE (AYAH IBU) */
+.couple {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* GARIS TURUN DARI TENGAH */
+.couple::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
   width: 2px;
   height: 40px;
   background: black;
+  transform: translateX(-50%);
 }
 
 /* CHILDREN */
 .children {
-  position: relative;
-  margin-top: 15px;
+  margin-top: 50px;
   width: 100%;
-}
-
-/* GRID (FIX MAX 2 KOLOM) */
-.row.children {
+  max-width: 600px;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
-  width: 100%;
+  position: relative;
 }
 
-/* TABLET & PC */
-@media (min-width: 600px) {
-  .row.children {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* GARIS */
+/* GARIS KE ANAK */
 .children::before {
   content: '';
   position: absolute;
-  top: -15px;
-  left: 5%;
-  right: 5%;
+  top: -20px;
+  left: 10%;
+  right: 10%;
   height: 2px;
   background: black;
 }
 
-/* CARD BESAR */
+/* CARD */
 .person {
-  width: 100%;
-  padding: 18px;
   border: 1px solid black;
   border-radius: 12px;
+  padding: 15px;
   background: white;
-  text-align: center;
+  cursor: pointer;
   transition: 0.2s;
 }
 
 .person:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-/* FOTO BESAR */
+/* FOTO */
 .person img {
-  width: 110px;
-  height: 110px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
 }
 
-/* POPUP */
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .children {
+    grid-template-columns: 1fr;
+  }
 
-.popup-content {
-  background: white;
-  width: 90%;
-  max-width: 320px;
-  margin: 80px auto;
-  padding: 20px;
-  border-radius: 10px;
+  .person img {
+    width: 80px;
+    height: 80px;
+  }
 }
 </style>
 </head>
@@ -117,29 +104,10 @@ body {
 
 <div class="tree" id="tree"></div>
 
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
-  </div>
-</div>
-
 <script>
-let globalData = [];
-
-// LOAD DATA
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
-  globalData = data;
-  init(data);
-});
-
-function init(data) {
 
   const tree = document.getElementById("tree");
 
@@ -151,38 +119,33 @@ function init(data) {
     return;
   }
 
-  // ROOT
-  const row1 = document.createElement("div");
-  row1.className = "row";
+  // ===== AYAH + IBU =====
+  const couple = document.createElement("div");
+  couple.className = "couple";
 
-  row1.appendChild(createPerson(ayah));
-  row1.appendChild(createPerson(ibu));
+  couple.appendChild(createPerson(ayah));
+  couple.appendChild(createPerson(ibu));
 
-  tree.appendChild(row1);
+  tree.appendChild(couple);
 
-  // GARIS
-  const vline = document.createElement("div");
-  vline.className = "v-line";
-  tree.appendChild(vline);
-
-  // ANAK
-  const gen2 = data.filter(x =>
+  // ===== ANAK =====
+  const children = data.filter(x =>
     x.ayah === ayah.nama && x.ibu === ibu.nama
   );
 
-  const row2 = document.createElement("div");
-  row2.className = "row children";
+  const childBox = document.createElement("div");
+  childBox.className = "children";
 
-  gen2.forEach(p => {
-    row2.appendChild(createPerson(p));
+  children.forEach(p => {
+    childBox.appendChild(createPerson(p));
   });
 
-  tree.appendChild(row2);
-}
+  tree.appendChild(childBox);
+
+});
 
 // CARD
 function createPerson(p) {
-
   const div = document.createElement("div");
   div.className = "person";
 
@@ -192,37 +155,10 @@ function createPerson(p) {
   `;
 
   div.onclick = () => {
-    showDetail(p);
+    window.location.href = "detail.html?id=" + p.id;
   };
 
   return div;
-}
-
-// FORMAT
-function formatDetail(p) {
-  return `Lahir: ${p.tanggal_lahir}
-Alamat: ${p.alamat_lahir}
-Domisili: ${p.domisili}
-Pasangan: ${p.pasangan}
-Anak: ${p.jumlah_anak}
-Status: ${p.status}
-WA: ${p.wa}
-Pekerjaan: ${p.pekerjaan}`;
-}
-
-// POPUP
-function showDetail(p) {
-  document.getElementById("popup").style.display = "block";
-  document.getElementById("nama").innerText = p.nama;
-  document.getElementById("info").innerHTML = formatDetail(p).replace(/\n/g, "<br>");
-
-  document.getElementById("btnDetail").onclick = function() {
-    window.location.href = "detail.html?id=" + p.id;
-  };
-}
-
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
 }
 </script>
 
