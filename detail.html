@@ -7,9 +7,10 @@
 
 <style>
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
   margin: 0;
+  background: #f5f5f5;
 }
 
 h2 { margin: 10px; }
@@ -79,6 +80,12 @@ h2 { margin: 10px; }
   padding: 15px;
   background: white;
   color: black;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.person:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .person.meninggal {
@@ -104,13 +111,26 @@ h2 { margin: 10px; }
   cursor: default;
 }
 
-/* ===== SEARCH ===== */
+/* ===== MODERN SEARCH BUTTON ===== */
 .search-btn {
-  padding: 8px 15px;
-  margin: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  font-size: 22px;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.search-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* SEARCH POPUP */
 .search-popup {
   display: none;
   position: fixed;
@@ -123,13 +143,41 @@ h2 { margin: 10px; }
 
 .search-box {
   background: white;
-  padding: 20px;
-  margin: 100px auto;
-  width: 300px;
-  border-radius: 10px;
+  padding: 25px;
+  margin: 120px auto;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
-/* ===== POPUP ===== */
+.search-box input {
+  width: 80%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+.search-box button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2575fc;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background 0.2s;
+}
+
+.search-box button:hover {
+  background: #6a11cb;
+}
+
+/* DETAIL POPUP */
 .popup {
   display: none;
   position: fixed;
@@ -163,7 +211,8 @@ h2 { margin: 10px; }
 <div class="breadcrumb" id="breadcrumb"></div>
 
 <button onclick="history.back()">⬅ Kembali</button>
-<button onclick="openSearch()" class="search-btn">🔍 Cari</button>
+<!-- Modern Floating Search Button -->
+<button onclick="openSearch()" class="search-btn">🔍</button>
 
 <div class="tree" id="tree"></div>
 
@@ -171,8 +220,9 @@ h2 { margin: 10px; }
 <div id="searchPopup" class="search-popup">
   <div class="search-box">
     <h3>Cari Nama</h3>
-    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName()">
-    <br><br>
+    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName(event)">
+    <br>
+    <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
   </div>
 </div>
@@ -189,7 +239,6 @@ h2 { margin: 10px; }
 
 <script>
 let globalData = [];
-
 const id = new URLSearchParams(window.location.search).get('id');
 
 fetch('data.json?v=' + new Date().getTime())
@@ -200,54 +249,34 @@ fetch('data.json?v=' + new Date().getTime())
 });
 
 function init(data) {
-
   const root = data.find(p => p.id === id);
-
   if (!root) {
     document.getElementById("judul").innerText = "Data tidak ditemukan";
     return;
   }
 
-  document.getElementById("judul").innerText =
-    "Silsilah Keluarga " + root.nama;
-
+  document.getElementById("judul").innerText = "Silsilah Keluarga " + root.nama;
   buildBreadcrumb(root, data);
 
   const tree = document.getElementById("tree");
-
   let pasanganList = [];
-
   if (root.pasangan) {
     let list = root.pasangan.split("|").map(x => x.trim());
-
-    pasanganList = data.filter(x =>
-      list.includes(x.nama)
-    );
+    pasanganList = data.filter(x => list.includes(x.nama));
   }
 
-  if (pasanganList.length === 0) {
-    createFamilyBlock(tree, root, null);
-  } else {
-    pasanganList.forEach(psg => {
-      createFamilyBlock(tree, root, psg);
-    });
-  }
+  if (pasanganList.length === 0) createFamilyBlock(tree, root, null);
+  else pasanganList.forEach(psg => createFamilyBlock(tree, root, psg));
 }
 
 function createFamilyBlock(tree, root, pasangan) {
-
   const block = document.createElement("div");
   block.className = "family-block";
-
   const couple = document.createElement("div");
   couple.className = "couple";
 
   couple.appendChild(createPerson(root));
-
-  if (pasangan) {
-    couple.appendChild(createPerson(pasangan));
-  }
-
+  if (pasangan) couple.appendChild(createPerson(pasangan));
   block.appendChild(couple);
 
   const children = globalData.filter(x =>
@@ -256,14 +285,9 @@ function createFamilyBlock(tree, root, pasangan) {
   );
 
   if (children.length > 0) {
-
     const childBox = document.createElement("div");
     childBox.className = "children";
-
-    children.forEach(p => {
-      childBox.appendChild(createPerson(p));
-    });
-
+    children.forEach(p => childBox.appendChild(createPerson(p)));
     block.appendChild(childBox);
   }
 
@@ -271,141 +295,90 @@ function createFamilyBlock(tree, root, pasangan) {
 }
 
 function punyaAnak(p) {
-  return globalData.some(x =>
-    x.ayah === p.nama || x.ibu === p.nama
-  );
+  return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
 }
 
 function createPerson(p) {
-
   const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
   div.className = isMeninggal ? "person meninggal person-card" : "person person-card";
-
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!hasChild ? 'disabled' : ''}">
-      ${p.nama}
-    </div>
+    <div class="name ${!hasChild ? 'disabled' : ''}">${p.nama}</div>
   `;
-
   div.setAttribute("data-name", p.nama.toLowerCase());
 
-  if (hasChild) {
-    div.querySelector('.name').onclick = () => goDetail(p.id);
-  }
-
+  if (hasChild) div.querySelector('.name').onclick = () => goDetail(p.id);
   return div;
 }
 
-/* ===== SEARCH FUNCTION ===== */
-function openSearch() {
-  document.getElementById("searchPopup").style.display = "block";
-}
-
-function closeSearch() {
-  document.getElementById("searchPopup").style.display = "none";
-}
-
-function searchName() {
-  let input = document.getElementById("searchInput").value.toLowerCase();
-  let cards = document.querySelectorAll(".person-card");
-
-  let firstMatch = null;
-
-  cards.forEach(card => {
-    let name = card.getAttribute("data-name");
-
-    if (name.includes(input) && input !== "") {
-      card.style.background = "yellow";
-
-      if (!firstMatch) {
-        firstMatch = card;
-      }
-    } else {
-      card.style.background = "";
-    }
-  });
-
-  if (firstMatch) {
-    firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-}
-
-/* ===== POPUP ===== */
+// DETAIL POPUP
 function openPopup(id) {
-
   const p = globalData.find(x => x.id === id);
   if (!p) return;
-
   const hasChild = punyaAnak(p);
 
   document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = p.nama;
-
-  document.getElementById("info").innerHTML =
-    `Lahir: ${p.tanggal_lahir}<br>
-     Alamat: ${p.alamat_lahir}<br>
-     Domisili: ${p.domisili}<br>
-     Pasangan: ${p.pasangan}<br>
-     Anak: ${p.jumlah_anak}<br>
-     Status: ${p.status}<br>
-     WA: ${p.wa}<br>
-     Pekerjaan: ${p.pekerjaan}`;
+  document.getElementById("info").innerHTML = `
+    Lahir: ${p.tanggal_lahir}<br>
+    Alamat: ${p.alamat_lahir}<br>
+    Domisili: ${p.domisili}<br>
+    Pasangan: ${p.pasangan}<br>
+    Anak: ${p.jumlah_anak}<br>
+    Status: ${p.status}<br>
+    WA: ${p.wa}<br>
+    Pekerjaan: ${p.pekerjaan}
+  `;
 
   const btn = document.getElementById("btnDetail");
-
   if (hasChild) {
     btn.style.display = "inline-block";
     btn.onclick = () => goDetail(p.id);
-  } else {
-    btn.style.display = "none";
-  }
+  } else btn.style.display = "none";
 }
 
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
+function closePopup() { document.getElementById("popup").style.display = "none"; }
+function goDetail(id) { window.location.href = "detail.html?id=" + id; }
+
+// SEARCH FUNCTIONS
+function openSearch() {
+  document.getElementById("searchPopup").style.display = "block";
+  document.getElementById("searchInput").focus();
 }
 
-/* ===== BREADCRUMB ===== */
+function closeSearch() { document.getElementById("searchPopup").style.display = "none"; }
+
+function searchName(e) {
+  if (e && e.key && e.key !== "Enter") return;
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  if (!input) return;
+
+  const person = globalData.find(p => p.nama.toLowerCase().includes(input));
+  if (person) window.location.href = "detail.html?id=" + person.id;
+  else alert("Nama tidak ditemukan!");
+}
+
+// BREADCRUMB
 function buildBreadcrumb(person, data) {
-
   const container = document.getElementById("breadcrumb");
-
-  let path = [];
-  let current = person;
-  const visited = new Set();
+  let path = [], current = person, visited = new Set();
 
   while (current && !visited.has(current.id)) {
     visited.add(current.id);
     path.unshift(current);
-
-    current = data.find(x =>
-      x.nama === current.ayah || x.nama === current.ibu
-    );
+    current = data.find(x => x.nama === current.ayah || x.nama === current.ibu);
   }
 
   path.forEach((p, i) => {
-
     const span = document.createElement("span");
     span.innerText = p.nama;
-
-    span.onclick = () => {
-      window.location.href = "detail.html?id=" + p.id;
-    };
-
+    span.onclick = () => { window.location.href = "detail.html?id=" + p.id; };
     container.appendChild(span);
-
-    if (i < path.length - 1) {
-      container.appendChild(document.createTextNode(" > "));
-    }
+    if (i < path.length - 1) container.appendChild(document.createTextNode(" > "));
   });
-}
-
-function goDetail(id) {
-  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
