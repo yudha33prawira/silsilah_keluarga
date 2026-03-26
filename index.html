@@ -10,6 +10,7 @@ body {
   text-align: center;
 }
 
+/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
@@ -28,29 +29,56 @@ body {
   background: black;
 }
 
+/* CHILDREN */
 .children {
   position: relative;
   margin-top: 10px;
 }
 
+/* GRID ANAK */
+.row.children {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  justify-items: center;
+  max-width: 300px;
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .row.children {
+    grid-template-columns: 1fr;
+    max-width: 200px;
+  }
+}
+
+/* GARIS */
 .children::before {
   content: '';
   position: absolute;
   top: -10px;
-  left: 10%;
-  right: 10%;
+  left: 20%;
+  right: 20%;
   height: 2px;
   background: black;
 }
 
+/* CARD */
 .person {
   border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
-  margin: 10px;
+  margin: 5px;
   background: white;
   cursor: pointer;
   min-width: 120px;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.person:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .person img {
@@ -59,7 +87,7 @@ body {
   border-radius: 50%;
 }
 
-/* popup */
+/* POPUP */
 .popup {
   display: none;
   position: fixed;
@@ -98,15 +126,28 @@ body {
 </div>
 
 <script>
-fetch('data.json')
+let globalData = [];
+
+// LOAD DATA
+fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
+  globalData = data;
+  init(data);
+});
+
+function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // ===== ROOT =====
+  // ROOT
   const ayah = data.find(p => p.nama === "Ngadiman");
   const ibu = data.find(p => p.nama === "Titik");
+
+  if (!ayah || !ibu) {
+    tree.innerHTML = "Data orang tua tidak ditemukan";
+    return;
+  }
 
   const row1 = document.createElement("div");
   row1.className = "row";
@@ -116,12 +157,12 @@ fetch('data.json')
 
   tree.appendChild(row1);
 
-  // ===== GARIS =====
+  // GARIS
   const vline = document.createElement("div");
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ===== ANAK =====
+  // ANAK
   const gen2 = data.filter(x =>
     x.ayah === ayah.nama && x.ibu === ibu.nama
   );
@@ -134,11 +175,9 @@ fetch('data.json')
   });
 
   tree.appendChild(row2);
+}
 
-});
-
-
-// ===== CARD =====
+// CARD
 function createPerson(p) {
 
   const div = document.createElement("div");
@@ -150,35 +189,32 @@ function createPerson(p) {
   `;
 
   div.onclick = () => {
-    showDetail(
-      p.nama,
-      `Lahir: ${p.tanggal_lahir}
+    showDetail(p);
+  };
+
+  return div;
+}
+
+// FORMAT DETAIL
+function formatDetail(p) {
+  return `Lahir: ${p.tanggal_lahir}
 Alamat: ${p.alamat_lahir}
 Domisili: ${p.domisili}
 Pasangan: ${p.pasangan}
 Anak: ${p.jumlah_anak}
 Status: ${p.status}
 WA: ${p.wa}
-Pekerjaan: ${p.pekerjaan}`,
-      p.id
-    );
-  };
-
-  return div;
+Pekerjaan: ${p.pekerjaan}`;
 }
 
-
-// ===== POPUP =====
-function showDetail(nama, info, id) {
+// POPUP
+function showDetail(p) {
   document.getElementById("popup").style.display = "block";
-  document.getElementById("nama").innerText = nama;
-  document.getElementById("info").innerHTML = info.replace(/\n/g, "<br>");
+  document.getElementById("nama").innerText = p.nama;
+  document.getElementById("info").innerHTML = formatDetail(p).replace(/\n/g, "<br>");
 
-  const btn = document.getElementById("btnDetail");
-
-  btn.style.display = "inline-block";
-  btn.onclick = function() {
-    window.location.href = "detail.html?id=" + id;
+  document.getElementById("btnDetail").onclick = function() {
+    window.location.href = "detail.html?id=" + p.id;
   };
 }
 
