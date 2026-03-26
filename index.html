@@ -166,7 +166,79 @@ body {
   </div>
 </div>
 
+<div class="tree" id="tree"></div>
+
 <script>
+fetch('data.json')
+  .then(res => res.json())
+  .then(data => {
+
+    const tree = document.getElementById("tree");
+
+    // Ambil generasi 1 (orang tua)
+    const gen1 = data.filter(p => p.generasi == 1);
+    const gen2 = data.filter(p => p.generasi == 2);
+
+    // ===== ROW ORANG TUA =====
+    const rowParent = document.createElement("div");
+    rowParent.className = "row";
+
+    gen1.forEach(p => {
+      const div = createPerson(p);
+      rowParent.appendChild(div);
+    });
+
+    tree.appendChild(rowParent);
+
+    // Garis tengah
+    const vline = document.createElement("div");
+    vline.className = "v-line";
+    tree.appendChild(vline);
+
+    // ===== ROW ANAK =====
+    const rowChild = document.createElement("div");
+    rowChild.className = "row children";
+
+    gen2.forEach(p => {
+      const div = createPerson(p);
+      rowChild.appendChild(div);
+    });
+
+    tree.appendChild(rowChild);
+
+  });
+
+
+// ===== FUNCTION BUAT CARD =====
+function createPerson(p) {
+  const div = document.createElement("div");
+  div.className = "person";
+
+  div.innerHTML = `
+    <img src="${p.foto}">
+    <div>${p.nama}</div>
+  `;
+
+  div.onclick = () => {
+    showDetail(
+      p.nama,
+      `Gen${p.generasi}
+Lahir: ${p.tanggal_lahir}
+Alamat Lahir: ${p.alamat_lahir}
+Domisili: ${p.domisili}
+Pasangan: ${p.pasangan}
+Keturunan: ${p.jumlah_anak}
+Status: ${p.status}
+WA: ${p.wa}`,
+      p.link_detail
+    );
+  };
+
+  return div;
+}
+
+
+// ===== POPUP =====
 function showDetail(nama, info, link) {
   document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = nama;
@@ -188,6 +260,7 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 </script>
+  
 
 </body>
 </html>
