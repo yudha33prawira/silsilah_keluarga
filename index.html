@@ -109,13 +109,13 @@ body {
   <div class="row">
 
     <div class="person"
-    onclick="showDetail('Ngadiman','Gen1\nAyah\nLahir: 1960\nAlamat Lahir: Purworjo\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Titik\nKeturunan: 4\nStatus Saat Ini : Meninggal\nWA: -----')">
+    onclick="showDetail('Ngadiman','Gen1\nAyah\nLahir: 1960\nAlamat Lahir: Purworjo\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Titik\nKeturunan: 4\nStatus Saat Ini : Meninggal\nWA: -----\nPekerjaan: ----')">
       <img src="images/ngadiman.jpg">
       <div>Ngadiman</div>
     </div>
 
     <div class="person"
-    onclick="showDetail('Titik','Gen1\nIbu\nLahir: 1965\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Ngadiman\nKeturunan: 4\nStatus Saat Ini: Masih Hidup\nWA: +62 812-1629-4218')">
+    onclick="showDetail('Titik','Gen1\nIbu\nLahir: 1965\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan Ngadiman\nKeturunan: 4\nStatus Saat Ini: Masih Hidup\nWA: +62 812-1629-4218\nPekerjaan: ----')">
       <img src="images/titik.jpg">
       <div>Titik</div>
     </div>
@@ -128,25 +128,25 @@ body {
   <div class="row children">
 
     <div class="person"
-    onclick="showDetail('Yuliarsih','Gen2\nAnak1\nLahir: 1975\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan R Oyo Sunarso\nKeturunan: 2\nStatus Saat Ini : Masih Hidup\nWA: +62 852-1862-9771','yuliarsih.html')">
+    onclick="showDetail('Yuliarsih','Gen2\nAnak1\nLahir: 1975\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan R Oyo Sunarso\nKeturunan: 2\nStatus Saat Ini : Masih Hidup\nWA: +62 852-1862-9771\nPekerjaan: ----','yuliarsih.html')">
       <img src="images/yuliarsih.jpg">
       <div>Yuliarsih</div>
     </div>
 
     <div class="person"
-    onclick="showDetail('Agus','Gen2\nAnak2\nLahir: 1978\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan -----\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: -----','agus.html')">
+    onclick="showDetail('Agus','Gen2\nAnak2\nLahir: 1978\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Menikah dengan -----\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: -----\nPekerjaan: Jualan Mie Ayam','agus.html')">
       <img src="images/agus.jpg">
       <div>Agus</div>
     </div>
 
     <div class="person"
-    onclick="showDetail('Suparmo','Gen2\nAnak3\nLahir: 1980\nAlamat Lahir: Tasikmalaya\nDomisili: Depok\nHubungan: Menikah dengan Yatih\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: +62 812-9225-9609','suparmo.html')">
+    onclick="showDetail('Suparmo','Gen2\nAnak3\nLahir: 1980\nAlamat Lahir: Tasikmalaya\nDomisili: Depok\nHubungan: Menikah dengan Yatih\nKeturunan: 2\nStatus Saat Ini: Masih Hidup\nWA: +62 812-9225-9609\nPekerjaan: Jualan Buah Buahan','suparmo.html')">
       <img src="images/suparmo.jpg">
       <div>Suparmo</div>
     </div>
 
     <div class="person"
-    onclick="showDetail('Eti','Gen2\nAnak4\nLahir: 1982\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Lajang\nKeturunan: -----\nStatus Saat Ini: Meninggal\nWA: -----')">
+    onclick="showDetail('Eti','Gen2\nAnak4\nLahir: 1982\nAlamat Lahir: Tasikmalaya\nDomisili: Tasikmalaya\nHubungan: Lajang\nKeturunan: -----\nStatus Saat Ini: Meninggal\nWA: -----\nPekerjaan: ----')">
       <img src="images/eti.jpg">
       <div>Eti</div>
     </div>
@@ -229,7 +229,8 @@ Domisili: ${p.domisili}
 Pasangan: ${p.pasangan}
 Keturunan: ${p.jumlah_anak}
 Status: ${p.status}
-WA: ${p.wa}`,
+WA: ${p.wa}
+Pekerjaan: ${p.pekerjaan}`,
       p.link_detail
     );
   };
