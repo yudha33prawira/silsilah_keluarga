@@ -8,6 +8,7 @@
 body {
   font-family: Arial;
   text-align: center;
+  margin: 0;
 }
 
 /* TREE */
@@ -15,12 +16,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  padding: 10px;
 }
 
 .row {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .v-line {
@@ -32,24 +36,17 @@ body {
 /* CHILDREN */
 .children {
   position: relative;
-  margin-top: 10px;
+  margin-top: 15px;
+  width: 100%;
 }
 
-/* GRID ANAK */
+/* GRID RESPONSIVE */
 .row.children {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  justify-items: center;
-  max-width: 300px;
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-  .row.children {
-    grid-template-columns: 1fr;
-    max-width: 200px;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  width: 100%;
+  padding: 0 10px;
 }
 
 /* GARIS */
@@ -57,8 +54,8 @@ body {
   content: '';
   position: absolute;
   top: -10px;
-  left: 20%;
-  right: 20%;
+  left: 5%;
+  right: 5%;
   height: 2px;
   background: black;
 }
@@ -66,12 +63,13 @@ body {
 /* CARD */
 .person {
   border: 1px solid black;
-  padding: 10px;
+  padding: 15px;
   border-radius: 10px;
-  margin: 5px;
   background: white;
   cursor: pointer;
-  min-width: 120px;
+  width: 100%;
+  max-width: 200px;
+  margin: auto;
   text-align: center;
   transition: 0.2s;
 }
@@ -82,8 +80,8 @@ body {
 }
 
 .person img {
-  width: 70px;
-  height: 70px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
 }
 
@@ -100,7 +98,7 @@ body {
 
 .popup-content {
   background: white;
-  width: 260px;
+  width: 280px;
   margin: 100px auto;
   padding: 20px;
   border-radius: 10px;
@@ -140,15 +138,15 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // ROOT
   const ayah = data.find(p => p.nama === "Ngadiman");
   const ibu = data.find(p => p.nama === "Titik");
 
   if (!ayah || !ibu) {
-    tree.innerHTML = "Data orang tua tidak ditemukan";
+    tree.innerHTML = "Data tidak ditemukan";
     return;
   }
 
+  // ROOT
   const row1 = document.createElement("div");
   row1.className = "row";
 
