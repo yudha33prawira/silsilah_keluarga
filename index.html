@@ -7,9 +7,10 @@
 
 <style>
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
   margin: 0;
+  background: #f5f5f5;
 }
 
 .tree {
@@ -67,11 +68,12 @@ body {
   padding: 15px;
   background: white;
   color: black;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .person:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .person.meninggal {
@@ -97,13 +99,26 @@ body {
   cursor: default;
 }
 
-/* SEARCH */
+/* MODERN SEARCH BUTTON */
 .search-btn {
-  padding: 8px 15px;
-  margin: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  font-size: 22px;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.search-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* SEARCH POPUP */
 .search-popup {
   display: none;
   position: fixed;
@@ -116,14 +131,41 @@ body {
 
 .search-box {
   background: white;
-  padding: 20px;
-  margin: 100px auto;
-  width: 300px;
-  border-radius: 10px;
+  padding: 25px;
+  margin: 120px auto;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 15px;
   text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
-/* POPUP DETAIL */
+.search-box input {
+  width: 80%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+.search-box button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2575fc;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background 0.2s;
+}
+
+.search-box button:hover {
+  background: #6a11cb;
+}
+
+/* DETAIL POPUP */
 .popup {
   display: none;
   position: fixed;
@@ -155,7 +197,8 @@ body {
 
 <h2>Silsilah Keluarga Ngadiman</h2>
 
-<button onclick="openSearch()" class="search-btn">🔍 Cari</button>
+<!-- Modern Search Button -->
+<button onclick="openSearch()" class="search-btn">🔍</button>
 
 <div class="tree" id="tree"></div>
 
@@ -164,7 +207,7 @@ body {
   <div class="search-box">
     <h3>Cari Nama</h3>
     <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName(event)">
-    <br><br>
+    <br>
     <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
   </div>
@@ -214,7 +257,6 @@ function init(data) {
   }
 }
 
-// BLOK KELUARGA
 function createFamilyBlock(tree, root, pasangan, data) {
   const block = document.createElement("div");
   block.className = "family-block";
@@ -262,7 +304,7 @@ function createPerson(p) {
   return div;
 }
 
-// POPUP DETAIL
+// DETAIL POPUP
 function openPopup(id) {
   const p = globalData.find(x => x.id === id);
   if (!p) return;
@@ -293,7 +335,7 @@ function openPopup(id) {
 function closePopup() { document.getElementById("popup").style.display = "none"; }
 function goDetail(id) { window.location.href = "detail.html?id=" + id; }
 
-// POPUP SEARCH
+// SEARCH POPUP
 function openSearch() {
   document.getElementById("searchPopup").style.display = "block";
   document.getElementById("searchInput").focus();
@@ -312,7 +354,6 @@ function searchName(e) {
   let person = globalData.find(p => p.nama.toLowerCase().includes(input));
 
   if (person) {
-    // langsung buka halaman detail orang itu
     window.location.href = "detail.html?id=" + person.id;
   } else {
     alert("Nama tidak ditemukan!");
