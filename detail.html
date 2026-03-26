@@ -124,28 +124,16 @@ fetch('data.json')
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ===== AMBIL ANAK (SUAMI + ISTRI) =====
-  let children = data.filter(x =>
-    x.orang_tua === root.nama ||
-    x.orang_tua === root.pasangan
+  // ===== AMBIL ANAK (FIX AYAH + IBU) =====
+  const children = data.filter(x =>
+    x.ayah === root.nama || x.ibu === root.nama
   );
-
-  // ===== HILANGKAN DUPLIKAT =====
-  const unique = [];
-  const used = new Set();
-
-  children.forEach(c => {
-    if (!used.has(c.nama)) {
-      unique.push(c);
-      used.add(c.nama);
-    }
-  });
 
   // ===== TAMPILKAN =====
   const row2 = document.createElement("div");
   row2.className = "row children";
 
-  unique.forEach(p => {
+  children.forEach(p => {
     row2.appendChild(createPerson(p, data, false));
   });
 
@@ -154,7 +142,7 @@ fetch('data.json')
 });
 
 
-// ===== BREADCRUMB =====
+// ===== BREADCRUMB (FIX AYAH IBU) =====
 function buildBreadcrumb(person, data) {
 
   const container = document.getElementById("breadcrumb");
@@ -164,7 +152,11 @@ function buildBreadcrumb(person, data) {
 
   while (current) {
     path.unshift(current);
-    current = data.find(x => x.nama === current.orang_tua);
+
+    // ambil salah satu orang tua (prioritas ayah)
+    current = data.find(x =>
+      x.nama === current.ayah || x.nama === current.ibu
+    );
   }
 
   path.forEach((p, i) => {
@@ -212,7 +204,6 @@ function createPerson(p, data, isRoot = false) {
         </div>
       `;
     } else {
-      // fallback kalau tidak ketemu
       div.innerHTML = `
         <img src="${p.foto}">
         <div>${p.nama}</div>
