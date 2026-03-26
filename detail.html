@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Detail Silsilah</title>
 
 <style>
@@ -11,205 +12,124 @@ body {
   margin: 0;
 }
 
-/* HEADER */
-h2 { margin: 10px; }
-
-/* BREADCRUMB */
-.breadcrumb {
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
-.breadcrumb span {
-  cursor: pointer;
-  color: blue;
-}
-
 /* TREE */
 .tree {
-  width: 100%;
-  max-width: 900px;
-  margin: auto;
-  padding: 10px;
-}
-
-/* ROW */
-.row {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
 }
 
-/* GARIS */
-.v-line {
+/* COUPLE */
+.couple {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  position: relative;
+}
+
+/* GARIS TURUN */
+.couple::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
   width: 2px;
   height: 40px;
   background: black;
+  transform: translateX(-50%);
 }
 
 /* CHILDREN */
 .children {
-  position: relative;
-  margin-top: 15px;
+  margin-top: 50px;
   width: 100%;
-}
-
-/* GRID (FIX: MAX 2 KOLOM) */
-.row.children {
+  max-width: 600px;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
-  width: 100%;
+  position: relative;
 }
 
-/* TABLET & PC → 2 KOLOM */
-@media (min-width: 600px) {
-  .row.children {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* GARIS HORIZONTAL */
+/* GARIS ANAK */
 .children::before {
   content: '';
   position: absolute;
-  top: -15px;
-  left: 5%;
-  right: 5%;
+  top: -20px;
+  left: 10%;
+  right: 10%;
   height: 2px;
   background: black;
 }
 
-/* CARD (FULL WIDTH BIAR BESAR) */
+/* CARD */
 .person {
-  width: 100%;
-  padding: 18px;
   border: 1px solid black;
   border-radius: 12px;
+  padding: 15px;
   background: white;
-  text-align: center;
-  transition: 0.2s;
+  cursor: pointer;
 }
 
-.person:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-/* FOTO BESAR */
 .person img {
-  width: 110px;
-  height: 110px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  cursor: pointer;
 }
 
-/* NAMA */
-.name {
-  font-weight: bold;
-  margin-top: 8px;
-  cursor: pointer;
-}
-
-/* PASANGAN */
-.couple {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* POPUP */
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
-
-.popup-content {
-  background: white;
-  width: 90%;
-  max-width: 320px;
-  margin: 80px auto;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.back {
-  margin-bottom: 10px;
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .children {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h2 id="judul">Silsilah Keluarga</h2>
-<div class="breadcrumb" id="breadcrumb"></div>
-
-<button class="back" onclick="history.back()">⬅ Kembali</button>
+<h2 id="judul"></h2>
 
 <div class="tree" id="tree"></div>
 
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
-  </div>
-</div>
-
 <script>
-let globalData = [];
-
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
-  globalData = data;
-  init(data);
-});
-
-function init(data) {
 
   const root = data.find(p => p.id === id);
-
-  if (!root) {
-    document.getElementById("judul").innerText = "Data tidak ditemukan";
-    return;
-  }
+  if (!root) return;
 
   document.getElementById("judul").innerText =
-    "Silsilah Keluarga " + root.nama;
-
-  buildBreadcrumb(root, data);
+    "Silsilah " + root.nama;
 
   const tree = document.getElementById("tree");
 
-  const row1 = document.createElement("div");
-  row1.className = "row";
-  row1.appendChild(createPerson(root, data, true));
-  tree.appendChild(row1);
+  // ===== ROOT + PASANGAN =====
+  const pasangan = data.find(x =>
+    x.nama.toLowerCase() === root.pasangan.toLowerCase()
+  );
 
-  const vline = document.createElement("div");
-  vline.className = "v-line";
-  tree.appendChild(vline);
+  const couple = document.createElement("div");
+  couple.className = "couple";
 
-  const pasanganNama = root.pasangan || "";
+  couple.appendChild(createPerson(root));
 
+  if (pasangan) {
+    couple.appendChild(createPerson(pasangan));
+  }
+
+  tree.appendChild(couple);
+
+  // ===== ANAK =====
   const children = data.filter(x =>
     x.ayah === root.nama ||
     x.ibu === root.nama ||
-    x.ayah === pasanganNama ||
-    x.ibu === pasanganNama
+    x.ayah === root.pasangan ||
+    x.ibu === root.pasangan
   );
 
   const unique = [];
@@ -222,118 +142,32 @@ function init(data) {
     }
   });
 
-  const row2 = document.createElement("div");
-  row2.className = "row children";
+  const childBox = document.createElement("div");
+  childBox.className = "children";
 
   unique.forEach(p => {
-    row2.appendChild(createPerson(p, data));
+    childBox.appendChild(createPerson(p));
   });
 
-  tree.appendChild(row2);
-}
+  tree.appendChild(childBox);
 
-function buildBreadcrumb(person, data) {
-  const container = document.getElementById("breadcrumb");
+});
 
-  let path = [];
-  let current = person;
-  const visited = new Set();
-
-  while (current && !visited.has(current.id)) {
-    visited.add(current.id);
-    path.unshift(current);
-
-    current = data.find(x =>
-      x.nama === current.ayah || x.nama === current.ibu
-    );
-  }
-
-  path.forEach((p, i) => {
-    const span = document.createElement("span");
-    span.innerText = p.nama;
-
-    span.onclick = () => {
-      window.location.href = "detail.html?id=" + p.id;
-    };
-
-    container.appendChild(span);
-
-    if (i < path.length - 1) {
-      container.appendChild(document.createTextNode(" > "));
-    }
-  });
-}
-
-function createPerson(p, data, isRoot = false) {
-
+// CARD
+function createPerson(p) {
   const div = document.createElement("div");
   div.className = "person";
 
-  if (isRoot && p.pasangan) {
-    const pasangan = data.find(x =>
-      x.nama.toLowerCase().trim() === p.pasangan.toLowerCase().trim()
-    );
+  div.innerHTML = `
+    <img src="${p.foto}">
+    <div>${p.nama}</div>
+  `;
 
-    if (pasangan) {
-      div.innerHTML = `
-        <div class="couple">
-          ${personHTML(p)}
-          ${personHTML(pasangan)}
-        </div>
-      `;
-    } else {
-      div.innerHTML = personHTML(p);
-    }
-  } else {
-    div.innerHTML = personHTML(p);
-  }
+  div.onclick = () => {
+    window.location.href = "detail.html?id=" + p.id;
+  };
 
   return div;
-}
-
-function personHTML(p) {
-  return `
-    <div>
-      <img src="${p.foto}" onclick="openPopup('${p.id}')">
-      <div class="name" onclick="goDetail('${p.id}')">${p.nama}</div>
-    </div>
-  `;
-}
-
-function openPopup(id) {
-  const p = globalData.find(x => x.id === id);
-  if (!p) return;
-
-  showDetail(p.nama, formatDetail(p), p.id);
-}
-
-function formatDetail(p) {
-  return `Lahir: ${p.tanggal_lahir}
-Alamat: ${p.alamat_lahir}
-Domisili: ${p.domisili}
-Pasangan: ${p.pasangan}
-Anak: ${p.jumlah_anak}
-Status: ${p.status}
-WA: ${p.wa}
-Pekerjaan: ${p.pekerjaan}`;
-}
-
-function showDetail(nama, info, id) {
-  document.getElementById("popup").style.display = "block";
-  document.getElementById("nama").innerText = nama;
-  document.getElementById("info").innerHTML = info.replace(/\n/g, "<br>");
-
-  document.getElementById("btnDetail").onclick = function() {
-    window.location.href = "detail.html?id=" + id;
-  };
-}
-
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
-}
-
-function goDetail(id) {
-  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
