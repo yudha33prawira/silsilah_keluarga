@@ -114,35 +114,42 @@ body {
 </div>
 
 <script>
-// ===== LOAD DATA =====
 fetch('data.json')
   .then(res => res.json())
   .then(data => {
 
     const tree = document.getElementById("tree");
 
-    // cari root (tidak punya orang tua)
+    // cari root
     const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
     roots.forEach(root => {
-      renderTree(root, tree, data);
+      buildLevel([root], tree, data);
     });
 
   });
 
 
-// ===== RENDER TREE =====
-function renderTree(person, container, data) {
+// ===== BUILD PER LEVEL (ANTI DOBEL) =====
+function buildLevel(parents, container, data) {
 
-  // tampilkan orang
+  // tampilkan parent
   const row = document.createElement("div");
   row.className = "row";
 
-  row.appendChild(createPerson(person));
+  parents.forEach(p => {
+    row.appendChild(createPerson(p, data));
+  });
+
   container.appendChild(row);
 
-  // cari anak
-  const children = data.filter(p => p.orang_tua === person.nama);
+  // cari semua anak dari semua parent
+  let children = [];
+
+  parents.forEach(p => {
+    const child = data.filter(x => x.orang_tua === p.nama);
+    children = children.concat(child);
+  });
 
   if (children.length > 0) {
 
@@ -151,26 +158,69 @@ function renderTree(person, container, data) {
     vline.className = "v-line";
     container.appendChild(vline);
 
-    // row anak
+    // tampilkan anak dalam 1 baris
     const childRow = document.createElement("div");
     childRow.className = "row children";
 
-    children.forEach(child => {
-      childRow.appendChild(createPerson(child));
+    children.forEach(c => {
+      childRow.appendChild(createPerson(c));
     });
 
     container.appendChild(childRow);
 
     // lanjut ke generasi berikutnya
-    children.forEach(child => {
-      renderTree(child, container, data);
-    });
+    buildLevel(children, container, data);
   }
 }
 
 
 // ===== CARD =====
-function createPerson(p) {
+function function createPerson(p, data) {
+
+  const div = document.createElement("div");
+  div.className = "person";
+
+  // cari pasangan
+  const pasangan = data.find(x => x.nama === p.pasangan);
+
+  // kalau punya pasangan → tampilkan berdua
+  if (pasangan) {
+    div.innerHTML = `
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <div>
+          <img src="${p.foto}">
+          <div>${p.nama}</div>
+        </div>
+        <div>
+          <img src="${pasangan.foto}">
+          <div>${pasangan.nama}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    div.innerHTML = `
+      <img src="${p.foto}">
+      <div>${p.nama}</div>
+    `;
+  }
+
+  div.onclick = () => {
+    showDetail(
+      p.nama,
+      `Lahir: ${p.tanggal_lahir}
+Alamat: ${p.alamat_lahir}
+Domisili: ${p.domisili}
+Pasangan: ${p.pasangan}
+Anak: ${p.jumlah_anak}
+Status: ${p.status}
+WA: ${p.wa}
+Pekerjaan: ${p.pekerjaan}`,
+      p.id
+    );
+  };
+
+  return div;
+} {
   const div = document.createElement("div");
   div.className = "person";
 
