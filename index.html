@@ -59,12 +59,6 @@ body {
   border-radius: 50%;
 }
 
-.couple {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
 /* popup */
 .popup {
   display: none;
@@ -110,22 +104,14 @@ fetch('data.json')
 
     const tree = document.getElementById("tree");
 
-    // ===== GENERASI 1 =====
+    // ===== GENERASI 1 (ROOT) =====
     const gen1 = data.filter(p => p.generasi == 1);
 
     const row1 = document.createElement("div");
     row1.className = "row";
 
-    const used = new Set();
-
     gen1.forEach(p => {
-      if (used.has(p.nama)) return;
-
-      row1.appendChild(createPerson(p, data));
-
-      if (p.pasangan) {
-        used.add(p.pasangan);
-      }
+      row1.appendChild(createPerson(p));
     });
 
     tree.appendChild(row1);
@@ -135,7 +121,7 @@ fetch('data.json')
     vline.className = "v-line";
     tree.appendChild(vline);
 
-    // ===== GENERASI 2 =====
+    // ===== GENERASI 2 (ANAK) =====
     let gen2 = [];
 
     gen1.forEach(p => {
@@ -143,19 +129,22 @@ fetch('data.json')
       gen2 = gen2.concat(anak);
     });
 
+    // hapus duplikat
+    const uniqueGen2 = [];
+    const used = new Set();
+
+    gen2.forEach(p => {
+      if (!used.has(p.nama)) {
+        uniqueGen2.push(p);
+        used.add(p.nama);
+      }
+    });
+
     const row2 = document.createElement("div");
     row2.className = "row children";
 
-    const used2 = new Set();
-
-    gen2.forEach(p => {
-      if (used2.has(p.nama)) return;
-
-      row2.appendChild(createPerson(p, data));
-
-      if (p.pasangan) {
-        used2.add(p.pasangan);
-      }
+    uniqueGen2.forEach(p => {
+      row2.appendChild(createPerson(p));
     });
 
     tree.appendChild(row2);
@@ -163,33 +152,16 @@ fetch('data.json')
   });
 
 
-// ===== CARD =====
-function createPerson(p, data) {
+// ===== CARD (TANPA PASANGAN) =====
+function createPerson(p) {
 
   const div = document.createElement("div");
   div.className = "person";
 
-  const pasangan = data.find(x => x.nama === p.pasangan);
-
-  if (pasangan) {
-    div.innerHTML = `
-      <div class="couple">
-        <div>
-          <img src="${p.foto}">
-          <div>${p.nama}</div>
-        </div>
-        <div>
-          <img src="${pasangan.foto}">
-          <div>${pasangan.nama}</div>
-        </div>
-      </div>
-    `;
-  } else {
-    div.innerHTML = `
-      <img src="${p.foto}">
-      <div>${p.nama}</div>
-    `;
-  }
+  div.innerHTML = `
+    <img src="${p.foto}">
+    <div>${p.nama}</div>
+  `;
 
   div.onclick = () => {
     showDetail(
