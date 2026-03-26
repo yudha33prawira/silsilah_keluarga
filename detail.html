@@ -1,3 +1,4 @@
+```html id="detail-final"
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,157 +7,84 @@
 <title>Detail Silsilah</title>
 
 <style>
-body { font-family: Arial; text-align: center; margin: 0; }
-h2 { margin: 10px; }
+body {
+  font-family: Arial;
+  text-align: center;
+}
 
-.breadcrumb { margin-bottom: 15px; font-size: 14px; }
-.breadcrumb span { cursor: pointer; color: blue; }
+.family-block {
+  margin-bottom: 40px;
+}
 
-.tree { display: flex; flex-direction: column; align-items: center; padding: 15px; }
-.family-block { margin-bottom: 40px; }
-
-.couple { display: flex; gap: 20px; justify-content: center; position: relative; }
-.couple::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  width: 2px;
-  height: 30px;
-  background: black;
-  transform: translateX(-50%);
+.couple {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
 }
 
 .children {
-  margin-top: 40px;
-  width: 100%;
-  max-width: 700px;
+  margin-top: 20px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  position: relative;
-}
-
-.children::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: black;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
 }
 
 .person {
   border: 1px solid black;
-  border-radius: 12px;
-  padding: 15px;
-  background: white;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .person.meninggal {
   background: black;
   color: white;
 }
-
-.person img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.name { margin-top: 8px; font-weight: bold; cursor: pointer; }
-.name.disabled { color: gray; cursor: default; }
-
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
-
-.popup-content {
-  background: white;
-  width: 90%;
-  max-width: 300px;
-  margin: 80px auto;
-  padding: 20px;
-  border-radius: 10px;
-}
 </style>
 </head>
 
 <body>
 
-<h2 id="judul">Silsilah</h2>
-<div class="breadcrumb" id="breadcrumb"></div>
+<h2 id="judul"></h2>
 <button onclick="history.back()">⬅ Kembali</button>
 
-<div class="tree" id="tree"></div>
-
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
-  </div>
-</div>
+<div id="tree"></div>
 
 <script>
 let globalData = [];
-let id = new URLSearchParams(window.location.search).get('id');
+
+const id = new URLSearchParams(window.location.search).get('id');
 
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
   globalData = data;
-
-  if (!id) id = data[0].id; // fallback biar tetap muncul
-
   init(data);
 });
 
 function init(data) {
 
   const root = data.find(p => p.id === id);
+  if (!root) return;
 
-  if (!root) {
-    document.getElementById("judul").innerText = "Data tidak ditemukan";
-    return;
-  }
-
-  document.getElementById("judul").innerText =
-    "Silsilah Keluarga " + root.nama;
-
-  buildBreadcrumb(root, data);
-
-  const tree = document.getElementById("tree");
+  document.getElementById("judul").innerText = root.nama;
 
   let pasanganList = [];
 
   if (root.pasangan) {
     let list = root.pasangan.split("|").map(x => x.trim());
-
-    pasanganList = data.filter(x =>
-      list.some(nama => x.nama.toLowerCase() === nama.toLowerCase())
-    );
+    pasanganList = data.filter(x => list.includes(x.nama));
   }
 
   if (pasanganList.length === 0) {
-    createFamilyBlock(tree, root, null);
+    createBlock(root, null);
   } else {
-    pasanganList.forEach(psg => {
-      createFamilyBlock(tree, root, psg);
-    });
+    pasanganList.forEach(p => createBlock(root, p));
   }
 }
 
-function createFamilyBlock(tree, root, pasangan) {
+function createBlock(root, pasangan) {
+
+  const container = document.getElementById("tree");
 
   const block = document.createElement("div");
   block.className = "family-block";
@@ -189,87 +117,22 @@ function createFamilyBlock(tree, root, pasangan) {
     block.appendChild(childBox);
   }
 
-  tree.appendChild(block);
-}
-
-function punyaAnak(p) {
-  return globalData.some(x =>
-    x.ayah === p.nama || x.ibu === p.nama
-  );
+  container.appendChild(block);
 }
 
 function createPerson(p) {
 
-  const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
   div.className = isMeninggal ? "person meninggal" : "person";
 
   div.innerHTML = `
-    <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!hasChild ? 'disabled' : ''}">
-      ${p.nama}
-    </div>
+    <div onclick="goDetail('${p.id}')">${p.nama}</div>
   `;
-
-  if (hasChild) {
-    div.querySelector('.name').onclick = () => goDetail(p.id);
-  }
 
   return div;
 }
 
-function openPopup(id) {
-  const p = globalData.find(x => x.id === id);
-  if (!p) return;
-
-  document.getElementById("popup").style.display = "block";
-  document.getElementById("nama").innerText = p.nama;
-
-  document.getElementById("info").innerHTML =
-    `Status: ${p.status}<br>Pasangan: ${p.pasangan}`;
-}
-
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
-}
-
-function buildBreadcrumb(person, data) {
-
-  const container = document.getElementById("breadcrumb");
-
-  let path = [];
-  let current = person;
-
-  while (current) {
-    path.unshift(current);
-    current = data.find(x =>
-      x.nama === current.ayah || x.nama === current.ibu
-    );
-  }
-
-  path.forEach((p, i) => {
-
-    const span = document.createElement("span");
-    span.innerText = p.nama;
-
-    span.onclick = () => {
-      window.location.href = "detail.html?id=" + p.id;
-    };
-
-    container.appendChild(span);
-
-    if (i < path.length - 1) {
-      container.appendChild(document.createTextNode(" > "));
-    }
-  });
-}
-
-function goDetail(id) {
-  window.location.href = "detail.html?id=" + id;
-}
-</script>
-
-</body>
-</html>
+function goDetail(id
+```
