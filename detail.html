@@ -12,20 +12,18 @@ body {
   margin: 0;
 }
 
-/* JUDUL */
 h2 { margin: 10px; }
 
-/* BREADCRUMB */
 .breadcrumb {
   margin-bottom: 15px;
   font-size: 14px;
 }
+
 .breadcrumb span {
   cursor: pointer;
   color: blue;
 }
 
-/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
@@ -33,12 +31,10 @@ h2 { margin: 10px; }
   padding: 15px;
 }
 
-/* BLOK KELUARGA */
 .family-block {
   margin-bottom: 40px;
 }
 
-/* COUPLE */
 .couple {
   display: flex;
   gap: 20px;
@@ -57,7 +53,6 @@ h2 { margin: 10px; }
   transform: translateX(-50%);
 }
 
-/* CHILDREN */
 .children {
   margin-top: 40px;
   width: 100%;
@@ -78,7 +73,6 @@ h2 { margin: 10px; }
   background: black;
 }
 
-/* CARD */
 .person {
   border: 1px solid black;
   border-radius: 12px;
@@ -87,7 +81,6 @@ h2 { margin: 10px; }
   color: black;
 }
 
-/* MENINGGAL */
 .person.meninggal {
   background: black;
   color: white;
@@ -97,7 +90,6 @@ h2 { margin: 10px; }
   color: white;
 }
 
-/* FOTO */
 .person img {
   width: 90px;
   height: 90px;
@@ -105,7 +97,6 @@ h2 { margin: 10px; }
   cursor: pointer;
 }
 
-/* NAMA */
 .name {
   margin-top: 8px;
   font-weight: bold;
@@ -117,7 +108,6 @@ h2 { margin: 10px; }
   cursor: default;
 }
 
-/* POPUP */
 .popup {
   display: none;
   position: fixed;
@@ -137,7 +127,6 @@ h2 { margin: 10px; }
   border-radius: 10px;
 }
 
-/* RESPONSIVE */
 @media (max-width: 600px) {
   .children {
     grid-template-columns: 1fr;
@@ -154,7 +143,6 @@ h2 { margin: 10px; }
 
 <div class="tree" id="tree"></div>
 
-<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -192,36 +180,33 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // ===== AMBIL SEMUA PASANGAN =====
+  // 🔥 SUPPORT "A|B|C"
   let pasanganList = [];
 
-  if (Array.isArray(root.pasangan)) {
+  if (root.pasangan) {
+    let list = root.pasangan.split("|").map(x => x.trim());
+
     pasanganList = data.filter(x =>
-      root.pasangan.includes(x.nama)
+      list.includes(x.nama)
     );
-  } else if (root.pasangan && root.pasangan !== "-") {
-    const p = data.find(x => x.nama === root.pasangan);
-    if (p) pasanganList.push(p);
   }
 
-  // ===== LOOP SETIAP PASANGAN =====
   if (pasanganList.length === 0) {
-    // tanpa pasangan
-    createFamilyBlock(tree, root, null, data);
+    createFamilyBlock(tree, root, null);
   } else {
     pasanganList.forEach(psg => {
-      createFamilyBlock(tree, root, psg, data);
+      createFamilyBlock(tree, root, psg);
     });
   }
 }
 
-// ===== BUAT BLOK KELUARGA =====
-function createFamilyBlock(tree, root, pasangan, data) {
+
+// ===== BLOK KELUARGA =====
+function createFamilyBlock(tree, root, pasangan) {
 
   const block = document.createElement("div");
   block.className = "family-block";
 
-  // COUPLE
   const couple = document.createElement("div");
   couple.className = "couple";
 
@@ -233,10 +218,10 @@ function createFamilyBlock(tree, root, pasangan, data) {
 
   block.appendChild(couple);
 
-  // ANAK KHUSUS PASANGAN INI
-  const children = data.filter(x =>
-    (x.ayah === root.nama && (!pasangan || x.ibu === pasangan.nama)) ||
-    (x.ibu === root.nama && (!pasangan || x.ayah === pasangan.nama))
+  // 🔥 ANAK SESUAI PASANGAN
+  const children = globalData.filter(x =>
+    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
+    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
   );
 
   if (children.length > 0) {
@@ -254,12 +239,14 @@ function createFamilyBlock(tree, root, pasangan, data) {
   tree.appendChild(block);
 }
 
+
 // ===== CEK PUNYA ANAK =====
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
   );
 }
+
 
 // ===== CARD =====
 function createPerson(p) {
@@ -284,6 +271,7 @@ function createPerson(p) {
   return div;
 }
 
+
 // ===== POPUP =====
 function openPopup(id) {
 
@@ -299,7 +287,7 @@ function openPopup(id) {
     `Lahir: ${p.tanggal_lahir}<br>
      Alamat: ${p.alamat_lahir}<br>
      Domisili: ${p.domisili}<br>
-     Pasangan: ${Array.isArray(p.pasangan) ? p.pasangan.join(", ") : p.pasangan}<br>
+     Pasangan: ${p.pasangan}<br>
      Anak: ${p.jumlah_anak}<br>
      Status: ${p.status}<br>
      WA: ${p.wa}<br>
@@ -318,6 +306,7 @@ function openPopup(id) {
 function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
+
 
 // ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
@@ -353,6 +342,7 @@ function buildBreadcrumb(person, data) {
     }
   });
 }
+
 
 // ===== NAVIGASI =====
 function goDetail(id) {
