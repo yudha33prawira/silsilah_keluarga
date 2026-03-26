@@ -104,15 +104,15 @@ fetch('data.json')
 
   const tree = document.getElementById("tree");
 
-  // ===== GENERASI 1 =====
-  const gen1 = data.filter(p => p.generasi == 1);
+  // ===== ROOT =====
+  const ayah = data.find(p => p.nama === "Ngadiman");
+  const ibu = data.find(p => p.nama === "Titik");
 
   const row1 = document.createElement("div");
   row1.className = "row";
 
-  gen1.forEach(p => {
-    row1.appendChild(createPerson(p));
-  });
+  row1.appendChild(createPerson(ayah));
+  row1.appendChild(createPerson(ibu));
 
   tree.appendChild(row1);
 
@@ -121,35 +121,15 @@ fetch('data.json')
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ===== GENERASI 2 =====
-  let gen2 = [];
+  // ===== ANAK =====
+  const gen2 = data.filter(x =>
+    x.ayah === ayah.nama && x.ibu === ibu.nama
+  );
 
-  gen1.forEach(p => {
-
-    // ambil anak dari p (ayah/ibu)
-    const anak = data.filter(x =>
-      x.orang_tua === p.nama
-    );
-
-    gen2 = gen2.concat(anak);
-  });
-
-  // ===== HAPUS DUPLIKAT =====
-  const uniqueGen2 = [];
-  const used = new Set();
-
-  gen2.forEach(p => {
-    if (!used.has(p.id)) {
-      uniqueGen2.push(p);
-      used.add(p.id);
-    }
-  });
-
-  // ===== TAMPILKAN =====
   const row2 = document.createElement("div");
   row2.className = "row children";
 
-  uniqueGen2.forEach(p => {
+  gen2.forEach(p => {
     row2.appendChild(createPerson(p));
   });
 
