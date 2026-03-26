@@ -14,7 +14,6 @@ h2 {
   margin-bottom: 10px;
 }
 
-/* ===== BREADCRUMB ===== */
 .breadcrumb {
   margin-bottom: 15px;
   font-size: 14px;
@@ -25,11 +24,6 @@ h2 {
   color: blue;
 }
 
-.breadcrumb span:hover {
-  text-decoration: underline;
-}
-
-/* ===== TREE ===== */
 .tree {
   display: flex;
   flex-direction: column;
@@ -79,6 +73,12 @@ h2 {
   border-radius: 50%;
 }
 
+.couple {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
 .back {
   margin-bottom: 10px;
 }
@@ -111,19 +111,17 @@ fetch('data.json')
       return;
     }
 
-    // ===== JUDUL =====
     document.getElementById("judul").innerText =
       "Silsilah Keluarga " + root.nama;
 
-    // ===== BREADCRUMB =====
     buildBreadcrumb(root, data);
 
     const tree = document.getElementById("tree");
 
-    // ===== ROOT =====
+    // ===== ROOT (PAKAI PASANGAN) =====
     const row1 = document.createElement("div");
     row1.className = "row";
-    row1.appendChild(createPerson(root));
+    row1.appendChild(createPerson(root, data, true));
     tree.appendChild(row1);
 
     // ===== GARIS =====
@@ -131,14 +129,14 @@ fetch('data.json')
     vline.className = "v-line";
     tree.appendChild(vline);
 
-    // ===== ANAK =====
+    // ===== ANAK (TANPA PASANGAN) =====
     const children = data.filter(x => x.orang_tua === root.nama);
 
     const row2 = document.createElement("div");
     row2.className = "row children";
 
     children.forEach(p => {
-      row2.appendChild(createPerson(p));
+      row2.appendChild(createPerson(p, data, false));
     });
 
     tree.appendChild(row2);
@@ -146,7 +144,7 @@ fetch('data.json')
   });
 
 
-// ===== BREADCRUMB FUNCTION =====
+// ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
 
   const container = document.getElementById("breadcrumb");
@@ -154,13 +152,11 @@ function buildBreadcrumb(person, data) {
   let path = [];
   let current = person;
 
-  // naik ke atas
   while (current) {
     path.unshift(current);
     current = data.find(x => x.nama === current.orang_tua);
   }
 
-  // render breadcrumb
   path.forEach((p, index) => {
 
     const span = document.createElement("span");
@@ -180,15 +176,36 @@ function buildBreadcrumb(person, data) {
 
 
 // ===== CARD =====
-function createPerson(p) {
+function createPerson(p, data, isRoot = false) {
 
   const div = document.createElement("div");
   div.className = "person";
 
-  div.innerHTML = `
-    <img src="${p.foto}">
-    <div>${p.nama}</div>
-  `;
+  // ===== ROOT → tampil pasangan =====
+  if (isRoot && p.pasangan) {
+
+    const pasangan = data.find(x => x.nama === p.pasangan);
+
+    if (pasangan) {
+      div.innerHTML = `
+        <div class="couple">
+          <div>
+            <img src="${p.foto}">
+            <div>${p.nama}</div>
+          </div>
+          <div>
+            <img src="${pasangan.foto}">
+            <div>${pasangan.nama}</div>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    div.innerHTML = `
+      <img src="${p.foto}">
+      <div>${p.nama}</div>
+    `;
+  }
 
   div.onclick = () => {
     window.location.href = "detail.html?id=" + p.id;
