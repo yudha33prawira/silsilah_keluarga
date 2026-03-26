@@ -97,6 +97,7 @@ body {
   <div class="popup-content">
     <h3 id="nama"></h3>
     <p id="info"></p>
+
     <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
@@ -109,74 +110,57 @@ fetch('data.json')
 
     const tree = document.getElementById("tree");
 
-    const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
+    // ===== GENERASI 1 =====
+    const gen1 = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
-    buildTree(roots, tree, data);
+    const row1 = document.createElement("div");
+    row1.className = "row";
 
-  });
+    const used = new Set();
 
+    gen1.forEach(p => {
+      if (used.has(p.nama)) return;
 
-// ===== BUILD TREE MULTI GENERASI =====
-function buildTree(parents, container, data) {
+      row1.appendChild(createPerson(p, data));
 
-  if (parents.length === 0) return;
+      if (p.pasangan) {
+        used.add(p.pasangan);
+      }
+    });
 
-  // tampilkan 1 level
-  const row = document.createElement("div");
-  row.className = "row";
+    tree.appendChild(row1);
 
-  const used = new Set();
-
-  parents.forEach(p => {
-
-    if (used.has(p.nama)) return;
-
-    row.appendChild(createPerson(p, data));
-
-    if (p.pasangan) {
-      used.add(p.pasangan);
-    }
-
-  });
-
-  container.appendChild(row);
-
-
-  // cari anak
-  let children = [];
-
-  parents.forEach(p => {
-    const child = data.filter(x => x.orang_tua === p.nama);
-    children = children.concat(child);
-  });
-
-  // hapus duplikat anak
-  const uniqueChildren = [];
-  const usedChild = new Set();
-
-  children.forEach(c => {
-    if (!usedChild.has(c.nama)) {
-      uniqueChildren.push(c);
-      usedChild.add(c.nama);
-    }
-  });
-
-  // kalau ada anak → lanjut
-  if (uniqueChildren.length > 0) {
-
+    // ===== GARIS =====
     const vline = document.createElement("div");
     vline.className = "v-line";
-    container.appendChild(vline);
+    tree.appendChild(vline);
 
-    const childContainer = document.createElement("div");
-    childContainer.className = "tree children";
+    // ===== GENERASI 2 =====
+    let gen2 = [];
 
-    container.appendChild(childContainer);
+    gen1.forEach(p => {
+      const anak = data.filter(x => x.orang_tua === p.nama);
+      gen2 = gen2.concat(anak);
+    });
 
-    // recursive ke bawah
-    buildTree(uniqueChildren, childContainer, data);
-  }
-}
+    const row2 = document.createElement("div");
+    row2.className = "row children";
+
+    const used2 = new Set();
+
+    gen2.forEach(p => {
+      if (used2.has(p.nama)) return;
+
+      row2.appendChild(createPerson(p, data));
+
+      if (p.pasangan) {
+        used2.add(p.pasangan);
+      }
+    });
+
+    tree.appendChild(row2);
+
+  });
 
 
 // ===== CARD =====
@@ -234,14 +218,10 @@ function showDetail(nama, info, id) {
 
   const btn = document.getElementById("btnDetail");
 
-  if (id) {
-    btn.style.display = "inline-block";
-    btn.onclick = function() {
-      window.location.href = "detail.html?id=" + id;
-    };
-  } else {
-    btn.style.display = "none";
-  }
+  btn.style.display = "inline-block";
+  btn.onclick = function() {
+    window.location.href = "detail.html?id=" + id;
+  };
 }
 
 function closePopup() {
