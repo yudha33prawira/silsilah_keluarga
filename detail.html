@@ -11,9 +11,25 @@ body {
 }
 
 h2 {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  color: blue;
+}
+
+.breadcrumb span:hover {
+  text-decoration: underline;
+}
+
+/* ===== TREE ===== */
 .tree {
   display: flex;
   flex-direction: column;
@@ -64,21 +80,23 @@ h2 {
 }
 
 .back {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h2 id="judul">Detail Keluarga</h2>
+<h2 id="judul">Silsilah Keluarga</h2>
+
+<div class="breadcrumb" id="breadcrumb"></div>
 
 <button class="back" onclick="history.back()">⬅ Kembali</button>
 
 <div class="tree" id="tree"></div>
 
 <script>
-// ambil id dari URL
+// ===== AMBIL ID =====
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
@@ -93,66 +111,75 @@ fetch('data.json')
       return;
     }
 
-    document.getElementById("judul").innerText = "Keturunan " + root.nama;
+    // ===== JUDUL =====
+    document.getElementById("judul").innerText =
+      "Silsilah Keluarga " + root.nama;
+
+    // ===== BREADCRUMB =====
+    buildBreadcrumb(root, data);
 
     const tree = document.getElementById("tree");
 
-    buildTree([root], tree, data);
-  });
+    // ===== ROOT =====
+    const row1 = document.createElement("div");
+    row1.className = "row";
+    row1.appendChild(createPerson(root));
+    tree.appendChild(row1);
 
-
-// ===== BUILD TREE (KHUSUS GARIS KETURUNAN) =====
-function buildTree(parents, container, data) {
-
-  if (parents.length === 0) return;
-
-  // tampilkan parent
-  const row = document.createElement("div");
-  row.className = "row";
-
-  parents.forEach(p => {
-    row.appendChild(createPerson(p));
-  });
-
-  container.appendChild(row);
-
-  // cari anak
-  let children = [];
-
-  parents.forEach(p => {
-    const child = data.filter(x => x.orang_tua === p.nama);
-    children = children.concat(child);
-  });
-
-  // hapus duplikat
-  const uniqueChildren = [];
-  const used = new Set();
-
-  children.forEach(c => {
-    if (!used.has(c.nama)) {
-      uniqueChildren.push(c);
-      used.add(c.nama);
-    }
-  });
-
-  // lanjut ke bawah
-  if (uniqueChildren.length > 0) {
-
+    // ===== GARIS =====
     const vline = document.createElement("div");
     vline.className = "v-line";
-    container.appendChild(vline);
+    tree.appendChild(vline);
 
-    const childContainer = document.createElement("div");
-    childContainer.className = "tree children";
+    // ===== ANAK =====
+    const children = data.filter(x => x.orang_tua === root.nama);
 
-    container.appendChild(childContainer);
+    const row2 = document.createElement("div");
+    row2.className = "row children";
 
-    buildTree(uniqueChildren, childContainer, data);
+    children.forEach(p => {
+      row2.appendChild(createPerson(p));
+    });
+
+    tree.appendChild(row2);
+
+  });
+
+
+// ===== BREADCRUMB FUNCTION =====
+function buildBreadcrumb(person, data) {
+
+  const container = document.getElementById("breadcrumb");
+
+  let path = [];
+  let current = person;
+
+  // naik ke atas
+  while (current) {
+    path.unshift(current);
+    current = data.find(x => x.nama === current.orang_tua);
   }
+
+  // render breadcrumb
+  path.forEach((p, index) => {
+
+    const span = document.createElement("span");
+    span.innerText = p.nama;
+
+    span.onclick = () => {
+      window.location.href = "detail.html?id=" + p.id;
+    };
+
+    container.appendChild(span);
+
+    if (index < path.length - 1) {
+      container.appendChild(document.createTextNode(" > "));
+    }
+  });
 }
 
 
-// ===== CARD (TANPA PASANGAN) =====
+// ===== CARD =====
 function createPerson(p) {
 
   const div = document.createElement("div");
@@ -162,6 +189,10 @@ function createPerson(p) {
     <img src="${p.foto}">
     <div>${p.nama}</div>
   `;
+
+  div.onclick = () => {
+    window.location.href = "detail.html?id=" + p.id;
+  };
 
   return div;
 }
