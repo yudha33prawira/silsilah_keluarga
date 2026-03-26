@@ -111,7 +111,7 @@ fetch('data.json')
     const tree = document.getElementById("tree");
 
     // ===== GENERASI 1 =====
-    const gen1 = data.filter(p => !p.orang_tua || p.orang_tua === "-");
+    const gen1 = data.filter(p => p.orang_tua === "-");
 
     const row1 = document.createElement("div");
     row1.className = "row";
