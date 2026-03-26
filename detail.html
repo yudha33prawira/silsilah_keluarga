@@ -10,9 +10,7 @@ body {
   text-align: center;
 }
 
-h2 {
-  margin-bottom: 10px;
-}
+h2 { margin-bottom: 10px; }
 
 .breadcrumb {
   margin-bottom: 15px;
@@ -79,16 +77,13 @@ h2 {
   justify-content: center;
 }
 
-.back {
-  margin-bottom: 10px;
-}
+.back { margin-bottom: 10px; }
 </style>
 </head>
 
 <body>
 
 <h2 id="judul">Silsilah Keluarga</h2>
-
 <div class="breadcrumb" id="breadcrumb"></div>
 
 <button class="back" onclick="history.back()">⬅ Kembali</button>
@@ -101,47 +96,62 @@ const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
 fetch('data.json')
-  .then(res => res.json())
-  .then(data => {
+.then(res => res.json())
+.then(data => {
 
-    const root = data.find(p => p.id === id);
+  const root = data.find(p => p.id === id);
 
-    if (!root) {
-      document.getElementById("judul").innerText = "Data tidak ditemukan";
-      return;
+  if (!root) {
+    document.getElementById("judul").innerText = "Data tidak ditemukan";
+    return;
+  }
+
+  document.getElementById("judul").innerText =
+    "Silsilah Keluarga " + root.nama;
+
+  buildBreadcrumb(root, data);
+
+  const tree = document.getElementById("tree");
+
+  // ===== ROOT + PASANGAN =====
+  const row1 = document.createElement("div");
+  row1.className = "row";
+  row1.appendChild(createPerson(root, data, true));
+  tree.appendChild(row1);
+
+  // ===== GARIS =====
+  const vline = document.createElement("div");
+  vline.className = "v-line";
+  tree.appendChild(vline);
+
+  // ===== AMBIL ANAK (SUAMI + ISTRI) =====
+  let children = data.filter(x =>
+    x.orang_tua === root.nama ||
+    x.orang_tua === root.pasangan
+  );
+
+  // ===== HILANGKAN DUPLIKAT =====
+  const unique = [];
+  const used = new Set();
+
+  children.forEach(c => {
+    if (!used.has(c.nama)) {
+      unique.push(c);
+      used.add(c.nama);
     }
-
-    document.getElementById("judul").innerText =
-      "Silsilah Keluarga " + root.nama;
-
-    buildBreadcrumb(root, data);
-
-    const tree = document.getElementById("tree");
-
-    // ===== ROOT (PAKAI PASANGAN) =====
-    const row1 = document.createElement("div");
-    row1.className = "row";
-    row1.appendChild(createPerson(root, data, true));
-    tree.appendChild(row1);
-
-    // ===== GARIS =====
-    const vline = document.createElement("div");
-    vline.className = "v-line";
-    tree.appendChild(vline);
-
-    // ===== ANAK (TANPA PASANGAN) =====
-    const children = data.filter(x => x.orang_tua === root.nama);
-
-    const row2 = document.createElement("div");
-    row2.className = "row children";
-
-    children.forEach(p => {
-      row2.appendChild(createPerson(p, data, false));
-    });
-
-    tree.appendChild(row2);
-
   });
+
+  // ===== TAMPILKAN =====
+  const row2 = document.createElement("div");
+  row2.className = "row children";
+
+  unique.forEach(p => {
+    row2.appendChild(createPerson(p, data, false));
+  });
+
+  tree.appendChild(row2);
+
+});
 
 
 // ===== BREADCRUMB =====
@@ -157,7 +167,7 @@ function buildBreadcrumb(person, data) {
     current = data.find(x => x.nama === current.orang_tua);
   }
 
-  path.forEach((p, index) => {
+  path.forEach((p, i) => {
 
     const span = document.createElement("span");
     span.innerText = p.nama;
@@ -168,7 +178,7 @@ function buildBreadcrumb(person, data) {
 
     container.appendChild(span);
 
-    if (index < path.length - 1) {
+    if (i < path.length - 1) {
       container.appendChild(document.createTextNode(" > "));
     }
   });
@@ -182,9 +192,11 @@ function createPerson(p, data, isRoot = false) {
   div.className = "person";
 
   // ===== ROOT → tampil pasangan =====
-  if (isRoot && p.pasangan) {
+  if (isRoot && p.pasangan && p.pasangan !== "-") {
 
-    const pasangan = data.find(x => x.nama === p.pasangan);
+    const pasangan = data.find(x =>
+      x.nama.toLowerCase().trim() === p.pasangan.toLowerCase().trim()
+    );
 
     if (pasangan) {
       div.innerHTML = `
@@ -199,7 +211,14 @@ function createPerson(p, data, isRoot = false) {
           </div>
         </div>
       `;
+    } else {
+      // fallback kalau tidak ketemu
+      div.innerHTML = `
+        <img src="${p.foto}">
+        <div>${p.nama}</div>
+      `;
     }
+
   } else {
     div.innerHTML = `
       <img src="${p.foto}">
