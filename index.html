@@ -1,3 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Silsilah Keluarga</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+}
+
+/* TREE */
+.tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ROW */
+.row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Garis vertikal */
+.v-line {
+  width: 2px;
+  height: 30px;
+  background: black;
+}
+
+/* Garis anak */
+.children {
+  position: relative;
+  margin-top: 10px;
+}
+
+.children::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: black;
+}
+
+/* CARD */
+.person {
+  position: relative;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px;
+  cursor: pointer;
+  background: white;
+  min-width: 120px;
+}
+
+.person::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: black;
+}
+
+.person img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+/* pasangan */
+.couple {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* POPUP */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background: white;
+  width: 260px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Silsilah Keluarga Ngadiman</h2>
+
+<div class="tree" id="tree"></div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+
+    <button id="btnDetail">Lihat Detail</button><br><br>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
+
 <script>
 fetch('data.json')
   .then(res => res.json())
@@ -5,6 +127,7 @@ fetch('data.json')
 
     const tree = document.getElementById("tree");
 
+    // cari root (tidak punya orang tua)
     const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
     buildLevel(roots, tree, data);
@@ -12,7 +135,7 @@ fetch('data.json')
   });
 
 
-// ===== BUILD PER LEVEL =====
+// ===== BUILD TREE =====
 function buildLevel(parents, container, data) {
 
   const row = document.createElement("div");
@@ -71,7 +194,7 @@ function buildLevel(parents, container, data) {
 }
 
 
-// ===== CARD (SUAMI ISTRI) =====
+// ===== CARD =====
 function createPerson(p, data) {
 
   const div = document.createElement("div");
@@ -81,7 +204,7 @@ function createPerson(p, data) {
 
   if (pasangan) {
     div.innerHTML = `
-      <div style="display:flex; gap:10px; justify-content:center;">
+      <div class="couple">
         <div>
           <img src="${p.foto}">
           <div>${p.nama}</div>
@@ -140,3 +263,6 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 </script>
+
+</body>
+</html>
