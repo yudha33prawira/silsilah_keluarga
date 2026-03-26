@@ -63,12 +63,6 @@ h2 {
   border-radius: 50%;
 }
 
-.couple {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
 .back {
   margin-bottom: 20px;
 }
@@ -99,7 +93,7 @@ fetch('data.json')
       return;
     }
 
-    document.getElementById("judul").innerText = "Keluarga " + root.nama;
+    document.getElementById("judul").innerText = "Keturunan " + root.nama;
 
     const tree = document.getElementById("tree");
 
@@ -107,30 +101,22 @@ fetch('data.json')
   });
 
 
-// ===== BUILD TREE =====
+// ===== BUILD TREE (KHUSUS GARIS KETURUNAN) =====
 function buildTree(parents, container, data) {
 
   if (parents.length === 0) return;
 
+  // tampilkan parent
   const row = document.createElement("div");
   row.className = "row";
 
-  const used = new Set();
-
   parents.forEach(p => {
-
-    if (used.has(p.nama)) return;
-
-    row.appendChild(createPerson(p, data));
-
-    if (p.pasangan) {
-      used.add(p.pasangan);
-    }
-
+    row.appendChild(createPerson(p));
   });
 
   container.appendChild(row);
 
+  // cari anak
   let children = [];
 
   parents.forEach(p => {
@@ -138,17 +124,18 @@ function buildTree(parents, container, data) {
     children = children.concat(child);
   });
 
-  // hilangkan duplikat
+  // hapus duplikat
   const uniqueChildren = [];
-  const usedChild = new Set();
+  const used = new Set();
 
   children.forEach(c => {
-    if (!usedChild.has(c.nama)) {
+    if (!used.has(c.nama)) {
       uniqueChildren.push(c);
-      usedChild.add(c.nama);
+      used.add(c.nama);
     }
   });
 
+  // lanjut ke bawah
   if (uniqueChildren.length > 0) {
 
     const vline = document.createElement("div");
@@ -165,13 +152,8 @@ function buildTree(parents, container, data) {
 }
 
 
-// ===== CARD =====
-function createPerson(p, data) {
-
-  const div = document.createElement("div");
-  div.className = "person";
-
-  function createPerson(p) {
+// ===== CARD (TANPA PASANGAN) =====
+function createPerson(p) {
 
   const div = document.createElement("div");
   div.className = "person";
@@ -180,14 +162,6 @@ function createPerson(p, data) {
     <img src="${p.foto}">
     <div>${p.nama}</div>
   `;
-
-  return div;
-} else {
-    div.innerHTML = `
-      <img src="${p.foto}">
-      <div>${p.nama}</div>
-    `;
-  }
 
   return div;
 }
