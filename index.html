@@ -138,6 +138,7 @@ fetch('data.json')
 // ===== BUILD TREE =====
 function buildLevel(parents, container, data) {
 
+  // ===== TAMPILKAN PARENT =====
   const row = document.createElement("div");
   row.className = "row";
 
@@ -157,6 +158,8 @@ function buildLevel(parents, container, data) {
 
   container.appendChild(row);
 
+
+  // ===== CARI ANAK =====
   let children = [];
 
   parents.forEach(p => {
@@ -164,6 +167,8 @@ function buildLevel(parents, container, data) {
     children = children.concat(child);
   });
 
+
+  // ===== TAMPILKAN ANAK SEKALI SAJA =====
   if (children.length > 0) {
 
     const vline = document.createElement("div");
@@ -189,11 +194,9 @@ function buildLevel(parents, container, data) {
 
     container.appendChild(childRow);
 
-    buildLevel(children, container, data);
+    // ❗ STOP DI SINI (JANGAN RECURSIVE LAGI)
   }
 }
-
-
 // ===== CARD =====
 function createPerson(p, data) {
 
