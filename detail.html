@@ -8,10 +8,13 @@
 body {
   font-family: Arial;
   text-align: center;
+  margin: 0;
 }
 
-h2 { margin-bottom: 10px; }
+/* HEADER */
+h2 { margin: 10px; }
 
+/* BREADCRUMB */
 .breadcrumb {
   margin-bottom: 15px;
   font-size: 14px;
@@ -22,10 +25,11 @@ h2 { margin-bottom: 10px; }
   color: blue;
 }
 
+/* TREE */
 .tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .row {
@@ -34,51 +38,51 @@ h2 { margin-bottom: 10px; }
   flex-wrap: wrap;
 }
 
+/* GARIS */
 .v-line {
   width: 2px;
-  height: 30px;
+  height: 40px;
   background: black;
 }
 
+/* CHILDREN */
 .children {
   position: relative;
-  margin-top: 10px;
+  margin-top: 15px;
+  width: 100%;
 }
 
-/* GRID ANAK */
+/* GRID RESPONSIVE OTOMATIS */
 .row.children {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  justify-items: center;
-  max-width: 300px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .row.children {
-    grid-template-columns: 1fr;
-    max-width: 200px;
-  }
-}
-
+/* GARIS HORIZONTAL */
 .children::before {
   content: '';
   position: absolute;
-  top: -10px;
-  left: 20%;
-  right: 20%;
+  top: -15px;
+  left: 5%;
+  right: 5%;
   height: 2px;
   background: black;
 }
 
+/* CARD */
 .person {
+  width: 100%;
+  max-width: 180px;
+  padding: 15px;
   border: 1px solid black;
-  padding: 10px;
-  border-radius: 10px;
-  margin: 5px;
+  border-radius: 12px;
   background: white;
-  min-width: 120px;
   text-align: center;
+  margin: auto;
   transition: 0.2s;
 }
 
@@ -87,23 +91,27 @@ h2 { margin-bottom: 10px; }
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
+/* FOTO */
 .person img {
-  width: 70px;
-  height: 70px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   cursor: pointer;
 }
 
+/* NAMA */
 .name {
-  cursor: pointer;
   font-weight: bold;
-  margin-top: 5px;
+  margin-top: 8px;
+  cursor: pointer;
 }
 
+/* PASANGAN */
 .couple {
   display: flex;
   gap: 10px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* POPUP */
@@ -119,13 +127,37 @@ h2 { margin-bottom: 10px; }
 
 .popup-content {
   background: white;
-  width: 260px;
-  margin: 100px auto;
+  width: 90%;
+  max-width: 300px;
+  margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
 }
 
 .back { margin-bottom: 10px; }
+
+/* RESPONSIVE BESAR */
+@media (min-width: 768px) {
+  .person {
+    max-width: 200px;
+  }
+
+  .person img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .person {
+    max-width: 220px;
+  }
+
+  .person img {
+    width: 110px;
+    height: 110px;
+  }
+}
 </style>
 </head>
 
@@ -152,11 +184,9 @@ h2 { margin-bottom: 10px; }
 <script>
 let globalData = [];
 
-// ===== AMBIL ID =====
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
-// ===== LOAD DATA SEKALI =====
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
@@ -180,18 +210,15 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // ROOT
   const row1 = document.createElement("div");
   row1.className = "row";
   row1.appendChild(createPerson(root, data, true));
   tree.appendChild(row1);
 
-  // GARIS
   const vline = document.createElement("div");
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ANAK
   const pasanganNama = root.pasangan || "";
 
   const children = data.filter(x =>
@@ -221,9 +248,7 @@ function init(data) {
   tree.appendChild(row2);
 }
 
-// ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
-
   const container = document.getElementById("breadcrumb");
 
   let path = [];
@@ -240,7 +265,6 @@ function buildBreadcrumb(person, data) {
   }
 
   path.forEach((p, i) => {
-
     const span = document.createElement("span");
     span.innerText = p.nama;
 
@@ -256,14 +280,12 @@ function buildBreadcrumb(person, data) {
   });
 }
 
-// ===== CARD =====
 function createPerson(p, data, isRoot = false) {
 
   const div = document.createElement("div");
   div.className = "person";
 
   if (isRoot && p.pasangan) {
-
     const pasangan = data.find(x =>
       x.nama.toLowerCase().trim() === p.pasangan.toLowerCase().trim()
     );
@@ -278,7 +300,6 @@ function createPerson(p, data, isRoot = false) {
     } else {
       div.innerHTML = personHTML(p);
     }
-
   } else {
     div.innerHTML = personHTML(p);
   }
@@ -286,7 +307,6 @@ function createPerson(p, data, isRoot = false) {
   return div;
 }
 
-// TEMPLATE
 function personHTML(p) {
   return `
     <div>
@@ -296,18 +316,11 @@ function personHTML(p) {
   `;
 }
 
-// ===== POPUP =====
 function openPopup(id) {
-
   const p = globalData.find(x => x.id === id);
-
   if (!p) return;
 
-  showDetail(
-    p.nama,
-    formatDetail(p),
-    p.id
-  );
+  showDetail(p.nama, formatDetail(p), p.id);
 }
 
 function formatDetail(p) {
@@ -335,7 +348,6 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-// NAVIGASI
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
