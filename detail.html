@@ -61,7 +61,6 @@ h2 { margin-bottom: 10px; }
   border-radius: 10px;
   margin: 10px;
   background: white;
-  cursor: pointer;
   min-width: 120px;
 }
 
@@ -69,12 +68,38 @@ h2 { margin-bottom: 10px; }
   width: 70px;
   height: 70px;
   border-radius: 50%;
+  cursor: pointer;
+}
+
+.name {
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 5px;
 }
 
 .couple {
   display: flex;
   gap: 10px;
   justify-content: center;
+}
+
+/* POPUP */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background: white;
+  width: 260px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .back { margin-bottom: 10px; }
@@ -90,12 +115,23 @@ h2 { margin-bottom: 10px; }
 
 <div class="tree" id="tree"></div>
 
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+
+    <button id="btnDetail">Lihat Detail</button><br><br>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
+
 <script>
 // ===== AMBIL ID =====
 const urlParams = new URLSearchParams(window.location.search);
 const id = urlParams.get('id');
 
-fetch('data.json')
+fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
 
@@ -113,7 +149,7 @@ fetch('data.json')
 
   const tree = document.getElementById("tree");
 
-  // ===== ROOT + PASANGAN =====
+  // ===== ROOT =====
   const row1 = document.createElement("div");
   row1.className = "row";
   row1.appendChild(createPerson(root, data, true));
@@ -124,16 +160,31 @@ fetch('data.json')
   vline.className = "v-line";
   tree.appendChild(vline);
 
-  // ===== AMBIL ANAK (FIX AYAH + IBU) =====
+  // ===== ANAK (AYAH + IBU + PASANGAN) =====
+  const pasanganNama = root.pasangan;
+
   const children = data.filter(x =>
-    x.ayah === root.nama || x.ibu === root.nama
+    x.ayah === root.nama ||
+    x.ibu === root.nama ||
+    x.ayah === pasanganNama ||
+    x.ibu === pasanganNama
   );
 
-  // ===== TAMPILKAN =====
+  // ===== HAPUS DUPLIKAT =====
+  const unique = [];
+  const used = new Set();
+
+  children.forEach(c => {
+    if (!used.has(c.id)) {
+      unique.push(c);
+      used.add(c.id);
+    }
+  });
+
   const row2 = document.createElement("div");
   row2.className = "row children";
 
-  children.forEach(p => {
+  unique.forEach(p => {
     row2.appendChild(createPerson(p, data, false));
   });
 
@@ -142,7 +193,7 @@ fetch('data.json')
 });
 
 
-// ===== BREADCRUMB (FIX AYAH IBU) =====
+// ===== BREADCRUMB =====
 function buildBreadcrumb(person, data) {
 
   const container = document.getElementById("breadcrumb");
@@ -153,7 +204,6 @@ function buildBreadcrumb(person, data) {
   while (current) {
     path.unshift(current);
 
-    // ambil salah satu orang tua (prioritas ayah)
     current = data.find(x =>
       x.nama === current.ayah || x.nama === current.ibu
     );
@@ -193,35 +243,78 @@ function createPerson(p, data, isRoot = false) {
     if (pasangan) {
       div.innerHTML = `
         <div class="couple">
-          <div>
-            <img src="${p.foto}">
-            <div>${p.nama}</div>
-          </div>
-          <div>
-            <img src="${pasangan.foto}">
-            <div>${pasangan.nama}</div>
-          </div>
+          ${personHTML(p)}
+          ${personHTML(pasangan)}
         </div>
       `;
     } else {
-      div.innerHTML = `
-        <img src="${p.foto}">
-        <div>${p.nama}</div>
-      `;
+      div.innerHTML = personHTML(p);
     }
 
   } else {
-    div.innerHTML = `
-      <img src="${p.foto}">
-      <div>${p.nama}</div>
-    `;
+    div.innerHTML = personHTML(p);
   }
 
-  div.onclick = () => {
-    window.location.href = "detail.html?id=" + p.id;
-  };
-
   return div;
+}
+
+
+// ===== TEMPLATE PERSON =====
+function personHTML(p) {
+  return `
+    <div>
+      <img src="${p.foto}" onclick="openPopup('${p.id}')">
+      <div class="name" onclick="goDetail('${p.id}')">${p.nama}</div>
+    </div>
+  `;
+}
+
+
+// ===== POPUP =====
+function openPopup(id) {
+
+  fetch('data.json?v=' + new Date().getTime())
+  .then(res => res.json())
+  .then(data => {
+
+    const p = data.find(x => x.id === id);
+
+    showDetail(
+      p.nama,
+      `Lahir: ${p.tanggal_lahir}
+Alamat: ${p.alamat_lahir}
+Domisili: ${p.domisili}
+Pasangan: ${p.pasangan}
+Anak: ${p.jumlah_anak}
+Status: ${p.status}
+WA: ${p.wa}
+Pekerjaan: ${p.pekerjaan}`,
+      p.id
+    );
+
+  });
+}
+
+function showDetail(nama, info, id) {
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("nama").innerText = nama;
+  document.getElementById("info").innerHTML = info.replace(/\n/g, "<br>");
+
+  const btn = document.getElementById("btnDetail");
+
+  btn.onclick = function() {
+    window.location.href = "detail.html?id=" + id;
+  };
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+
+// ===== NAVIGASI =====
+function goDetail(id) {
+  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
