@@ -73,6 +73,7 @@ body {
   transform: scale(1.05);
 }
 
+/* FOTO */
 .person img {
   width: 90px;
   height: 90px;
@@ -80,10 +81,16 @@ body {
   cursor: pointer;
 }
 
+/* NAMA */
 .name {
   margin-top: 8px;
   font-weight: bold;
   cursor: pointer;
+}
+
+.name.disabled {
+  color: gray;
+  cursor: default;
 }
 
 /* POPUP */
@@ -149,7 +156,12 @@ function init(data) {
   const ayah = data.find(p => p.nama === "Ngadiman");
   const ibu = data.find(p => p.nama === "Titik");
 
-  // COUPLE
+  if (!ayah || !ibu) {
+    tree.innerHTML = "Data tidak ditemukan";
+    return;
+  }
+
+  // ===== COUPLE =====
   const couple = document.createElement("div");
   couple.className = "couple";
 
@@ -158,7 +170,7 @@ function init(data) {
 
   tree.appendChild(couple);
 
-  // ANAK
+  // ===== ANAK =====
   const children = data.filter(x =>
     x.ayah === ayah.nama && x.ibu === ibu.nama
   );
@@ -173,31 +185,44 @@ function init(data) {
   tree.appendChild(childBox);
 }
 
-// CARD
+
+// ===== CEK PUNYA ANAK =====
+function punyaAnak(p) {
+  return globalData.some(x =>
+    x.ayah === p.nama || x.ibu === p.nama
+  );
+}
+
+
+// ===== CARD =====
 function createPerson(p) {
+
+  const hasChild = punyaAnak(p);
 
   const div = document.createElement("div");
   div.className = "person";
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name" onclick="goDetail('${p.id}')">${p.nama}</div>
+    <div class="name ${!hasChild ? 'disabled' : ''}"
+         ${hasChild ? `onclick="goDetail('${p.id}')"` : ''}>
+         ${p.nama}
+    </div>
   `;
 
   return div;
 }
 
-// POPUP
+
+// ===== POPUP =====
 function openPopup(id) {
   const p = globalData.find(x => x.id === id);
   if (!p) return;
 
-  showDetail(p);
-}
-
-function showDetail(p) {
   document.getElementById("popup").style.display = "block";
+
   document.getElementById("nama").innerText = p.nama;
+
   document.getElementById("info").innerHTML =
     `Lahir: ${p.tanggal_lahir}<br>
      Alamat: ${p.alamat_lahir}<br>
@@ -217,7 +242,8 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-// NAVIGASI
+
+// ===== NAVIGASI =====
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
