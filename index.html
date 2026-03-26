@@ -10,28 +10,24 @@ body {
   text-align: center;
 }
 
-/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ROW */
 .row {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-/* Garis vertikal */
 .v-line {
   width: 2px;
   height: 30px;
   background: black;
 }
 
-/* Garis anak */
 .children {
   position: relative;
   margin-top: 10px;
@@ -47,26 +43,14 @@ body {
   background: black;
 }
 
-/* CARD */
 .person {
-  position: relative;
   border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
   margin: 10px;
-  cursor: pointer;
   background: white;
+  cursor: pointer;
   min-width: 120px;
-}
-
-.person::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  width: 2px;
-  height: 10px;
-  background: black;
 }
 
 .person img {
@@ -75,14 +59,13 @@ body {
   border-radius: 50%;
 }
 
-/* pasangan */
 .couple {
   display: flex;
   gap: 10px;
   justify-content: center;
 }
 
-/* POPUP */
+/* popup */
 .popup {
   display: none;
   position: fixed;
@@ -114,7 +97,6 @@ body {
   <div class="popup-content">
     <h3 id="nama"></h3>
     <p id="info"></p>
-
     <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
@@ -127,18 +109,19 @@ fetch('data.json')
 
     const tree = document.getElementById("tree");
 
-    // cari root (tidak punya orang tua)
     const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
-    buildLevel(roots, tree, data);
+    buildTree(roots, tree, data);
 
   });
 
 
-// ===== BUILD TREE =====
-function buildLevel(parents, container, data) {
+// ===== BUILD TREE MULTI GENERASI =====
+function buildTree(parents, container, data) {
 
-  // ===== TAMPILKAN PARENT =====
+  if (parents.length === 0) return;
+
+  // tampilkan 1 level
   const row = document.createElement("div");
   row.className = "row";
 
@@ -159,7 +142,7 @@ function buildLevel(parents, container, data) {
   container.appendChild(row);
 
 
-  // ===== CARI ANAK =====
+  // cari anak
   let children = [];
 
   parents.forEach(p => {
@@ -167,36 +150,35 @@ function buildLevel(parents, container, data) {
     children = children.concat(child);
   });
 
+  // hapus duplikat anak
+  const uniqueChildren = [];
+  const usedChild = new Set();
 
-  // ===== TAMPILKAN ANAK SEKALI SAJA =====
-  if (children.length > 0) {
+  children.forEach(c => {
+    if (!usedChild.has(c.nama)) {
+      uniqueChildren.push(c);
+      usedChild.add(c.nama);
+    }
+  });
+
+  // kalau ada anak → lanjut
+  if (uniqueChildren.length > 0) {
 
     const vline = document.createElement("div");
     vline.className = "v-line";
     container.appendChild(vline);
 
-    const childRow = document.createElement("div");
-    childRow.className = "row children";
+    const childContainer = document.createElement("div");
+    childContainer.className = "tree children";
 
-    const usedChild = new Set();
+    container.appendChild(childContainer);
 
-    children.forEach(c => {
-
-      if (usedChild.has(c.nama)) return;
-
-      childRow.appendChild(createPerson(c, data));
-
-      if (c.pasangan) {
-        usedChild.add(c.pasangan);
-      }
-
-    });
-
-    container.appendChild(childRow);
-
-    // ❗ STOP DI SINI (JANGAN RECURSIVE LAGI)
+    // recursive ke bawah
+    buildTree(uniqueChildren, childContainer, data);
   }
 }
+
+
 // ===== CARD =====
 function createPerson(p, data) {
 
