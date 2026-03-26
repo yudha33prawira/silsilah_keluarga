@@ -12,25 +12,18 @@ body {
   margin: 0;
 }
 
-/* SEARCH */
-.search-box {
-  margin: 15px;
+h2 { margin: 10px; }
+
+.breadcrumb {
+  margin-bottom: 15px;
+  font-size: 14px;
 }
-.search-box input {
-  padding: 8px;
-  width: 220px;
-}
-.search-box button {
-  padding: 8px 12px;
+
+.breadcrumb span {
   cursor: pointer;
+  color: blue;
 }
 
-/* HIGHLIGHT */
-.highlight {
-  border: 3px solid red !important;
-}
-
-/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
@@ -38,102 +31,123 @@ body {
   padding: 15px;
 }
 
-/* BLOK */
 .family-block {
   margin-bottom: 40px;
 }
 
-/* COUPLE */
 .couple {
   display: flex;
   gap: 20px;
   justify-content: center;
+  position: relative;
 }
 
-/* CHILDREN */
+.couple::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  background: black;
+  transform: translateX(-50%);
+}
+
 .children {
   margin-top: 40px;
+  width: 100%;
+  max-width: 700px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
+  position: relative;
 }
 
-/* CARD */
+.children::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: black;
+}
+
 .person {
   border: 1px solid black;
   border-radius: 12px;
   padding: 15px;
-  cursor: pointer;
+  background: white;
+  color: black;
 }
+
 .person.meninggal {
   background: black;
   color: white;
 }
 
-/* FOTO */
+.person.meninggal .name {
+  color: white;
+}
+
 .person img {
   width: 90px;
   height: 90px;
   border-radius: 50%;
+  cursor: pointer;
 }
 
-/* NAMA */
 .name {
   margin-top: 8px;
   font-weight: bold;
+  cursor: pointer;
 }
 
-/* POPUP */
+.name.disabled {
+  color: gray;
+  cursor: default;
+}
+
 .popup {
   display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.5);
-  z-index: 999;
 }
+
 .popup-content {
   background: white;
   width: 90%;
-  max-width: 350px;
+  max-width: 300px;
   margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
-  text-align: left;
 }
-.popup-content h3 {
-  margin-top: 0;
-}
-.popup-content pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-.popup-content button {
-  margin-top: 10px;
-  padding: 6px 12px;
-  cursor: pointer;
+
+@media (max-width: 600px) {
+  .children {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <h2 id="judul">Silsilah</h2>
-
-<!-- SEARCH -->
-<div class="search-box">
-  <input type="text" id="searchInput" placeholder="Cari nama...">
-  <button onclick="cari()">Cari</button>
-</div>
-
+<div class="breadcrumb" id="breadcrumb"></div>
 <button onclick="history.back()">⬅ Kembali</button>
 
 <div class="tree" id="tree"></div>
 
-<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
-    <h3 id="popupNama"></h3>
-    <pre id="popupInfo"></pre>
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+    <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
 </div>
@@ -150,40 +164,46 @@ fetch('data.json?v=' + new Date().getTime())
   init(data);
 });
 
-// ENTER SEARCH
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("searchInput")
-    .addEventListener("keypress", function(e) {
-      if (e.key === "Enter") cari();
-    });
-});
-
 function init(data) {
+
   const root = data.find(p => p.id === id);
+
   if (!root) {
     document.getElementById("judul").innerText = "Data tidak ditemukan";
     return;
   }
-  document.getElementById("judul").innerText = "Silsilah Keluarga " + root.nama;
+
+  document.getElementById("judul").innerText =
+    "Silsilah Keluarga " + root.nama;
+
+  buildBreadcrumb(root, data);
 
   const tree = document.getElementById("tree");
 
-  // Multi pasangan
+  // 🔥 SUPPORT "A|B|C"
   let pasanganList = [];
-  if (root.pasangan) {
-    pasanganList = root.pasangan.split("|").map(x => x.trim());
-  }
-  const pasanganObj = data.filter(x => pasanganList.includes(x.nama));
 
-  if (pasanganObj.length === 0) {
+  if (root.pasangan) {
+    let list = root.pasangan.split("|").map(x => x.trim());
+
+    pasanganList = data.filter(x =>
+      list.includes(x.nama)
+    );
+  }
+
+  if (pasanganList.length === 0) {
     createFamilyBlock(tree, root, null);
   } else {
-    pasanganObj.forEach(psg => createFamilyBlock(tree, root, psg));
+    pasanganList.forEach(psg => {
+      createFamilyBlock(tree, root, psg);
+    });
   }
 }
 
-// BLOK KELUARGA
+
+// ===== BLOK KELUARGA =====
 function createFamilyBlock(tree, root, pasangan) {
+
   const block = document.createElement("div");
   block.className = "family-block";
 
@@ -191,66 +211,142 @@ function createFamilyBlock(tree, root, pasangan) {
   couple.className = "couple";
 
   couple.appendChild(createPerson(root));
-  if (pasangan) couple.appendChild(createPerson(pasangan));
+
+  if (pasangan) {
+    couple.appendChild(createPerson(pasangan));
+  }
+
   block.appendChild(couple);
 
-  // Anak sesuai pasangan
+  // 🔥 ANAK SESUAI PASANGAN
   const children = globalData.filter(x =>
     (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
     (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
   );
+
   if (children.length > 0) {
+
     const childBox = document.createElement("div");
     childBox.className = "children";
-    children.forEach(p => childBox.appendChild(createPerson(p)));
+
+    children.forEach(p => {
+      childBox.appendChild(createPerson(p));
+    });
+
     block.appendChild(childBox);
   }
 
   tree.appendChild(block);
 }
 
-// CARD
+
+// ===== CEK PUNYA ANAK =====
+function punyaAnak(p) {
+  return globalData.some(x =>
+    x.ayah === p.nama || x.ibu === p.nama
+  );
+}
+
+
+// ===== CARD =====
 function createPerson(p) {
+
+  const hasChild = punyaAnak(p);
+  const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
+
   const div = document.createElement("div");
-  div.className = "person";
-  if ((p.status||'').toLowerCase().includes("meninggal")) div.classList.add("meninggal");
+  div.className = isMeninggal ? "person meninggal" : "person";
+
   div.innerHTML = `
-    <img src="${p.foto}">
-    <div class="name">${p.nama}</div>
+    <img src="${p.foto}" onclick="openPopup('${p.id}')">
+    <div class="name ${!hasChild ? 'disabled' : ''}">
+      ${p.nama}
+    </div>
   `;
-  div.onclick = () => openPopup(p);
+
+  if (hasChild) {
+    div.querySelector('.name').onclick = () => goDetail(p.id);
+  }
+
   return div;
 }
 
-// POPUP
-function openPopup(p) {
-  document.getElementById("popup").style.display = "block";
-  document.getElementById("popupNama").innerText = p.nama;
 
-  document.getElementById("popupInfo").innerText =
-`Tanggal Lahir: ${p.tanggal_lahir || '-'}
-Alamat Lahir: ${p.alamat_lahir || '-'}
-Domisili: ${p.domisili || '-'}
-Pasangan: ${p.pasangan || '-'}
-Jumlah Anak: ${p.jumlah_anak || '0'}
-Status: ${p.status || '-'}
-WA: ${p.wa || '-'}
-Pekerjaan: ${p.pekerjaan || '-'}`;
+// ===== POPUP =====
+function openPopup(id) {
+
+  const p = globalData.find(x => x.id === id);
+  if (!p) return;
+
+  const hasChild = punyaAnak(p);
+
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("nama").innerText = p.nama;
+
+  document.getElementById("info").innerHTML =
+    `Lahir: ${p.tanggal_lahir}<br>
+     Alamat: ${p.alamat_lahir}<br>
+     Domisili: ${p.domisili}<br>
+     Pasangan: ${p.pasangan}<br>
+     Anak: ${p.jumlah_anak}<br>
+     Status: ${p.status}<br>
+     WA: ${p.wa}<br>
+     Pekerjaan: ${p.pekerjaan}`;
+
+  const btn = document.getElementById("btnDetail");
+
+  if (hasChild) {
+    btn.style.display = "inline-block";
+    btn.onclick = () => goDetail(p.id);
+  } else {
+    btn.style.display = "none";
+  }
 }
 
 function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-// SEARCH
-function cari() {
-  const keyword = document.getElementById("searchInput").value.toLowerCase();
-  const cards = document.querySelectorAll(".person");
-  cards.forEach(card => {
-    const nama = card.innerText.toLowerCase();
-    card.classList.remove("highlight");
-    if (keyword && nama.includes(keyword)) card.classList.add("highlight");
+
+// ===== BREADCRUMB =====
+function buildBreadcrumb(person, data) {
+
+  const container = document.getElementById("breadcrumb");
+
+  let path = [];
+  let current = person;
+  const visited = new Set();
+
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    path.unshift(current);
+
+    current = data.find(x =>
+      x.nama === current.ayah || x.nama === current.ibu
+    );
+  }
+
+  path.forEach((p, i) => {
+
+    const span = document.createElement("span");
+    span.innerText = p.nama;
+
+    span.onclick = () => {
+      window.location.href = "detail.html?id=" + p.id;
+    };
+
+    container.appendChild(span);
+
+    if (i < path.length - 1) {
+      container.appendChild(document.createTextNode(" > "));
+    }
   });
+}
+
+
+// ===== NAVIGASI =====
+function goDetail(id) {
+  window.location.href = "detail.html?id=" + id;
 }
 </script>
 
