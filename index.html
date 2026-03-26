@@ -13,23 +13,23 @@ body {
 
 /* TREE */
 .tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
+  max-width: 900px;
+  margin: auto;
   padding: 10px;
 }
 
+/* ROW */
 .row {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  width: 100%;
 }
 
+/* GARIS */
 .v-line {
   width: 2px;
-  height: 30px;
+  height: 40px;
   background: black;
 }
 
@@ -40,36 +40,39 @@ body {
   width: 100%;
 }
 
-/* GRID RESPONSIVE */
+/* GRID (FIX MAX 2 KOLOM) */
 .row.children {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: 1fr;
   gap: 15px;
   width: 100%;
-  padding: 0 10px;
+}
+
+/* TABLET & PC */
+@media (min-width: 600px) {
+  .row.children {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* GARIS */
 .children::before {
   content: '';
   position: absolute;
-  top: -10px;
+  top: -15px;
   left: 5%;
   right: 5%;
   height: 2px;
   background: black;
 }
 
-/* CARD */
+/* CARD BESAR */
 .person {
-  border: 1px solid black;
-  padding: 15px;
-  border-radius: 10px;
-  background: white;
-  cursor: pointer;
   width: 100%;
-  max-width: 200px;
-  margin: auto;
+  padding: 18px;
+  border: 1px solid black;
+  border-radius: 12px;
+  background: white;
   text-align: center;
   transition: 0.2s;
 }
@@ -79,9 +82,10 @@ body {
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
+/* FOTO BESAR */
 .person img {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
 }
 
@@ -98,8 +102,9 @@ body {
 
 .popup-content {
   background: white;
-  width: 280px;
-  margin: 100px auto;
+  width: 90%;
+  max-width: 320px;
+  margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
 }
@@ -193,7 +198,7 @@ function createPerson(p) {
   return div;
 }
 
-// FORMAT DETAIL
+// FORMAT
 function formatDetail(p) {
   return `Lahir: ${p.tanggal_lahir}
 Alamat: ${p.alamat_lahir}
