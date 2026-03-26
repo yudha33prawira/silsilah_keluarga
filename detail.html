@@ -86,10 +86,6 @@ h2 { margin: 10px; }
   color: white;
 }
 
-.person.meninggal .name {
-  color: white;
-}
-
 .person img {
   width: 90px;
   height: 90px;
@@ -108,6 +104,32 @@ h2 { margin: 10px; }
   cursor: default;
 }
 
+/* ===== SEARCH ===== */
+.search-btn {
+  padding: 8px 15px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.search-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.search-box {
+  background: white;
+  padding: 20px;
+  margin: 100px auto;
+  width: 300px;
+  border-radius: 10px;
+}
+
+/* ===== POPUP ===== */
 .popup {
   display: none;
   position: fixed;
@@ -139,10 +161,23 @@ h2 { margin: 10px; }
 
 <h2 id="judul">Silsilah</h2>
 <div class="breadcrumb" id="breadcrumb"></div>
+
 <button onclick="history.back()">⬅ Kembali</button>
+<button onclick="openSearch()" class="search-btn">🔍 Cari</button>
 
 <div class="tree" id="tree"></div>
 
+<!-- SEARCH POPUP -->
+<div id="searchPopup" class="search-popup">
+  <div class="search-box">
+    <h3>Cari Nama</h3>
+    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName()">
+    <br><br>
+    <button onclick="closeSearch()">Tutup</button>
+  </div>
+</div>
+
+<!-- DETAIL POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -180,7 +215,6 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // 🔥 SUPPORT "A|B|C"
   let pasanganList = [];
 
   if (root.pasangan) {
@@ -200,8 +234,6 @@ function init(data) {
   }
 }
 
-
-// ===== BLOK KELUARGA =====
 function createFamilyBlock(tree, root, pasangan) {
 
   const block = document.createElement("div");
@@ -218,7 +250,6 @@ function createFamilyBlock(tree, root, pasangan) {
 
   block.appendChild(couple);
 
-  // 🔥 ANAK SESUAI PASANGAN
   const children = globalData.filter(x =>
     (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
     (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
@@ -239,23 +270,19 @@ function createFamilyBlock(tree, root, pasangan) {
   tree.appendChild(block);
 }
 
-
-// ===== CEK PUNYA ANAK =====
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
   );
 }
 
-
-// ===== CARD =====
 function createPerson(p) {
 
   const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
-  div.className = isMeninggal ? "person meninggal" : "person";
+  div.className = isMeninggal ? "person meninggal person-card" : "person person-card";
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
@@ -264,6 +291,8 @@ function createPerson(p) {
     </div>
   `;
 
+  div.setAttribute("data-name", p.nama.toLowerCase());
+
   if (hasChild) {
     div.querySelector('.name').onclick = () => goDetail(p.id);
   }
@@ -271,8 +300,41 @@ function createPerson(p) {
   return div;
 }
 
+/* ===== SEARCH FUNCTION ===== */
+function openSearch() {
+  document.getElementById("searchPopup").style.display = "block";
+}
 
-// ===== POPUP =====
+function closeSearch() {
+  document.getElementById("searchPopup").style.display = "none";
+}
+
+function searchName() {
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  let cards = document.querySelectorAll(".person-card");
+
+  let firstMatch = null;
+
+  cards.forEach(card => {
+    let name = card.getAttribute("data-name");
+
+    if (name.includes(input) && input !== "") {
+      card.style.background = "yellow";
+
+      if (!firstMatch) {
+        firstMatch = card;
+      }
+    } else {
+      card.style.background = "";
+    }
+  });
+
+  if (firstMatch) {
+    firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+/* ===== POPUP ===== */
 function openPopup(id) {
 
   const p = globalData.find(x => x.id === id);
@@ -307,8 +369,7 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-
-// ===== BREADCRUMB =====
+/* ===== BREADCRUMB ===== */
 function buildBreadcrumb(person, data) {
 
   const container = document.getElementById("breadcrumb");
@@ -343,8 +404,6 @@ function buildBreadcrumb(person, data) {
   });
 }
 
-
-// ===== NAVIGASI =====
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
