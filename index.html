@@ -73,6 +73,12 @@ body {
   transform: scale(1.05);
 }
 
+/* STATUS MENINGGAL */
+.person.meninggal {
+  background: black;
+  color: white;
+}
+
 /* FOTO */
 .person img {
   width: 90px;
@@ -162,7 +168,7 @@ function init(data) {
     return;
   }
 
-  // ===== COUPLE =====
+  // COUPLE
   const couple = document.createElement("div");
   couple.className = "couple";
 
@@ -171,7 +177,7 @@ function init(data) {
 
   tree.appendChild(couple);
 
-  // ===== ANAK =====
+  // ANAK
   const children = data.filter(x =>
     x.ayah === ayah.nama && x.ibu === ibu.nama
   );
@@ -186,20 +192,27 @@ function init(data) {
   tree.appendChild(childBox);
 }
 
-// ===== CEK PUNYA ANAK =====
+
+// CEK PUNYA ANAK
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
   );
 }
 
-// ===== CARD =====
+
+// CARD
 function createPerson(p) {
 
   const hasChild = punyaAnak(p);
 
   const div = document.createElement("div");
   div.className = "person";
+
+  // STATUS MENINGGAL
+  if (p.status && p.status.toLowerCase() === "meninggal") {
+    div.classList.add("meninggal");
+  }
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
@@ -208,7 +221,7 @@ function createPerson(p) {
     </div>
   `;
 
-  // hanya klik kalau punya anak
+  // klik hanya kalau punya anak
   if (hasChild) {
     div.querySelector('.name').onclick = () => goDetail(p.id);
   }
@@ -216,7 +229,8 @@ function createPerson(p) {
   return div;
 }
 
-// ===== POPUP =====
+
+// POPUP
 function openPopup(id) {
   const p = globalData.find(x => x.id === id);
   if (!p) return;
@@ -237,7 +251,6 @@ function openPopup(id) {
 
   const btn = document.getElementById("btnDetail");
 
-  // CEK PUNYA ANAK
   const hasChild = punyaAnak(p);
 
   if (hasChild) {
@@ -252,7 +265,8 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-// ===== NAVIGASI =====
+
+// NAVIGASI
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
