@@ -20,6 +20,11 @@ body {
   padding: 15px;
 }
 
+/* BLOK KELUARGA */
+.family-block {
+  margin-bottom: 40px;
+}
+
 /* COUPLE */
 .couple {
   display: flex;
@@ -31,17 +36,17 @@ body {
 .couple::after {
   content: '';
   position: absolute;
-  bottom: -40px;
+  bottom: -30px;
   left: 50%;
   width: 2px;
-  height: 40px;
+  height: 30px;
   background: black;
   transform: translateX(-50%);
 }
 
 /* CHILDREN */
 .children {
-  margin-top: 50px;
+  margin-top: 40px;
   width: 100%;
   max-width: 700px;
   display: grid;
@@ -53,7 +58,7 @@ body {
 .children::before {
   content: '';
   position: absolute;
-  top: -20px;
+  top: -15px;
   left: 10%;
   right: 10%;
   height: 2px;
@@ -66,6 +71,7 @@ body {
   border-radius: 12px;
   padding: 15px;
   background: white;
+  color: black;
   transition: 0.2s;
 }
 
@@ -73,9 +79,13 @@ body {
   transform: scale(1.05);
 }
 
-/* STATUS MENINGGAL */
+/* MENINGGAL */
 .person.meninggal {
   background: black;
+  color: white;
+}
+
+.person.meninggal .name {
   color: white;
 }
 
@@ -139,7 +149,6 @@ body {
   <div class="popup-content">
     <h3 id="nama"></h3>
     <p id="info"></p>
-
     <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
@@ -148,7 +157,6 @@ body {
 <script>
 let globalData = [];
 
-// LOAD DATA
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
@@ -160,40 +168,77 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  const ayah = data.find(p => p.nama === "Ngadiman");
-  const ibu = data.find(p => p.nama === "Titik");
+  const root = data.find(p => p.nama === "Ngadiman");
 
-  if (!ayah || !ibu) {
+  if (!root) {
     tree.innerHTML = "Data tidak ditemukan";
     return;
   }
+
+  // ===== AMBIL SEMUA PASANGAN =====
+  let pasanganList = [];
+
+  if (Array.isArray(root.pasangan)) {
+    pasanganList = data.filter(x =>
+      root.pasangan.includes(x.nama)
+    );
+  } else if (root.pasangan && root.pasangan !== "-") {
+    const p = data.find(x => x.nama === root.pasangan);
+    if (p) pasanganList.push(p);
+  }
+
+  // ===== BUAT BLOK =====
+  if (pasanganList.length === 0) {
+    createFamilyBlock(tree, root, null, data);
+  } else {
+    pasanganList.forEach(psg => {
+      createFamilyBlock(tree, root, psg, data);
+    });
+  }
+}
+
+
+// ===== BLOK KELUARGA =====
+function createFamilyBlock(tree, root, pasangan, data) {
+
+  const block = document.createElement("div");
+  block.className = "family-block";
 
   // COUPLE
   const couple = document.createElement("div");
   couple.className = "couple";
 
-  couple.appendChild(createPerson(ayah));
-  couple.appendChild(createPerson(ibu));
+  couple.appendChild(createPerson(root));
 
-  tree.appendChild(couple);
+  if (pasangan) {
+    couple.appendChild(createPerson(pasangan));
+  }
 
-  // ANAK
+  block.appendChild(couple);
+
+  // ANAK PER PASANGAN
   const children = data.filter(x =>
-    x.ayah === ayah.nama && x.ibu === ibu.nama
+    (x.ayah === root.nama && (!pasangan || x.ibu === pasangan.nama)) ||
+    (x.ibu === root.nama && (!pasangan || x.ayah === pasangan.nama))
   );
 
-  const childBox = document.createElement("div");
-  childBox.className = "children";
+  if (children.length > 0) {
 
-  children.forEach(p => {
-    childBox.appendChild(createPerson(p));
-  });
+    const childBox = document.createElement("div");
+    childBox.className = "children";
 
-  tree.appendChild(childBox);
+    children.forEach(p => {
+      childBox.appendChild(createPerson(p));
+    });
+
+    block.appendChild(childBox);
+  }
+
+  tree.appendChild(block);
 }
 
 
-// CEK PUNYA ANAK
+// ===== CEK PUNYA ANAK =====
 function punyaAnak(p) {
   return globalData.some(x =>
     x.ayah === p.nama || x.ibu === p.nama
@@ -201,18 +246,14 @@ function punyaAnak(p) {
 }
 
 
-// CARD
+// ===== CARD =====
 function createPerson(p) {
 
   const hasChild = punyaAnak(p);
+  const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
-  div.className = "person";
-
-  // STATUS MENINGGAL
-  if (p.status && p.status.toLowerCase() === "meninggal") {
-    div.classList.add("meninggal");
-  }
+  div.className = isMeninggal ? "person meninggal" : "person";
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
@@ -221,7 +262,6 @@ function createPerson(p) {
     </div>
   `;
 
-  // klik hanya kalau punya anak
   if (hasChild) {
     div.querySelector('.name').onclick = () => goDetail(p.id);
   }
@@ -230,28 +270,28 @@ function createPerson(p) {
 }
 
 
-// POPUP
+// ===== POPUP =====
 function openPopup(id) {
+
   const p = globalData.find(x => x.id === id);
   if (!p) return;
 
-  document.getElementById("popup").style.display = "block";
+  const hasChild = punyaAnak(p);
 
+  document.getElementById("popup").style.display = "block";
   document.getElementById("nama").innerText = p.nama;
 
   document.getElementById("info").innerHTML =
     `Lahir: ${p.tanggal_lahir}<br>
      Alamat: ${p.alamat_lahir}<br>
      Domisili: ${p.domisili}<br>
-     Pasangan: ${p.pasangan}<br>
+     Pasangan: ${Array.isArray(p.pasangan) ? p.pasangan.join(", ") : p.pasangan}<br>
      Anak: ${p.jumlah_anak}<br>
      Status: ${p.status}<br>
      WA: ${p.wa}<br>
      Pekerjaan: ${p.pekerjaan}`;
 
   const btn = document.getElementById("btnDetail");
-
-  const hasChild = punyaAnak(p);
 
   if (hasChild) {
     btn.style.display = "inline-block";
@@ -266,7 +306,7 @@ function closePopup() {
 }
 
 
-// NAVIGASI
+// ===== NAVIGASI =====
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
