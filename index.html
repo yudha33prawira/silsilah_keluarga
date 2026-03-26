@@ -12,13 +12,42 @@ body {
   margin: 0;
 }
 
-input {
-  padding: 10px;
-  width: 80%;
-  max-width: 300px;
+/* SEARCH */
+.search-box {
   margin: 15px;
+}
+
+.search-box input {
+  padding: 10px;
+  width: 200px;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+
+.search-box button {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: none;
+  background: black;
+  color: white;
+  cursor: pointer;
+}
+
+/* RESULT */
+.result {
+  max-width: 250px;
+  margin: auto;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.result div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.result div:hover {
+  background: #eee;
 }
 
 /* TREE */
@@ -28,12 +57,10 @@ input {
   align-items: center;
 }
 
-/* BLOK */
 .family-block {
   margin-bottom: 40px;
 }
 
-/* COUPLE */
 .couple {
   display: flex;
   gap: 20px;
@@ -52,7 +79,6 @@ input {
   transform: translateX(-50%);
 }
 
-/* CHILDREN */
 .children {
   margin-top: 40px;
   width: 100%;
@@ -73,13 +99,11 @@ input {
   background: black;
 }
 
-/* CARD */
 .person {
   border: 1px solid black;
   border-radius: 12px;
   padding: 15px;
   background: white;
-  transition: 0.2s;
 }
 
 .person.highlight {
@@ -95,44 +119,175 @@ input {
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  cursor: pointer;
 }
 
 .name {
   margin-top: 8px;
   font-weight: bold;
-  cursor: pointer;
-}
-
-/* SEARCH RESULT */
-.result {
-  background: white;
-  border: 1px solid #ccc;
-  max-width: 300px;
-  margin: auto;
-  text-align: left;
-}
-
-.result div {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.result div:hover {
-  background: #eee;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Silsilah Keluarga</h2>
+<h2>Silsilah Keluarga Ngadiman</h2>
 
-<input type="text" id="search" placeholder="Cari nama...">
+<!-- SEARCH -->
+<div class="search-box">
+  <input type="text" id="search" placeholder="Cari nama...">
+  <button onclick="doSearch()">Cari</button>
+</div>
+
 <div class="result" id="result"></div>
 
 <div class="tree" id="tree"></div>
 
 <script>
-let global
+let globalData = [];
+
+fetch('data.json?v=' + new Date().getTime())
+.then(res => res.json())
+.then(data => {
+  globalData = data;
+  init(data);
+});
+
+// INIT TREE
+function init(data) {
+
+  const tree = document.getElementById("tree");
+  const root = data.find(p => p.nama === "Ngadiman");
+
+  if (!root) return;
+
+  let pasanganList = [];
+
+  if (root.pasangan) {
+    let list = root.pasangan.split("|").map(x => x.trim());
+    pasanganList = data.filter(x => list.includes(x.nama));
+  }
+
+  if (pasanganList.length === 0) {
+    createFamilyBlock(tree, root, null);
+  } else {
+    pasanganList.forEach(psg => {
+      createFamilyBlock(tree, root, psg);
+    });
+  }
+}
+
+// BLOK
+function createFamilyBlock(tree, root, pasangan) {
+
+  const block = document.createElement("div");
+  block.className = "family-block";
+
+  const couple = document.createElement("div");
+  couple.className = "couple";
+
+  couple.appendChild(createPerson(root));
+
+  if (pasangan) {
+    couple.appendChild(createPerson(pasangan));
+  }
+
+  block.appendChild(couple);
+
+  const children = globalData.filter(x =>
+    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
+    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
+  );
+
+  if (children.length > 0) {
+
+    const childBox = document.createElement("div");
+    childBox.className = "children";
+
+    children.forEach(p => {
+      childBox.appendChild(createPerson(p));
+    });
+
+    block.appendChild(childBox);
+  }
+
+  tree.appendChild(block);
+}
+
+// CARD
+function createPerson(p) {
+
+  const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
+
+  const div = document.createElement("div");
+  div.className = isMeninggal ? "person meninggal" : "person";
+
+  div.innerHTML = `
+    <img src="${p.foto}">
+    <div class="name">${p.nama}</div>
+  `;
+
+  return div;
+}
+
+// ENTER SUPPORT
+document.getElementById("search").addEventListener("keypress", function(e){
+  if (e.key === "Enter") {
+    doSearch();
+  }
+});
+
+// SEARCH FUNCTION
+function doSearch() {
+
+  const keyword = document.getElementById("search").value.toLowerCase();
+  const resultBox = document.getElementById("result");
+
+  resultBox.innerHTML = "";
+
+  // reset highlight
+  document.querySelectorAll(".person").forEach(p => {
+    p.classList.remove("highlight");
+  });
+
+  if (!keyword) return;
+
+  const found = globalData.filter(x =>
+    x.nama.toLowerCase().includes(keyword)
+  );
+
+  if (found.length === 0) {
+    resultBox.innerHTML = "<div>Tidak ditemukan</div>";
+    return;
+  }
+
+  found.forEach((p, i) => {
+
+    // highlight di tree
+    document.querySelectorAll(".person").forEach(card => {
+      if (card.innerText.toLowerCase().includes(keyword)) {
+        card.classList.add("highlight");
+      }
+    });
+
+    // hasil list
+    const div = document.createElement("div");
+    div.innerText = p.nama;
+
+    div.onclick = () => {
+      window.location.href = "detail.html?id=" + p.id;
+    };
+
+    resultBox.appendChild(div);
+  });
+
+  // scroll ke hasil pertama
+  const first = document.querySelector(".highlight");
+  if (first) {
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+</script>
+
+</body>
+</html>
 ```
