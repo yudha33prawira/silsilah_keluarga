@@ -13,7 +13,9 @@ body {
 }
 
 /* JUDUL */
-h2 { margin: 10px; }
+h2 {
+  margin: 10px;
+}
 
 /* BREADCRUMB */
 .breadcrumb {
@@ -57,7 +59,7 @@ h2 { margin: 10px; }
 .children {
   margin-top: 50px;
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
@@ -81,25 +83,12 @@ h2 { margin: 10px; }
   padding: 15px;
   background: white;
   transition: 0.2s;
-  color: black;
 }
 
-/* 🔥 STATUS MENINGGAL */
-.person.meninggal {
-  background: black;
-  color: white;
-}
-
-.person.meninggal .name {
-  color: white;
-}
-
-/* HOVER */
 .person:hover {
   transform: scale(1.05);
 }
 
-/* FOTO */
 .person img {
   width: 90px;
   height: 90px;
@@ -107,7 +96,6 @@ h2 { margin: 10px; }
   cursor: pointer;
 }
 
-/* NAMA */
 .name {
   margin-top: 8px;
   font-weight: bold;
@@ -151,6 +139,7 @@ h2 { margin: 10px; }
 <body>
 
 <h2 id="judul">Silsilah</h2>
+
 <div class="breadcrumb" id="breadcrumb"></div>
 
 <button onclick="history.back()">⬅ Kembali</button>
@@ -197,10 +186,14 @@ function init(data) {
 
   const tree = document.getElementById("tree");
 
-  // PASANGAN
-  const pasangan = data.find(x =>
-    x.nama.toLowerCase().trim() === (root.pasangan || "").toLowerCase().trim()
-  );
+  // ===== PASANGAN =====
+  let pasangan = null;
+
+  if (root.pasangan && root.pasangan !== "-") {
+    pasangan = data.find(x =>
+      x.nama.toLowerCase().trim() === root.pasangan.toLowerCase().trim()
+    );
+  }
 
   const couple = document.createElement("div");
   couple.className = "couple";
@@ -213,7 +206,7 @@ function init(data) {
 
   tree.appendChild(couple);
 
-  // ANAK
+  // ===== ANAK =====
   const children = data.filter(x =>
     x.ayah === root.nama ||
     x.ibu === root.nama ||
@@ -250,23 +243,61 @@ function punyaAnak(p) {
 }
 
 
+// ===== BREADCRUMB =====
+function buildBreadcrumb(person, data) {
+
+  const container = document.getElementById("breadcrumb");
+
+  let path = [];
+  let current = person;
+  const visited = new Set();
+
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    path.unshift(current);
+
+    current = data.find(x =>
+      x.nama === current.ayah || x.nama === current.ibu
+    );
+  }
+
+  path.forEach((p, i) => {
+
+    const span = document.createElement("span");
+    span.innerText = p.nama;
+
+    span.onclick = () => {
+      window.location.href = "detail.html?id=" + p.id;
+    };
+
+    container.appendChild(span);
+
+    if (i < path.length - 1) {
+      container.appendChild(document.createTextNode(" > "));
+    }
+  });
+}
+
+
 // ===== CARD =====
 function createPerson(p) {
 
   const hasChild = punyaAnak(p);
 
   const div = document.createElement("div");
-
-  // 🔥 tambahkan class meninggal
-  div.className = "person " + (p.status === "Meninggal" ? "meninggal" : "");
+  div.className = "person";
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!hasChild ? 'disabled' : ''}"
-         ${hasChild ? `onclick="goDetail('${p.id}')"` : ''}>
-         ${p.nama}
+    <div class="name ${!hasChild ? 'disabled' : ''}">
+      ${p.nama}
     </div>
   `;
+
+  // hanya bisa klik kalau punya anak
+  if (hasChild) {
+    div.querySelector('.name').onclick = () => goDetail(p.id);
+  }
 
   return div;
 }
@@ -277,8 +308,6 @@ function openPopup(id) {
 
   const p = globalData.find(x => x.id === id);
   if (!p) return;
-
-  const hasChild = punyaAnak(p);
 
   document.getElementById("popup").style.display = "block";
 
@@ -296,6 +325,8 @@ function openPopup(id) {
 
   const btn = document.getElementById("btnDetail");
 
+  const hasChild = punyaAnak(p);
+
   if (hasChild) {
     btn.style.display = "inline-block";
     btn.onclick = () => goDetail(p.id);
@@ -309,7 +340,7 @@ function closePopup() {
 }
 
 
-// NAVIGASI
+// ===== NAVIGASI =====
 function goDetail(id) {
   window.location.href = "detail.html?id=" + id;
 }
