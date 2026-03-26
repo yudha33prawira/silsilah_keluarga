@@ -1,4 +1,3 @@
-```html id="detail-final"
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,44 +9,134 @@
 body {
   font-family: Arial;
   text-align: center;
+  margin: 0;
 }
 
+/* SEARCH */
+.search-box {
+  margin: 15px;
+}
+.search-box input {
+  padding: 8px;
+  width: 220px;
+}
+.search-box button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* HIGHLIGHT */
+.highlight {
+  border: 3px solid red !important;
+}
+
+/* TREE */
+.tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+}
+
+/* BLOK */
 .family-block {
   margin-bottom: 40px;
 }
 
+/* COUPLE */
 .couple {
   display: flex;
   gap: 20px;
   justify-content: center;
 }
 
+/* CHILDREN */
 .children {
-  margin-top: 20px;
+  margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
 }
 
+/* CARD */
 .person {
   border: 1px solid black;
-  padding: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
 }
-
 .person.meninggal {
   background: black;
   color: white;
 }
+
+/* FOTO */
+.person img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+}
+
+/* NAMA */
+.name {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+/* POPUP */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+.popup-content {
+  background: white;
+  width: 90%;
+  max-width: 350px;
+  margin: 80px auto;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: left;
+}
+.popup-content h3 {
+  margin-top: 0;
+}
+.popup-content pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.popup-content button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
 </style>
 </head>
-
 <body>
 
-<h2 id="judul"></h2>
+<h2 id="judul">Silsilah</h2>
+
+<!-- SEARCH -->
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Cari nama...">
+  <button onclick="cari()">Cari</button>
+</div>
+
 <button onclick="history.back()">⬅ Kembali</button>
 
-<div id="tree"></div>
+<div class="tree" id="tree"></div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="popupNama"></h3>
+    <pre id="popupInfo"></pre>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
 
 <script>
 let globalData = [];
@@ -61,31 +150,40 @@ fetch('data.json?v=' + new Date().getTime())
   init(data);
 });
 
+// ENTER SEARCH
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("searchInput")
+    .addEventListener("keypress", function(e) {
+      if (e.key === "Enter") cari();
+    });
+});
+
 function init(data) {
-
   const root = data.find(p => p.id === id);
-  if (!root) return;
-
-  document.getElementById("judul").innerText = root.nama;
-
-  let pasanganList = [];
-
-  if (root.pasangan) {
-    let list = root.pasangan.split("|").map(x => x.trim());
-    pasanganList = data.filter(x => list.includes(x.nama));
+  if (!root) {
+    document.getElementById("judul").innerText = "Data tidak ditemukan";
+    return;
   }
+  document.getElementById("judul").innerText = "Silsilah Keluarga " + root.nama;
 
-  if (pasanganList.length === 0) {
-    createBlock(root, null);
+  const tree = document.getElementById("tree");
+
+  // Multi pasangan
+  let pasanganList = [];
+  if (root.pasangan) {
+    pasanganList = root.pasangan.split("|").map(x => x.trim());
+  }
+  const pasanganObj = data.filter(x => pasanganList.includes(x.nama));
+
+  if (pasanganObj.length === 0) {
+    createFamilyBlock(tree, root, null);
   } else {
-    pasanganList.forEach(p => createBlock(root, p));
+    pasanganObj.forEach(psg => createFamilyBlock(tree, root, psg));
   }
 }
 
-function createBlock(root, pasangan) {
-
-  const container = document.getElementById("tree");
-
+// BLOK KELUARGA
+function createFamilyBlock(tree, root, pasangan) {
   const block = document.createElement("div");
   block.className = "family-block";
 
@@ -93,46 +191,68 @@ function createBlock(root, pasangan) {
   couple.className = "couple";
 
   couple.appendChild(createPerson(root));
-
-  if (pasangan) {
-    couple.appendChild(createPerson(pasangan));
-  }
-
+  if (pasangan) couple.appendChild(createPerson(pasangan));
   block.appendChild(couple);
 
+  // Anak sesuai pasangan
   const children = globalData.filter(x =>
     (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
     (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
   );
-
   if (children.length > 0) {
-
     const childBox = document.createElement("div");
     childBox.className = "children";
-
-    children.forEach(p => {
-      childBox.appendChild(createPerson(p));
-    });
-
+    children.forEach(p => childBox.appendChild(createPerson(p)));
     block.appendChild(childBox);
   }
 
-  container.appendChild(block);
+  tree.appendChild(block);
 }
 
+// CARD
 function createPerson(p) {
-
-  const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
-
   const div = document.createElement("div");
-  div.className = isMeninggal ? "person meninggal" : "person";
-
+  div.className = "person";
+  if ((p.status||'').toLowerCase().includes("meninggal")) div.classList.add("meninggal");
   div.innerHTML = `
-    <div onclick="goDetail('${p.id}')">${p.nama}</div>
+    <img src="${p.foto}">
+    <div class="name">${p.nama}</div>
   `;
-
+  div.onclick = () => openPopup(p);
   return div;
 }
 
-function goDetail(id
-```
+// POPUP
+function openPopup(p) {
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("popupNama").innerText = p.nama;
+
+  document.getElementById("popupInfo").innerText =
+`Tanggal Lahir: ${p.tanggal_lahir || '-'}
+Alamat Lahir: ${p.alamat_lahir || '-'}
+Domisili: ${p.domisili || '-'}
+Pasangan: ${p.pasangan || '-'}
+Jumlah Anak: ${p.jumlah_anak || '0'}
+Status: ${p.status || '-'}
+WA: ${p.wa || '-'}
+Pekerjaan: ${p.pekerjaan || '-'}`;
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+// SEARCH
+function cari() {
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+  const cards = document.querySelectorAll(".person");
+  cards.forEach(card => {
+    const nama = card.innerText.toLowerCase();
+    card.classList.remove("highlight");
+    if (keyword && nama.includes(keyword)) card.classList.add("highlight");
+  });
+}
+</script>
+
+</body>
+</html>
