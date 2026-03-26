@@ -1,118 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Silsilah Keluarga</title>
-
-<style>
-body {
-  font-family: Arial;
-  text-align: center;
-}
-
-/* TREE */
-.tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* ROW */
-.row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* Garis vertikal */
-.v-line {
-  width: 2px;
-  height: 30px;
-  background: black;
-}
-
-/* Garis anak */
-.children {
-  position: relative;
-  margin-top: 10px;
-}
-
-.children::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: black;
-}
-
-/* Garis ke anak */
-.person {
-  position: relative;
-  border: 1px solid black;
-  padding: 10px;
-  border-radius: 10px;
-  margin: 10px;
-  width: 110px;
-  cursor: pointer;
-  background: white;
-}
-
-.person::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  width: 2px;
-  height: 10px;
-  background: black;
-}
-
-.person img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-}
-
-/* POPUP */
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
-
-.popup-content {
-  background: white;
-  width: 260px;
-  margin: 100px auto;
-  padding: 20px;
-  border-radius: 10px;
-}
-</style>
-</head>
-
-<body>
-
-<h2>Silsilah Keluarga Ngadiman</h2>
-
-<div class="tree" id="tree"></div>
-
-<!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
-  </div>
-</div>
-
 <script>
 fetch('data.json')
   .then(res => res.json())
@@ -120,30 +5,35 @@ fetch('data.json')
 
     const tree = document.getElementById("tree");
 
-    // cari root
     const roots = data.filter(p => !p.orang_tua || p.orang_tua === "-");
 
-    roots.forEach(root => {
-      buildLevel([root], tree, data);
-    });
+    buildLevel(roots, tree, data);
 
   });
 
 
-// ===== BUILD PER LEVEL (ANTI DOBEL) =====
+// ===== BUILD PER LEVEL =====
 function buildLevel(parents, container, data) {
 
-  // tampilkan parent
   const row = document.createElement("div");
   row.className = "row";
 
+  const used = new Set();
+
   parents.forEach(p => {
+
+    if (used.has(p.nama)) return;
+
     row.appendChild(createPerson(p, data));
+
+    if (p.pasangan) {
+      used.add(p.pasangan);
+    }
+
   });
 
   container.appendChild(row);
 
-  // cari semua anak dari semua parent
   let children = [];
 
   parents.forEach(p => {
@@ -153,37 +43,42 @@ function buildLevel(parents, container, data) {
 
   if (children.length > 0) {
 
-    // garis turun
     const vline = document.createElement("div");
     vline.className = "v-line";
     container.appendChild(vline);
 
-    // tampilkan anak dalam 1 baris
     const childRow = document.createElement("div");
     childRow.className = "row children";
 
+    const usedChild = new Set();
+
     children.forEach(c => {
-      childRow.appendChild(createPerson(c));
+
+      if (usedChild.has(c.nama)) return;
+
+      childRow.appendChild(createPerson(c, data));
+
+      if (c.pasangan) {
+        usedChild.add(c.pasangan);
+      }
+
     });
 
     container.appendChild(childRow);
 
-    // lanjut ke generasi berikutnya
     buildLevel(children, container, data);
   }
 }
 
 
-// ===== CARD =====
-function function createPerson(p, data) {
+// ===== CARD (SUAMI ISTRI) =====
+function createPerson(p, data) {
 
   const div = document.createElement("div");
   div.className = "person";
 
-  // cari pasangan
   const pasangan = data.find(x => x.nama === p.pasangan);
 
-  // kalau punya pasangan → tampilkan berdua
   if (pasangan) {
     div.innerHTML = `
       <div style="display:flex; gap:10px; justify-content:center;">
@@ -203,31 +98,6 @@ function function createPerson(p, data) {
       <div>${p.nama}</div>
     `;
   }
-
-  div.onclick = () => {
-    showDetail(
-      p.nama,
-      `Lahir: ${p.tanggal_lahir}
-Alamat: ${p.alamat_lahir}
-Domisili: ${p.domisili}
-Pasangan: ${p.pasangan}
-Anak: ${p.jumlah_anak}
-Status: ${p.status}
-WA: ${p.wa}
-Pekerjaan: ${p.pekerjaan}`,
-      p.id
-    );
-  };
-
-  return div;
-} {
-  const div = document.createElement("div");
-  div.className = "person";
-
-  div.innerHTML = `
-    <img src="${p.foto}">
-    <div>${p.nama}</div>
-  `;
 
   div.onclick = () => {
     showDetail(
@@ -270,6 +140,3 @@ function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 </script>
-
-</body>
-</html>
