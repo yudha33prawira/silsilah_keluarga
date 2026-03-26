@@ -99,60 +99,66 @@ body {
 
 <script>
 fetch('data.json')
-  .then(res => res.json())
-  .then(data => {
+.then(res => res.json())
+.then(data => {
 
-    const tree = document.getElementById("tree");
+  const tree = document.getElementById("tree");
 
-    // ===== GENERASI 1 (ROOT) =====
-    const gen1 = data.filter(p => p.generasi == 1);
+  // ===== GENERASI 1 =====
+  const gen1 = data.filter(p => p.generasi == 1);
 
-    const row1 = document.createElement("div");
-    row1.className = "row";
+  const row1 = document.createElement("div");
+  row1.className = "row";
 
-    gen1.forEach(p => {
-      row1.appendChild(createPerson(p));
-    });
-
-    tree.appendChild(row1);
-
-    // ===== GARIS =====
-    const vline = document.createElement("div");
-    vline.className = "v-line";
-    tree.appendChild(vline);
-
-    // ===== GENERASI 2 (ANAK) =====
-    let gen2 = [];
-
-    gen1.forEach(p => {
-      const anak = data.filter(x => x.orang_tua === p.nama);
-      gen2 = gen2.concat(anak);
-    });
-
-    // hapus duplikat
-    const uniqueGen2 = [];
-    const used = new Set();
-
-    gen2.forEach(p => {
-      if (!used.has(p.nama)) {
-        uniqueGen2.push(p);
-        used.add(p.nama);
-      }
-    });
-
-    const row2 = document.createElement("div");
-    row2.className = "row children";
-
-    uniqueGen2.forEach(p => {
-      row2.appendChild(createPerson(p));
-    });
-
-    tree.appendChild(row2);
-
+  gen1.forEach(p => {
+    row1.appendChild(createPerson(p));
   });
 
+  tree.appendChild(row1);
 
-// ===== CARD (TANPA PASANGAN) =====
+  // ===== GARIS =====
+  const vline = document.createElement("div");
+  vline.className = "v-line";
+  tree.appendChild(vline);
+
+  // ===== GENERASI 2 =====
+  let gen2 = [];
+
+  gen1.forEach(p => {
+
+    // ambil anak dari p (ayah/ibu)
+    const anak = data.filter(x =>
+      x.orang_tua === p.nama
+    );
+
+    gen2 = gen2.concat(anak);
+  });
+
+  // ===== HAPUS DUPLIKAT =====
+  const uniqueGen2 = [];
+  const used = new Set();
+
+  gen2.forEach(p => {
+    if (!used.has(p.id)) {
+      uniqueGen2.push(p);
+      used.add(p.id);
+    }
+  });
+
+  // ===== TAMPILKAN =====
+  const row2 = document.createElement("div");
+  row2.className = "row children";
+
+  uniqueGen2.forEach(p => {
+    row2.appendChild(createPerson(p));
+  });
+
+  tree.appendChild(row2);
+
+});
+
+
+// ===== CARD =====
 function createPerson(p) {
 
   const div = document.createElement("div");
