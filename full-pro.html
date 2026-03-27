@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Silsilah Pro</title>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f5f5f5;
+  text-align:center;
+}
+
+/* TREE */
+.tree {
+  display:flex;
+  justify-content:center;
+}
+
+/* FAMILY BLOCK */
+.family {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+
+/* COUPLE */
+.couple {
+  display:flex;
+  gap:40px;
+  align-items:center;
+  position:relative;
+}
+
+.love {
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  top:35px;
+}
+
+/* LINE DOWN */
+.couple::after {
+  content:'';
+  position:absolute;
+  bottom:-30px;
+  left:50%;
+  width:2px;
+  height:30px;
+  background:black;
+  transform:translateX(-50%);
+}
+
+/* CHILDREN */
+.children {
+  display:flex;
+  gap:30px;
+  margin-top:40px;
+  position:relative;
+}
+
+/* LINE HORIZONTAL */
+.children::before {
+  content:'';
+  position:absolute;
+  top:-20px;
+  left:0;
+  right:0;
+  height:2px;
+  background:black;
+}
+
+/* LINE TO EACH CHILD */
+.child {
+  position:relative;
+}
+
+.child::before {
+  content:'';
+  position:absolute;
+  top:-20px;
+  left:50%;
+  width:2px;
+  height:20px;
+  background:black;
+  transform:translateX(-50%);
+}
+
+/* PERSON */
+.person {
+  background:white;
+  border:1px solid black;
+  border-radius:12px;
+  padding:10px;
+  width:90px;
+}
+
+.person img, .siluet {
+  width:70px;
+  height:70px;
+  border-radius:50%;
+}
+
+/* SILUET */
+.siluet {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  animation:pulse 2s infinite;
+}
+
+.siluet.l { background:#2193b0; color:white; }
+.siluet.p { background:#ff758c; color:white; }
+
+@keyframes pulse {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
+}
+
+.name {
+  margin-top:5px;
+  font-weight:bold;
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🌳 Full Silsilah (Pro)</h2>
+
+<div class="tree" id="tree"></div>
+
+<script>
+let dataGlobal=[];
+
+/* ===== NAMA PENDEK ===== */
+function shortName(nama){
+  if(!nama) return "-";
+
+  let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
+  let parts=nama.split(" ");
+
+  for(let i=0;i<parts.length;i++){
+    let w=parts[i].toLowerCase();
+
+    if(gelar.includes(w)) continue;
+    if(w.length===2 && w.endsWith(".")) continue;
+
+    return parts[i];
+  }
+
+  return parts[0];
+}
+
+/* LOAD */
+fetch('data.json?v='+Date.now())
+.then(r=>r.json())
+.then(data=>{
+  dataGlobal=data;
+  buildTree();
+});
+
+/* ROOT (GENERASI 1) */
+function buildTree(){
+  const tree=document.getElementById("tree");
+
+  let roots=dataGlobal.filter(p=>p.generasi==="1" && p.jenis_kelamin==="L");
+
+  roots.forEach(root=>{
+    tree.appendChild(createFamily(root));
+  });
+}
+
+/* CREATE FAMILY (RECURSIVE 🔥) */
+function createFamily(person){
+
+  let wrapper=document.createElement("div");
+  wrapper.className="family";
+
+  let pasanganList=[];
+
+  if(person.pasangan){
+    let list=person.pasangan.split("|").map(x=>x.trim());
+    pasanganList=dataGlobal.filter(x=>list.includes(x.nama));
+  }
+
+  if(!pasanganList.length){
+    wrapper.appendChild(createPerson(person));
+    return wrapper;
+  }
+
+  pasanganList.forEach(pasangan=>{
+
+    let couple=document.createElement("div");
+    couple.className="couple";
+
+    couple.appendChild(createPerson(person));
+
+    let love=document.createElement("div");
+    love.className="love";
+    love.innerHTML="❤️";
+    couple.appendChild(love);
+
+    couple.appendChild(createPerson(pasangan));
+
+    wrapper.appendChild(couple);
+
+    let children=dataGlobal.filter(x=>
+      (x.ayah===person.nama && x.ibu===pasangan.nama) ||
+      (x.ibu===person.nama && x.ayah===pasangan.nama)
+    );
+
+    if(children.length){
+      let childBox=document.createElement("div");
+      childBox.className="children";
+
+      children.forEach(c=>{
+        let childDiv=document.createElement("div");
+        childDiv.className="child";
+
+        childDiv.appendChild(createFamily(c)); // 🔥 RECURSIVE
+
+        childBox.appendChild(childDiv);
+      });
+
+      wrapper.appendChild(childBox);
+    }
+
+  });
+
+  return wrapper;
+}
+
+/* PERSON */
+function createPerson(p){
+
+  let div=document.createElement("div");
+  div.className="person";
+
+  let foto="";
+
+  if(p.foto && p.foto.trim()!==""){
+    foto=`<img src="${p.foto}">`;
+  } else {
+    let g=(p.jenis_kelamin||"").toUpperCase();
+    foto = g==="L"
+      ? `<div class="siluet l">👨</div>`
+      : `<div class="siluet p">👩</div>`;
+  }
+
+  div.innerHTML=`
+    ${foto}
+    <div class="name">${shortName(p.nama)}</div>
+  `;
+
+  return div;
+}
+</script>
+
+</body>
+</html>
