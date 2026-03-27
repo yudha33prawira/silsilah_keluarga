@@ -11,7 +11,7 @@ h2 { margin:10px; }
 
 .toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
 
-.search-btn,.filter-btn {
+.search-btn,.filter-btn,.full-btn {
   padding:10px 15px;
   border:none;
   border-radius:10px;
@@ -21,6 +21,7 @@ h2 { margin:10px; }
 
 .search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
 .filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
+.full-btn { background:linear-gradient(135deg,#11998e,#38ef7d); }
 
 /* FILTER */
 .filter-panel {
@@ -173,6 +174,7 @@ h2 { margin:10px; }
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
   <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
+  <button onclick="goFull()" class="full-btn">🌳 Full Silsilah</button>
 </div>
 
 <div class="filter-panel" id="filterPanel">
@@ -212,18 +214,19 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* ✅ NAMA PENDEK + ANTI GELAR */
+/* ===== NAMA PENDEK FIX FINAL ===== */
 function shortName(nama){
   if(!nama) return "-";
 
   let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
-  let parts=nama.split(" ");
+  let parts=nama.trim().split(/\s+/);
 
   for(let i=0;i<parts.length;i++){
-    let w=parts[i].toLowerCase();
+    let w=parts[i].toLowerCase().replace(/\./g,"");
 
     if(gelar.includes(w)) continue;
-    if(w.length===2 && w.endsWith(".")) continue;
+
+    if(parts[i].length<=3 && parts[i].includes(".")) continue;
 
     return parts[i];
   }
@@ -289,7 +292,7 @@ function punyaAnak(p){
   return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
 }
 
-/* ✅ PERSON + SILUET */
+/* PERSON + SILUET */
 function createPerson(p){
   const has=punyaAnak(p);
   const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
@@ -397,6 +400,11 @@ function applyFilter(type,value){
     div.onclick=()=>goDetail(p.id);
     result.appendChild(div);
   });
+}
+
+/* FULL PAGE */
+function goFull(){
+  window.location.href="full-pro.html";
 }
 </script>
 
