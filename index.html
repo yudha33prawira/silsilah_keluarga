@@ -13,6 +13,7 @@ body {
   background: #f5f5f5;
 }
 
+/* TREE */
 .tree {
   display: flex;
   flex-direction: row;
@@ -47,7 +48,6 @@ body {
 .couple {
   display: flex;
   gap: 20px;
-  justify-content: center;
   position: relative;
 }
 
@@ -82,18 +82,17 @@ body {
   background: black;
 }
 
+/* PERSON */
 .person {
   border: 1px solid black;
   border-radius: 12px;
   padding: 15px;
   background: white;
-  color: black;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: 0.2s;
 }
 
 .person:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .person.meninggal {
@@ -116,9 +115,9 @@ body {
 
 .name.disabled {
   color: gray;
-  cursor: default;
 }
 
+/* SEARCH */
 .search-btn {
   width: 50px;
   height: 50px;
@@ -130,7 +129,7 @@ body {
   cursor: pointer;
 }
 
-.search-popup {
+.search-popup, .popup {
   display: none;
   position: fixed;
   top: 0;
@@ -140,44 +139,57 @@ body {
   background: rgba(0,0,0,0.5);
 }
 
-.search-box {
+.search-box, .popup-content {
   background: white;
-  padding: 25px;
-  margin: 120px auto;
-  width: 90%;
-  max-width: 350px;
-  border-radius: 15px;
-}
-
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
-
-.popup-content {
-  background: white;
+  padding: 20px;
+  margin: 100px auto;
   width: 90%;
   max-width: 300px;
-  margin: 80px auto;
-  padding: 20px;
   border-radius: 10px;
 }
 
+/* FILTER PANEL */
+.filter-panel {
+  position: fixed;
+  right: 10px;
+  top: 100px;
+  width: 200px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.filter-panel button {
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #2575fc;
+  color: white;
+  cursor: pointer;
+}
+
+.filter-item {
+  border-bottom: 1px solid #eee;
+  padding: 5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.filter-item:hover {
+  background: #f0f0f0;
+}
+
+/* MOBILE */
 @media (max-width: 600px) {
-  .tree {
-    flex-direction: column;
-  }
-  .family-block::after {
-    display: none;
-  }
-  .children {
-    grid-template-columns: 1fr;
-  }
+  .tree { flex-direction: column; }
+  .family-block::after { display: none; }
+  .children { grid-template-columns: 1fr; }
+  .filter-panel { position: static; width: 90%; margin: auto; }
 }
 </style>
 </head>
@@ -189,18 +201,25 @@ body {
 
 <div class="tree" id="tree"></div>
 
-<!-- Search -->
+<!-- FILTER -->
+<div class="filter-panel">
+  <h4>Filter Generasi</h4>
+  <div id="genButtons"></div>
+  <div id="filterResult"></div>
+</div>
+
+<!-- SEARCH -->
 <div id="searchPopup" class="search-popup">
   <div class="search-box">
     <h3>Cari Nama</h3>
-    <input type="text" id="searchInput" placeholder="Ketik nama..." onkeyup="searchName(event)">
+    <input type="text" id="searchInput" onkeyup="searchName(event)">
     <br><br>
     <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
   </div>
 </div>
 
-<!-- Popup -->
+<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -213,27 +232,22 @@ body {
 <script>
 let globalData = [];
 
-// Load data
 fetch('data.json?v=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
   globalData = data;
   init(data);
+  generateGenButtons();
 });
 
-// INIT (FIX DOUBLE)
+// INIT (fix double)
 function init(data) {
   const tree = document.getElementById("tree");
 
   const roots = data.filter(p => 
-    p.generasi === "1" && 
+    p.generasi === "1" &&
     (p.jenis_kelamin || "").toUpperCase() === "L"
   );
-
-  if (!roots.length) {
-    tree.innerHTML = "Data tidak ditemukan";
-    return;
-  }
 
   roots.forEach(root => {
     let pasanganList = [];
@@ -280,12 +294,10 @@ function createFamilyBlock(tree, root, pasangan, data) {
   tree.appendChild(block);
 }
 
-// CHECK ANAK
 function punyaAnak(p) {
   return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
 }
 
-// CARD
 function createPerson(p) {
   const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
@@ -314,20 +326,13 @@ function openPopup(id) {
   document.getElementById("nama").innerText = p.nama;
   document.getElementById("info").innerHTML = `
     Lahir: ${p.tanggal_lahir}<br>
-    Alamat: ${p.alamat_lahir}<br>
     Domisili: ${p.domisili}<br>
-    Pasangan: ${p.pasangan}<br>
-    Anak: ${p.jumlah_anak}<br>
     Status: ${p.status}
   `;
 
   const btn = document.getElementById("btnDetail");
-  if (hasChild) {
-    btn.style.display = "inline-block";
-    btn.onclick = () => goDetail(p.id);
-  } else {
-    btn.style.display = "none";
-  }
+  btn.style.display = hasChild ? "inline-block" : "none";
+  btn.onclick = () => goDetail(p.id);
 }
 
 function closePopup() {
@@ -351,18 +356,52 @@ function searchName(e) {
   if (e && e.key && e.key !== "Enter") return;
 
   let input = document.getElementById("searchInput").value.toLowerCase();
-  if (!input) return;
-
   let person = globalData.find(p => p.nama.toLowerCase().includes(input));
 
-  if (person) {
-    window.location.href = "detail.html?id=" + person.id;
-  } else {
-    alert("Nama tidak ditemukan!");
+  if (person) window.location.href = "detail.html?id=" + person.id;
+  else alert("Nama tidak ditemukan!");
+}
+
+// FILTER GENERASI
+function generateGenButtons() {
+  const gens = [...new Set(globalData.map(p => p.generasi))].sort();
+  const box = document.getElementById("genButtons");
+
+  box.innerHTML = `<button onclick="filterGen('all')">Semua</button>`;
+
+  gens.forEach(g => {
+    box.innerHTML += `<button onclick="filterGen('${g}')">Gen ${g}</button>`;
+  });
+}
+
+function filterGen(gen) {
+  let result = [...globalData];
+
+  if (gen !== "all") {
+    result = result.filter(p => p.generasi === gen);
   }
+
+  result.sort((a, b) => (a.tanggal_lahir || 0) - (b.tanggal_lahir || 0));
+
+  renderFilter(result);
+}
+
+function renderFilter(list) {
+  const box = document.getElementById("filterResult");
+  box.innerHTML = "";
+
+  list.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "filter-item";
+    div.innerHTML = `
+      ${p.nama}<br>
+      <small>Gen ${p.generasi} • ${p.tanggal_lahir}</small>
+    `;
+    div.onclick = () => goDetail(p.id);
+    box.appendChild(div);
+  });
 }
 </script>
 
 </body>
 </html>
-```
