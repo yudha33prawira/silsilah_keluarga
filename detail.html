@@ -60,7 +60,6 @@ h2 { margin: 10px; }
   position: relative;
 }
 
-/* ❤️ LOVE ICON */
 .love-icon {
   position: absolute;
   top: 40px;
@@ -69,7 +68,6 @@ h2 { margin: 10px; }
   font-size: 22px;
 }
 
-/* garis turun */
 .couple::after {
   content: '';
   position: absolute;
@@ -144,7 +142,6 @@ h2 { margin: 10px; }
 <body>
 
 <h2 id="judul">Silsilah</h2>
-
 <div class="breadcrumb" id="breadcrumb"></div>
 
 <div class="toolbar">
@@ -164,7 +161,7 @@ h2 { margin: 10px; }
   </div>
 </div>
 
-<!-- POPUP DETAIL -->
+<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -178,7 +175,26 @@ h2 { margin: 10px; }
 let globalData = [];
 const id = new URLSearchParams(window.location.search).get('id');
 
-/* LOAD DATA */
+/* ===== FUNGSI NAMA PENDEK ===== */
+function getNamaPendek(nama) {
+  if (!nama) return "";
+
+  const gelar = ["h.", "hj.", "dr.", "drs.", "ir.", "kh.", "ust.", "ustadz", "habib"];
+
+  let parts = nama.trim().split(" ");
+
+  if (parts.length === 1) return parts[0];
+
+  let first = parts[0].toLowerCase();
+
+  if (gelar.includes(first)) {
+    return parts[1] || parts[0];
+  }
+
+  return parts[0];
+}
+
+/* LOAD */
 fetch('data.json?v=' + Date.now())
 .then(res => res.json())
 .then(data => {
@@ -191,12 +207,11 @@ function init(data) {
   const root = data.find(p => p.id === id);
   if (!root) return;
 
-  document.getElementById("judul").innerText = "Silsilah " + root.nama;
+  document.getElementById("judul").innerText = "Silsilah " + getNamaPendek(root.nama);
 
   buildBreadcrumb(root, data);
 
   let pasanganList = [];
-
   if (root.pasangan) {
     let list = root.pasangan.split("|").map(x => x.trim());
     pasanganList = data.filter(x => list.includes(x.nama));
@@ -259,7 +274,7 @@ function createPerson(p) {
 
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!has ? 'disabled' : ''}">${p.nama}</div>
+    <div class="name ${!has ? 'disabled' : ''}">${getNamaPendek(p.nama)}</div>
   `;
 
   if (has) div.querySelector('.name').onclick = () => goDetail(p.id);
@@ -267,7 +282,7 @@ function createPerson(p) {
   return div;
 }
 
-/* POPUP DETAIL (FULL DATA NORMAL LAGI) */
+/* POPUP (FULL DATA) */
 function val(v){ return v ? v : "-"; }
 
 function openPopup(id) {
@@ -342,7 +357,7 @@ function buildBreadcrumb(person, data) {
 
   path.forEach((p,i)=>{
     const span = document.createElement("span");
-    span.innerText = p.nama;
+    span.innerText = getNamaPendek(p.nama);
     span.onclick = () => goDetail(p.id);
 
     box.appendChild(span);
