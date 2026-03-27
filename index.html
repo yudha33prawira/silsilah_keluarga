@@ -22,6 +22,7 @@ h2 { margin:10px; }
 .search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
 .filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
+/* FILTER */
 .filter-panel {
   display:none;
   width:90%;
@@ -58,6 +59,7 @@ h2 { margin:10px; }
   text-align:left;
 }
 
+/* TREE */
 .tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
 
 .family-block { display:flex; flex-direction:column; align-items:center; }
@@ -104,16 +106,43 @@ h2 { margin:10px; }
 
 .person.meninggal { background:black; color:white; }
 
-.person img {
+/* FOTO / SILUET */
+.person img,
+.siluet {
   width:80px;
   height:80px;
   border-radius:50%;
   cursor:pointer;
 }
 
+.siluet {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  animation:pulse 2s infinite;
+}
+
+.siluet.l {
+  background:linear-gradient(135deg,#2193b0,#6dd5ed);
+  color:white;
+}
+
+.siluet.p {
+  background:linear-gradient(135deg,#ff758c,#ff7eb3);
+  color:white;
+}
+
+@keyframes pulse {
+  0% { transform:scale(1); opacity:0.9; }
+  50% { transform:scale(1.08); opacity:1; }
+  100% { transform:scale(1); opacity:0.9; }
+}
+
 .name { font-weight:bold; margin-top:5px; cursor:pointer; }
 .name.disabled { color:gray; }
 
+/* POPUP */
 .search-popup,.popup {
   display:none;
   position:fixed;
@@ -183,21 +212,18 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* ✅ FIX NAMA PENDEK (GELAR + INISIAL) */
+/* ✅ NAMA PENDEK + ANTI GELAR */
 function shortName(nama){
   if(!nama) return "-";
 
-  let gelar = ["h","hj","dr","ir","kh","ust","ustadz"];
-  let parts = nama.split(" ");
+  let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
+  let parts=nama.split(" ");
 
   for(let i=0;i<parts.length;i++){
-    let w = parts[i].toLowerCase();
+    let w=parts[i].toLowerCase();
 
-    // skip gelar
     if(gelar.includes(w)) continue;
-
-    // skip inisial seperti R.
-    if(w.length === 2 && w.endsWith(".")) continue;
+    if(w.length===2 && w.endsWith(".")) continue;
 
     return parts[i];
   }
@@ -263,18 +289,32 @@ function punyaAnak(p){
   return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
 }
 
+/* ✅ PERSON + SILUET */
 function createPerson(p){
   const has=punyaAnak(p);
+  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
 
   const div=document.createElement("div");
-  div.className="person "+((p.status||"").toLowerCase().includes("meninggal")?"meninggal":"");
+  div.className="person "+(isMeninggal?"meninggal":"");
+
+  let fotoHTML="";
+
+  if(p.foto && p.foto.trim()!==""){
+    fotoHTML=`<img src="${p.foto}" onclick="openPopup('${p.id}')">`;
+  } else {
+    let gender=(p.jenis_kelamin||"").toUpperCase();
+    fotoHTML = gender==="L"
+      ? `<div class="siluet l" onclick="openPopup('${p.id}')">👨</div>`
+      : `<div class="siluet p" onclick="openPopup('${p.id}')">👩</div>`;
+  }
 
   div.innerHTML=`
-    <img src="${p.foto}" onclick="openPopup('${p.id}')">
+    ${fotoHTML}
     <div class="name ${!has?'disabled':''}">${shortName(p.nama)}</div>
   `;
 
   if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
+
   return div;
 }
 
