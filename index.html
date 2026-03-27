@@ -13,25 +13,21 @@ body {
   text-align: center;
 }
 
-/* ===== TOP BUTTON ===== */
-.top-buttons {
-  position: fixed;
-  top: 15px;
-  right: 15px;
+/* ===== TOOLBAR ===== */
+.toolbar {
   display: flex;
+  justify-content: center;
   gap: 10px;
-  z-index: 1000;
+  margin: 10px 0;
 }
 
 .search-btn, .filter-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  padding: 10px 15px;
+  border-radius: 10px;
   border: none;
   color: white;
-  font-size: 22px;
+  font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   transition: 0.2s;
 }
 
@@ -44,7 +40,7 @@ body {
 }
 
 .search-btn:hover, .filter-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* ===== TREE ===== */
@@ -119,15 +115,14 @@ body {
 
 /* ===== FILTER PANEL ===== */
 .filter-panel {
-  position: fixed;
-  right: 10px;
-  top: 80px;
-  width: 230px;
+  display: none;
+  width: 90%;
+  max-width: 600px;
+  margin: 10px auto;
   background: white;
-  padding: 10px;
+  padding: 15px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  display: none;
 }
 
 .filter-container {
@@ -135,9 +130,13 @@ body {
   gap: 10px;
 }
 
+.filter-left, .filter-right {
+  width: 50%;
+}
+
 .filter-left div {
   background: #eee;
-  padding: 6px;
+  padding: 8px;
   margin-bottom: 5px;
   cursor: pointer;
   border-radius: 6px;
@@ -146,7 +145,7 @@ body {
 .filter-right div {
   background: #2575fc;
   color: white;
-  padding: 6px;
+  padding: 8px;
   margin-bottom: 5px;
   cursor: pointer;
   border-radius: 6px;
@@ -177,11 +176,8 @@ body {
   border-radius: 10px;
 }
 
-/* ===== RESPONSIVE ===== */
 @media(max-width:600px){
-  .tree { flex-direction: column; }
   .children { grid-template-columns: 1fr; }
-  .filter-panel { width: 90%; right:5%; }
 }
 </style>
 </head>
@@ -190,20 +186,15 @@ body {
 
 <h2>Silsilah Keluarga</h2>
 
-<div class="top-buttons">
-  <button onclick="openSearch()" class="search-btn">🔍</button>
-  <button onclick="toggleFilter()" class="filter-btn">🎛</button>
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
+  <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
 </div>
 
-<div class="tree" id="tree"></div>
-
 <!-- FILTER -->
-<div class="filter-panel">
-  <div style="text-align:right;">
-    <button onclick="toggleFilter()" style="border:none;background:red;color:white;border-radius:6px;padding:5px;">X</button>
-  </div>
-
-  <h4>Filter</h4>
+<div class="filter-panel" id="filterPanel">
+  <h4>Filter Data</h4>
 
   <div class="filter-container">
     <div class="filter-left">
@@ -212,11 +203,15 @@ body {
       <div onclick="setFilter('status')">Status</div>
     </div>
 
-    <div class="filter-right" id="filterOptions">Pilih</div>
+    <div class="filter-right" id="filterOptions">
+      Pilih filter
+    </div>
   </div>
 
   <div id="filterResult"></div>
 </div>
+
+<div class="tree" id="tree"></div>
 
 <!-- SEARCH -->
 <div id="searchPopup" class="search-popup">
@@ -245,54 +240,54 @@ let globalData = [];
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
-  globalData = data;
+  globalData=data;
   init(data);
 });
 
-// INIT (NO DOUBLE GEN 1)
+// INIT
 function init(data){
-  const tree = document.getElementById("tree");
+  const tree=document.getElementById("tree");
 
-  const roots = data.filter(p =>
-    p.generasi === "1" &&
-    (p.jenis_kelamin || "").toUpperCase() === "L"
+  const roots=data.filter(p=>
+    p.generasi==="1" &&
+    (p.jenis_kelamin||"").toUpperCase()==="L"
   );
 
   roots.forEach(root=>{
-    let pasangan = data.filter(x => root.pasangan?.includes(x.nama));
+    let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
 
-    if(pasangan.length === 0){
-      createFamilyBlock(tree, root, null);
+    if(pasangan.length===0){
+      createFamilyBlock(tree,root,null);
     } else {
-      pasangan.forEach(p => createFamilyBlock(tree, root, p));
+      pasangan.forEach(p=>createFamilyBlock(tree,root,p));
     }
   });
 }
 
-// CREATE BLOCK
-function createFamilyBlock(tree, root, pasangan){
-  const block = document.createElement("div");
-  block.className = "family-block";
+// CREATE
+function createFamilyBlock(tree,root,pasangan){
+  const block=document.createElement("div");
+  block.className="family-block";
 
-  const couple = document.createElement("div");
-  couple.className = "couple";
+  const couple=document.createElement("div");
+  couple.className="couple";
 
   couple.appendChild(createPerson(root));
   if(pasangan) couple.appendChild(createPerson(pasangan));
 
   block.appendChild(couple);
 
-  let children = globalData.filter(x =>
-    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
-    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
+  let children=globalData.filter(x=>
+    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
+    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
 
   children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
   if(children.length){
-    const box = document.createElement("div");
-    box.className = "children";
-    children.forEach(c => box.appendChild(createPerson(c)));
+    const box=document.createElement("div");
+    box.className="children";
+    children.forEach(c=>box.appendChild(createPerson(c)));
     block.appendChild(box);
   }
 
@@ -301,28 +296,27 @@ function createFamilyBlock(tree, root, pasangan){
 
 // PERSON
 function punyaAnak(p){
-  return globalData.some(x => x.ayah===p.nama || x.ibu===p.nama);
+  return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
 }
 
 function createPerson(p){
-  const has = punyaAnak(p);
+  const has=punyaAnak(p);
 
-  const div = document.createElement("div");
-  div.className = "person " + ((p.status||"").includes("Meninggal")?"meninggal":"");
+  const div=document.createElement("div");
+  div.className="person "+((p.status||"").includes("Meninggal")?"meninggal":"");
 
-  div.innerHTML = `
+  div.innerHTML=`
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
     <div class="name ${!has?'disabled':''}">${p.nama}</div>
   `;
 
-  if(has) div.querySelector('.name').onclick = () => goDetail(p.id);
-
+  if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
   return div;
 }
 
 // POPUP
 function openPopup(id){
-  const p = globalData.find(x=>x.id===id);
+  const p=globalData.find(x=>x.id===id);
 
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
@@ -339,65 +333,51 @@ function openSearch(){ document.getElementById("searchPopup").style.display="blo
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
 
 function searchName(e){
-  if(e && e.key !== "Enter") return;
-
-  let val = document.getElementById("searchInput").value.toLowerCase();
-  let p = globalData.find(x=>x.nama.toLowerCase().includes(val));
-
-  if(p) goDetail(p.id);
-  else alert("Nama tidak ditemukan");
+  if(e && e.key!=="Enter") return;
+  let v=document.getElementById("searchInput").value.toLowerCase();
+  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
+  if(p) goDetail(p.id); else alert("Tidak ditemukan");
 }
 
 // FILTER TOGGLE
 function toggleFilter(){
-  const panel = document.querySelector(".filter-panel");
-  panel.style.display = (panel.style.display === "block") ? "none" : "block";
+  const panel=document.getElementById("filterPanel");
+  panel.style.display = (panel.style.display==="block")?"none":"block";
 }
 
 // FILTER LOGIC
-let activeFilter = null;
+let activeFilter=null;
 
 function setFilter(type){
-  activeFilter = type;
-  const box = document.getElementById("filterOptions");
-  box.innerHTML = "";
+  activeFilter=type;
+  const box=document.getElementById("filterOptions");
+  box.innerHTML="";
 
   if(type==="gender"){
-    box.innerHTML = `
-      <div onclick="applyFilter('L')">L</div>
-      <div onclick="applyFilter('P')">P</div>
-    `;
+    box.innerHTML=`<div onclick="applyFilter('L')">L</div><div onclick="applyFilter('P')">P</div>`;
   }
 
   if(type==="generasi"){
     [...new Set(globalData.map(p=>p.generasi))].forEach(g=>{
-      box.innerHTML += `<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
+      box.innerHTML+=`<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
     });
   }
 
   if(type==="status"){
-    box.innerHTML = `
-      <div onclick="applyFilter('hidup')">Hidup</div>
-      <div onclick="applyFilter('meninggal')">Meninggal</div>
-    `;
+    box.innerHTML=`<div onclick="applyFilter('hidup')">Hidup</div><div onclick="applyFilter('meninggal')">Meninggal</div>`;
   }
 }
 
 function applyFilter(val){
-  let res = [...globalData];
+  let res=[...globalData];
 
-  if(activeFilter==="gender")
-    res = res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
-
-  if(activeFilter==="generasi")
-    res = res.filter(p=>p.generasi===val);
-
-  if(activeFilter==="status")
-    res = res.filter(p=>(p.status||"").toLowerCase().includes(val));
+  if(activeFilter==="gender") res=res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
+  if(activeFilter==="generasi") res=res.filter(p=>p.generasi===val);
+  if(activeFilter==="status") res=res.filter(p=>(p.status||"").toLowerCase().includes(val));
 
   res.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
-  const box = document.getElementById("filterResult");
+  const box=document.getElementById("filterResult");
   box.innerHTML="";
 
   res.forEach(p=>{
