@@ -7,16 +7,9 @@
 
 <style>
 body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
-
 h2 { margin:10px; }
 
-/* TOOLBAR */
-.toolbar {
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:10px 0;
-}
+.toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
 
 .search-btn,.filter-btn {
   padding:10px 15px;
@@ -29,7 +22,6 @@ h2 { margin:10px; }
 .search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
 .filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
-/* FILTER PANEL */
 .filter-panel {
   display:none;
   width:90%;
@@ -66,7 +58,6 @@ h2 { margin:10px; }
   text-align:left;
 }
 
-/* TREE */
 .tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
 
 .family-block { display:flex; flex-direction:column; align-items:center; }
@@ -123,7 +114,6 @@ h2 { margin:10px; }
 .name { font-weight:bold; margin-top:5px; cursor:pointer; }
 .name.disabled { color:gray; }
 
-/* POPUP */
 .search-popup,.popup {
   display:none;
   position:fixed;
@@ -193,13 +183,25 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* === NAMA PENDEK === */
+/* ✅ FIX NAMA PENDEK (GELAR + INISIAL) */
 function shortName(nama){
   if(!nama) return "-";
-  let gelar=["h","hj","dr","ir","kh","ust","ustadz"];
-  let parts=nama.split(" ");
-  if(parts.length===1) return parts[0];
-  if(gelar.includes(parts[0].toLowerCase())) return parts[1];
+
+  let gelar = ["h","hj","dr","ir","kh","ust","ustadz"];
+  let parts = nama.split(" ");
+
+  for(let i=0;i<parts.length;i++){
+    let w = parts[i].toLowerCase();
+
+    // skip gelar
+    if(gelar.includes(w)) continue;
+
+    // skip inisial seperti R.
+    if(w.length === 2 && w.endsWith(".")) continue;
+
+    return parts[i];
+  }
+
   return parts[0];
 }
 
