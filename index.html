@@ -99,7 +99,7 @@ body {
   cursor: default;
 }
 
-/* MODERN SEARCH BUTTON */
+/* Modern Search Button */
 .search-btn {
   width: 50px;
   height: 50px;
@@ -118,7 +118,7 @@ body {
   box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
 
-/* SEARCH POPUP */
+/* Search Popup */
 .search-popup {
   display: none;
   position: fixed;
@@ -165,7 +165,7 @@ body {
   background: #6a11cb;
 }
 
-/* DETAIL POPUP */
+/* Detail Popup */
 .popup {
   display: none;
   position: fixed;
@@ -195,14 +195,14 @@ body {
 
 <body>
 
-<h2>Silsilah Keluarga Ngadiman</h2>
+<h2>Silsilah Keluarga</h2>
 
 <!-- Modern Search Button -->
 <button onclick="openSearch()" class="search-btn">🔍</button>
 
 <div class="tree" id="tree"></div>
 
-<!-- SEARCH POPUP -->
+<!-- Search Popup -->
 <div id="searchPopup" class="search-popup">
   <div class="search-box">
     <h3>Cari Nama</h3>
@@ -213,7 +213,7 @@ body {
   </div>
 </div>
 
-<!-- DETAIL POPUP -->
+<!-- Detail Popup -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -226,37 +226,54 @@ body {
 <script>
 let globalData = [];
 
+// Load data JSON
 fetch('data.json?v=' + new Date().getTime())
-.then(res => res.json())
-.then(data => {
-  globalData = data;
-  init(data);
-});
+  .then(res => res.json())
+  .then(data => {
+    globalData = data;
+    init(data);
+  });
 
+// Inisialisasi halaman utama
 function init(data) {
   const tree = document.getElementById("tree");
-  const root = data.find(p => p.nama === "Ngadiman");
 
-  if (!root) {
+  // Ambil semua kepala keluarga Generasi 1
+  const roots = data.filter(p => p.generasi === "1");
+
+  if (!roots.length) {
     tree.innerHTML = "Data tidak ditemukan";
     return;
   }
 
-  let pasanganList = [];
-  if (root.pasangan) {
-    let list = root.pasangan.split("|").map(x => x.trim());
-    pasanganList = data.filter(x => list.includes(x.nama));
-  }
+  // Loop tiap kepala keluarga Gen 1
+  roots.forEach((root, index) => {
 
-  if (pasanganList.length === 0) {
-    createFamilyBlock(tree, root, null, data);
-  } else {
-    pasanganList.forEach(psg => {
-      createFamilyBlock(tree, root, psg, data);
-    });
-  }
+    // Tambahkan garis horizontal sebagai pemisah, kecuali yang pertama
+    if (index > 0) {
+      const hr = document.createElement("hr");
+      hr.style.width = "80%";
+      hr.style.margin = "40px auto";
+      hr.style.border = "1px solid black";
+      tree.appendChild(hr);
+    }
+
+    // Cari pasangan
+    let pasanganList = [];
+    if (root.pasangan) {
+      let list = root.pasangan.split("|").map(x => x.trim());
+      pasanganList = data.filter(x => list.includes(x.nama));
+    }
+
+    if (pasanganList.length === 0) {
+      createFamilyBlock(tree, root, null, data);
+    } else {
+      pasanganList.forEach(psg => createFamilyBlock(tree, root, psg, data));
+    }
+  });
 }
 
+// Buat blok keluarga
 function createFamilyBlock(tree, root, pasangan, data) {
   const block = document.createElement("div");
   block.className = "family-block";
@@ -268,6 +285,7 @@ function createFamilyBlock(tree, root, pasangan, data) {
 
   block.appendChild(couple);
 
+  // Anak-anak
   const children = data.filter(x =>
     (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
     (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
@@ -283,16 +301,19 @@ function createFamilyBlock(tree, root, pasangan, data) {
   tree.appendChild(block);
 }
 
+// Cek punya anak
 function punyaAnak(p) {
   return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
 }
 
+// Buat card orang
 function createPerson(p) {
   const hasChild = punyaAnak(p);
   const isMeninggal = (p.status || "").toLowerCase().includes("meninggal");
 
   const div = document.createElement("div");
   div.className = isMeninggal ? "person meninggal person-card" : "person person-card";
+
   div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
     <div class="name ${!hasChild ? 'disabled' : ''}">${p.nama}</div>
@@ -304,7 +325,7 @@ function createPerson(p) {
   return div;
 }
 
-// DETAIL POPUP
+// Detail popup
 function openPopup(id) {
   const p = globalData.find(x => x.id === id);
   if (!p) return;
@@ -335,7 +356,7 @@ function openPopup(id) {
 function closePopup() { document.getElementById("popup").style.display = "none"; }
 function goDetail(id) { window.location.href = "detail.html?id=" + id; }
 
-// SEARCH POPUP
+// Search popup
 function openSearch() {
   document.getElementById("searchPopup").style.display = "block";
   document.getElementById("searchInput").focus();
@@ -345,6 +366,7 @@ function closeSearch() {
   document.getElementById("searchPopup").style.display = "none";
 }
 
+// Cari nama
 function searchName(e) {
   if (e && e.key && e.key !== "Enter") return;
 
