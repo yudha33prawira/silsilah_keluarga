@@ -15,6 +15,16 @@ body {
 
 h2 { margin: 10px; }
 
+.breadcrumb {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  color: blue;
+}
+
 /* TOOLBAR */
 .toolbar {
   display: flex;
@@ -23,20 +33,13 @@ h2 { margin: 10px; }
   margin: 10px 0;
 }
 
-.search-btn, .filter-btn {
+.search-btn {
   padding: 10px 15px;
-  border-radius: 10px;
   border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
   color: white;
   cursor: pointer;
-}
-
-.search-btn {
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-}
-
-.filter-btn {
-  background: linear-gradient(135deg,#ff7e5f,#ff9966);
 }
 
 /* TREE */
@@ -46,12 +49,26 @@ h2 { margin: 10px; }
   align-items: center;
 }
 
+.family-block {
+  margin-bottom: 40px;
+}
+
 .couple {
   display: flex;
-  gap: 20px;
+  gap: 40px;
+  justify-content: center;
   position: relative;
 }
 
+.love-icon {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+}
+
+/* garis turun */
 .couple::after {
   content: '';
   position: absolute;
@@ -68,8 +85,6 @@ h2 { margin: 10px; }
   display: grid;
   grid-template-columns: repeat(2,1fr);
   gap: 15px;
-  max-width: 700px;
-  width: 100%;
 }
 
 .person {
@@ -101,50 +116,6 @@ h2 { margin: 10px; }
   color: gray;
 }
 
-/* FILTER */
-.filter-panel {
-  display: none;
-  width: 90%;
-  max-width: 600px;
-  margin: 10px auto;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-.filter-container {
-  display: flex;
-  gap: 10px;
-}
-
-.filter-left, .filter-right {
-  width: 50%;
-}
-
-.filter-left div {
-  background: #eee;
-  padding: 8px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.filter-right div {
-  background: #2575fc;
-  color: white;
-  padding: 8px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.filter-item {
-  border-bottom: 1px solid #ddd;
-  padding: 5px;
-  text-align: left;
-  cursor: pointer;
-}
-
 /* POPUP */
 .search-popup, .popup {
   display: none;
@@ -163,11 +134,6 @@ h2 { margin: 10px; }
   border-radius: 10px;
 }
 
-.breadcrumb span {
-  cursor: pointer;
-  color: blue;
-}
-
 @media(max-width:600px){
   .children { grid-template-columns: 1fr; }
 }
@@ -177,32 +143,12 @@ h2 { margin: 10px; }
 <body>
 
 <h2 id="judul">Silsilah</h2>
-<div id="breadcrumb"></div>
 
-<button onclick="history.back()">⬅ Kembali</button>
+<div class="breadcrumb" id="breadcrumb"></div>
 
 <div class="toolbar">
+  <button onclick="history.back()">⬅ Kembali</button>
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-  <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
-</div>
-
-<!-- FILTER -->
-<div class="filter-panel" id="filterPanel">
-  <h4>Filter Data</h4>
-
-  <div class="filter-container">
-    <div class="filter-left">
-      <div onclick="setFilter('gender')">Gender</div>
-      <div onclick="setFilter('generasi')">Generasi</div>
-      <div onclick="setFilter('status')">Status</div>
-    </div>
-
-    <div class="filter-right" id="filterOptions">
-      Pilih filter
-    </div>
-  </div>
-
-  <div id="filterResult"></div>
 </div>
 
 <div class="tree" id="tree"></div>
@@ -222,7 +168,7 @@ h2 { margin: 10px; }
   <div class="popup-content">
     <h3 id="nama"></h3>
     <p id="info"></p>
-    <button id="btnDetail">Detail</button><br><br>
+    <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
 </div>
@@ -231,81 +177,93 @@ h2 { margin: 10px; }
 let globalData = [];
 const id = new URLSearchParams(window.location.search).get('id');
 
-fetch('data.json?v='+Date.now())
-.then(r=>r.json())
-.then(data=>{
+fetch('data.json?v=' + Date.now())
+.then(res => res.json())
+.then(data => {
   globalData = data;
   init(data);
 });
 
-function init(data){
-  const root = data.find(p=>p.id===id);
-  if(!root) return;
+/* INIT */
+function init(data) {
+  const root = data.find(p => p.id === id);
+  if (!root) return;
 
-  document.getElementById("judul").innerText="Silsilah "+root.nama;
-  buildBreadcrumb(root,data);
+  document.getElementById("judul").innerText = "Silsilah " + root.nama;
 
-  let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
+  buildBreadcrumb(root, data);
 
-  if(pasangan.length===0) createFamilyBlock(root,null);
-  else pasangan.forEach(p=>createFamilyBlock(root,p));
+  let pasangan = data.filter(x => root.pasangan?.includes(x.nama));
+
+  if (!pasangan.length) createFamilyBlock(root, null);
+  else pasangan.forEach(p => createFamilyBlock(root, p));
 }
 
-function createFamilyBlock(root,pasangan){
-  const tree=document.getElementById("tree");
+/* FAMILY */
+function createFamilyBlock(root, pasangan) {
+  const tree = document.getElementById("tree");
 
-  const block=document.createElement("div");
+  const block = document.createElement("div");
+  block.className = "family-block";
 
-  const couple=document.createElement("div");
-  couple.className="couple";
+  const couple = document.createElement("div");
+  couple.className = "couple";
 
   couple.appendChild(createPerson(root));
-  if(pasangan) couple.appendChild(createPerson(pasangan));
+
+  if (pasangan) {
+    const love = document.createElement("div");
+    love.className = "love-icon";
+    love.innerHTML = "❤️";
+    couple.appendChild(love);
+
+    couple.appendChild(createPerson(pasangan));
+  }
 
   block.appendChild(couple);
 
-  let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
-    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
+  let children = globalData.filter(x =>
+    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
+    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
   );
 
   children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
-  if(children.length){
-    const box=document.createElement("div");
-    box.className="children";
-    children.forEach(c=>box.appendChild(createPerson(c)));
+  if (children.length) {
+    const box = document.createElement("div");
+    box.className = "children";
+    children.forEach(c => box.appendChild(createPerson(c)));
     block.appendChild(box);
   }
 
   tree.appendChild(block);
 }
 
-function punyaAnak(p){
-  return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
+/* UTIL */
+function punyaAnak(p) {
+  return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
 }
 
-function createPerson(p){
-  const has=punyaAnak(p);
+function createPerson(p) {
+  const has = punyaAnak(p);
 
-  const div=document.createElement("div");
-  div.className="person "+((p.status||"").toLowerCase().includes("meninggal")?"meninggal":"");
+  const div = document.createElement("div");
+  div.className = "person " + ((p.status||"").toLowerCase().includes("meninggal") ? "meninggal" : "");
 
-  div.innerHTML=`
+  div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!has?'disabled':''}">${p.nama}</div>
+    <div class="name ${!has ? 'disabled' : ''}">${p.nama}</div>
   `;
 
-  if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
+  if (has) div.querySelector('.name').onclick = () => goDetail(p.id);
+
   return div;
 }
 
-/* ===== POPUP DETAIL FULL ===== */
-function val(v){
-  return v ? v : "-";
-}
+/* POPUP DETAIL (FULL DATA) */
+function val(v){ return v ? v : "-"; }
 
-function openPopup(id){
+function openPopup(id) {
   const p = globalData.find(x => x.id === id);
   if (!p) return;
 
@@ -316,10 +274,10 @@ function openPopup(id){
 
   document.getElementById("info").innerHTML = `
     Lahir: ${val(p.tanggal_lahir)}<br>
-    Alamat: ${val(p.alamat_lahir)}<br>
+    Alamat Lahir: ${val(p.alamat_lahir)}<br>
     Domisili: ${val(p.domisili)}<br>
     Pasangan: ${val(p.pasangan)}<br>
-    Anak: ${val(p.jumlah_anak)}<br>
+    Jumlah Anak: ${val(p.jumlah_anak)}<br>
     Status: ${val(p.status)}<br>
     WA: ${val(p.wa)}<br>
     Pekerjaan: ${val(p.pekerjaan)}
@@ -335,87 +293,53 @@ function openPopup(id){
   }
 }
 
-function closePopup(){ document.getElementById("popup").style.display="none"; }
-function goDetail(id){ window.location.href="detail.html?id="+id; }
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+function goDetail(id) {
+  window.location.href = "detail.html?id=" + id;
+}
 
 /* SEARCH */
-function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
-function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
-
-function searchName(e){
-  if(e && e.key!=="Enter") return;
-  let v=document.getElementById("searchInput").value.toLowerCase();
-  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) goDetail(p.id); else alert("Tidak ditemukan");
+function openSearch() {
+  document.getElementById("searchPopup").style.display = "block";
 }
 
-/* FILTER */
-function toggleFilter(){
-  const panel=document.getElementById("filterPanel");
-  panel.style.display = (panel.style.display==="block")?"none":"block";
+function closeSearch() {
+  document.getElementById("searchPopup").style.display = "none";
 }
 
-let activeFilter=null;
+function searchName(e) {
+  if (e && e.key !== "Enter") return;
 
-function setFilter(type){
-  activeFilter=type;
-  const box=document.getElementById("filterOptions");
-  box.innerHTML="";
+  let v = document.getElementById("searchInput").value.toLowerCase();
+  let p = globalData.find(x => x.nama.toLowerCase().includes(v));
 
-  if(type==="gender"){
-    box.innerHTML=`<div onclick="applyFilter('L')">L</div><div onclick="applyFilter('P')">P</div>`;
-  }
-
-  if(type==="generasi"){
-    [...new Set(globalData.map(p=>p.generasi))].forEach(g=>{
-      box.innerHTML+=`<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
-    });
-  }
-
-  if(type==="status"){
-    box.innerHTML=`<div onclick="applyFilter('hidup')">Hidup</div><div onclick="applyFilter('meninggal')">Meninggal</div>`;
-  }
-}
-
-function applyFilter(val){
-  let res=[...globalData];
-
-  if(activeFilter==="gender") res=res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
-  if(activeFilter==="generasi") res=res.filter(p=>p.generasi===val);
-  if(activeFilter==="status") res=res.filter(p=>(p.status||"").toLowerCase().includes(val));
-
-  res.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
-
-  const box=document.getElementById("filterResult");
-  box.innerHTML="";
-
-  res.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="filter-item";
-    d.innerHTML=`${p.nama}<br><small>${val(p.tanggal_lahir)}</small>`;
-    d.onclick=()=>goDetail(p.id);
-    box.appendChild(d);
-  });
+  if (p) goDetail(p.id);
+  else alert("Tidak ditemukan");
 }
 
 /* BREADCRUMB */
-function buildBreadcrumb(person,data){
-  const container=document.getElementById("breadcrumb");
-  let path=[], current=person;
+function buildBreadcrumb(person, data) {
+  const box = document.getElementById("breadcrumb");
+  let path = [];
+  let current = person;
 
-  while(current){
+  while (current) {
     path.unshift(current);
-    current=data.find(x=>x.nama===current.ayah || x.nama===current.ibu);
+    current = data.find(x => x.nama === current.ayah || x.nama === current.ibu);
   }
 
   path.forEach((p,i)=>{
-    const span=document.createElement("span");
-    span.innerText=p.nama;
-    span.onclick=()=>goDetail(p.id);
-    container.appendChild(span);
+    const span = document.createElement("span");
+    span.innerText = p.nama;
+    span.onclick = () => goDetail(p.id);
 
-    if(i<path.length-1)
-      container.appendChild(document.createTextNode(" > "));
+    box.appendChild(span);
+
+    if (i < path.length - 1)
+      box.appendChild(document.createTextNode(" > "));
   });
 }
 </script>
