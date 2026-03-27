@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,12 +9,7 @@
 body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
 h2 { margin:10px; }
 
-.toolbar {
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:10px 0;
-}
+.toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
 
 .search-btn,.filter-btn {
   padding:10px 15px;
@@ -63,7 +57,6 @@ h2 { margin:10px; }
   border-bottom:1px solid #ddd;
   padding:5px;
   text-align:left;
-  cursor:pointer;
 }
 
 /* TREE */
@@ -219,7 +212,7 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* NAMA PENDEK */
+/* ✅ NAMA PENDEK + ANTI GELAR */
 function shortName(nama){
   if(!nama) return "-";
 
@@ -253,7 +246,6 @@ function init(data){
   });
 }
 
-/* FAMILY */
 function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
 
@@ -297,7 +289,7 @@ function punyaAnak(p){
   return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
 }
 
-/* PERSON FIX FOTO ERROR */
+/* ✅ PERSON + SILUET */
 function createPerson(p){
   const has=punyaAnak(p);
   const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
@@ -305,21 +297,15 @@ function createPerson(p){
   const div=document.createElement("div");
   div.className="person "+(isMeninggal?"meninggal":"");
 
-  let gender=(p.jenis_kelamin||"").toUpperCase();
-
-  function siluet(){
-    return gender==="L"
-      ? `<div class="siluet l" onclick="openPopup('${p.id}')">👨</div>`
-      : `<div class="siluet p" onclick="openPopup('${p.id}')">👩</div>`;
-  }
-
   let fotoHTML="";
 
   if(p.foto && p.foto.trim()!==""){
-    fotoHTML = `<img src="${p.foto}" onclick="openPopup('${p.id}')" 
-      onerror="this.onerror=null; this.outerHTML='${siluet().replace(/'/g,"\\'")}'">`;
+    fotoHTML=`<img src="${p.foto}" onclick="openPopup('${p.id}')">`;
   } else {
-    fotoHTML = siluet();
+    let gender=(p.jenis_kelamin||"").toUpperCase();
+    fotoHTML = gender==="L"
+      ? `<div class="siluet l" onclick="openPopup('${p.id}')">👨</div>`
+      : `<div class="siluet p" onclick="openPopup('${p.id}')">👩</div>`;
   }
 
   div.innerHTML=`
@@ -328,6 +314,7 @@ function createPerson(p){
   `;
 
   if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
+
   return div;
 }
 
@@ -415,4 +402,3 @@ function applyFilter(type,value){
 
 </body>
 </html>
-```
