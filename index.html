@@ -6,77 +6,182 @@
 <title>Silsilah Keluarga</title>
 
 <style>
-body { font-family: Arial; text-align: center; margin: 0; background:#f5f5f5; }
-
-.tree {
-  display:flex; flex-wrap:wrap; gap:50px; justify-content:center; padding:20px;
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f5f5f5;
+  text-align: center;
 }
 
-.family-block { display:flex; flex-direction:column; align-items:center; }
+/* ===== TOP BUTTON ===== */
+.top-buttons {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
 
-.couple { display:flex; gap:20px; position:relative; }
+.search-btn, .filter-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+.search-btn {
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
+}
+
+.filter-btn {
+  background: linear-gradient(135deg,#ff7e5f,#ff9966);
+}
+
+.search-btn:hover, .filter-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ===== TREE ===== */
+.tree {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 50px;
+  padding: 20px;
+}
+
+.family-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.couple {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
 .couple::after {
-  content:''; position:absolute; bottom:-30px; left:50%;
-  width:2px; height:30px; background:black; transform:translateX(-50%);
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  background: black;
+  transform: translateX(-50%);
 }
 
 .children {
-  margin-top:40px; display:grid; grid-template-columns:repeat(2,1fr);
-  gap:15px; max-width:700px; width:100%;
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 15px;
+  max-width: 700px;
+  width: 100%;
 }
 
-.person { border:1px solid black; border-radius:12px; padding:10px; background:white; }
-.person.meninggal { background:black; color:white; }
-
-.person img { width:80px; height:80px; border-radius:50%; cursor:pointer; }
-
-.name { font-weight:bold; margin-top:5px; cursor:pointer; }
-.name.disabled { color:gray; }
-
-.search-btn {
-  width:50px;height:50px;border-radius:50%;border:none;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:white;font-size:20px;cursor:pointer;
+.person {
+  border: 1px solid black;
+  border-radius: 12px;
+  padding: 10px;
+  background: white;
 }
 
-/* FILTER */
+.person.meninggal {
+  background: black;
+  color: white;
+}
+
+.person img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.name {
+  font-weight: bold;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.name.disabled {
+  color: gray;
+}
+
+/* ===== FILTER PANEL ===== */
 .filter-panel {
-  position:fixed; right:10px; top:100px;
-  width:230px; background:white; padding:10px;
-  border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.2);
+  position: fixed;
+  right: 10px;
+  top: 80px;
+  width: 230px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: none;
 }
 
-.filter-container { display:flex; gap:10px; }
+.filter-container {
+  display: flex;
+  gap: 10px;
+}
 
 .filter-left div {
-  background:#eee; padding:6px; margin-bottom:5px;
-  cursor:pointer; border-radius:6px;
+  background: #eee;
+  padding: 6px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  border-radius: 6px;
 }
 
 .filter-right div {
-  background:#2575fc; color:white;
-  padding:6px; margin-bottom:5px;
-  cursor:pointer; border-radius:6px;
+  background: #2575fc;
+  color: white;
+  padding: 6px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  border-radius: 6px;
 }
 
 .filter-item {
-  border-bottom:1px solid #ddd; padding:5px; text-align:left; cursor:pointer;
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  text-align: left;
+  cursor: pointer;
 }
 
-.search-popup,.popup {
-  display:none; position:fixed; top:0; left:0;
-  width:100%; height:100%; background:rgba(0,0,0,0.5);
+/* ===== POPUP ===== */
+.search-popup, .popup {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
 }
 
-.search-box,.popup-content {
-  background:white; padding:20px; margin:100px auto;
-  width:90%; max-width:300px; border-radius:10px;
+.search-box, .popup-content {
+  background: white;
+  padding: 20px;
+  margin: 100px auto;
+  width: 90%;
+  max-width: 300px;
+  border-radius: 10px;
 }
 
+/* ===== RESPONSIVE ===== */
 @media(max-width:600px){
-  .tree{flex-direction:column;}
-  .children{grid-template-columns:1fr;}
-  .filter-panel{position:static;width:90%;margin:auto;}
+  .tree { flex-direction: column; }
+  .children { grid-template-columns: 1fr; }
+  .filter-panel { width: 90%; right:5%; }
 }
 </style>
 </head>
@@ -84,28 +189,40 @@ body { font-family: Arial; text-align: center; margin: 0; background:#f5f5f5; }
 <body>
 
 <h2>Silsilah Keluarga</h2>
-<button onclick="openSearch()" class="search-btn">🔍</button>
+
+<div class="top-buttons">
+  <button onclick="openSearch()" class="search-btn">🔍</button>
+  <button onclick="toggleFilter()" class="filter-btn">🎛</button>
+</div>
 
 <div class="tree" id="tree"></div>
 
 <!-- FILTER -->
 <div class="filter-panel">
+  <div style="text-align:right;">
+    <button onclick="toggleFilter()" style="border:none;background:red;color:white;border-radius:6px;padding:5px;">X</button>
+  </div>
+
   <h4>Filter</h4>
+
   <div class="filter-container">
     <div class="filter-left">
       <div onclick="setFilter('gender')">Gender</div>
       <div onclick="setFilter('generasi')">Generasi</div>
       <div onclick="setFilter('status')">Status</div>
     </div>
+
     <div class="filter-right" id="filterOptions">Pilih</div>
   </div>
+
   <div id="filterResult"></div>
 </div>
 
 <!-- SEARCH -->
 <div id="searchPopup" class="search-popup">
   <div class="search-box">
-    <input type="text" id="searchInput" onkeyup="searchName(event)">
+    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
+    <br><br>
     <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
   </div>
@@ -124,75 +241,93 @@ body { font-family: Arial; text-align: center; margin: 0; background:#f5f5f5; }
 <script>
 let globalData = [];
 
+// LOAD DATA
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
-.then(data=>{ globalData=data; init(data); });
+.then(data=>{
+  globalData = data;
+  init(data);
+});
 
-// INIT (NO DOUBLE)
+// INIT (NO DOUBLE GEN 1)
 function init(data){
-  const tree=document.getElementById("tree");
+  const tree = document.getElementById("tree");
 
-  const roots=data.filter(p=>p.generasi==="1" && (p.jenis_kelamin||"").toUpperCase()==="L");
+  const roots = data.filter(p =>
+    p.generasi === "1" &&
+    (p.jenis_kelamin || "").toUpperCase() === "L"
+  );
 
   roots.forEach(root=>{
-    let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
-    if(pasangan.length===0) createFamilyBlock(tree,root,null);
-    else pasangan.forEach(p=>createFamilyBlock(tree,root,p));
+    let pasangan = data.filter(x => root.pasangan?.includes(x.nama));
+
+    if(pasangan.length === 0){
+      createFamilyBlock(tree, root, null);
+    } else {
+      pasangan.forEach(p => createFamilyBlock(tree, root, p));
+    }
   });
 }
 
-function createFamilyBlock(tree,root,pasangan){
-  const block=document.createElement("div");
-  block.className="family-block";
+// CREATE BLOCK
+function createFamilyBlock(tree, root, pasangan){
+  const block = document.createElement("div");
+  block.className = "family-block";
 
-  const couple=document.createElement("div");
-  couple.className="couple";
+  const couple = document.createElement("div");
+  couple.className = "couple";
+
   couple.appendChild(createPerson(root));
   if(pasangan) couple.appendChild(createPerson(pasangan));
 
   block.appendChild(couple);
 
-  let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
-    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
+  let children = globalData.filter(x =>
+    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
+    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
   );
 
   children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
   if(children.length){
-    const box=document.createElement("div");
-    box.className="children";
-    children.forEach(c=>box.appendChild(createPerson(c)));
+    const box = document.createElement("div");
+    box.className = "children";
+    children.forEach(c => box.appendChild(createPerson(c)));
     block.appendChild(box);
   }
 
   tree.appendChild(block);
 }
 
+// PERSON
 function punyaAnak(p){
-  return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
+  return globalData.some(x => x.ayah===p.nama || x.ibu===p.nama);
 }
 
 function createPerson(p){
-  const has=punyaAnak(p);
-  const div=document.createElement("div");
-  div.className="person "+((p.status||"").includes("Meninggal")?"meninggal":"");
+  const has = punyaAnak(p);
 
-  div.innerHTML=`
+  const div = document.createElement("div");
+  div.className = "person " + ((p.status||"").includes("Meninggal")?"meninggal":"");
+
+  div.innerHTML = `
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
     <div class="name ${!has?'disabled':''}">${p.nama}</div>
   `;
 
-  if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
+  if(has) div.querySelector('.name').onclick = () => goDetail(p.id);
+
   return div;
 }
 
 // POPUP
 function openPopup(id){
-  const p=globalData.find(x=>x.id===id);
+  const p = globalData.find(x=>x.id===id);
+
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
-  document.getElementById("info").innerHTML=`Lahir: ${p.tanggal_lahir}<br>Status:${p.status}`;
+  document.getElementById("info").innerHTML=`Lahir: ${p.tanggal_lahir}<br>Status: ${p.status}`;
+
   document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
@@ -202,47 +337,69 @@ function goDetail(id){ window.location.href="detail.html?id="+id; }
 // SEARCH
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
+
 function searchName(e){
-  if(e && e.key!=="Enter") return;
-  let v=document.getElementById("searchInput").value.toLowerCase();
-  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) goDetail(p.id); else alert("Tidak ditemukan");
+  if(e && e.key !== "Enter") return;
+
+  let val = document.getElementById("searchInput").value.toLowerCase();
+  let p = globalData.find(x=>x.nama.toLowerCase().includes(val));
+
+  if(p) goDetail(p.id);
+  else alert("Nama tidak ditemukan");
 }
 
-// FILTER
-let activeFilter=null;
+// FILTER TOGGLE
+function toggleFilter(){
+  const panel = document.querySelector(".filter-panel");
+  panel.style.display = (panel.style.display === "block") ? "none" : "block";
+}
+
+// FILTER LOGIC
+let activeFilter = null;
 
 function setFilter(type){
-  activeFilter=type;
-  const box=document.getElementById("filterOptions");
-  box.innerHTML="";
+  activeFilter = type;
+  const box = document.getElementById("filterOptions");
+  box.innerHTML = "";
 
   if(type==="gender"){
-    box.innerHTML=`<div onclick="applyFilter('L')">L</div><div onclick="applyFilter('P')">P</div>`;
+    box.innerHTML = `
+      <div onclick="applyFilter('L')">L</div>
+      <div onclick="applyFilter('P')">P</div>
+    `;
   }
 
   if(type==="generasi"){
     [...new Set(globalData.map(p=>p.generasi))].forEach(g=>{
-      box.innerHTML+=`<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
+      box.innerHTML += `<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
     });
   }
 
   if(type==="status"){
-    box.innerHTML=`<div onclick="applyFilter('hidup')">Hidup</div><div onclick="applyFilter('meninggal')">Meninggal</div>`;
+    box.innerHTML = `
+      <div onclick="applyFilter('hidup')">Hidup</div>
+      <div onclick="applyFilter('meninggal')">Meninggal</div>
+    `;
   }
 }
 
 function applyFilter(val){
-  let res=[...globalData];
+  let res = [...globalData];
 
-  if(activeFilter==="gender") res=res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
-  if(activeFilter==="generasi") res=res.filter(p=>p.generasi===val);
-  if(activeFilter==="status") res=res.filter(p=>(p.status||"").toLowerCase().includes(val));
+  if(activeFilter==="gender")
+    res = res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
+
+  if(activeFilter==="generasi")
+    res = res.filter(p=>p.generasi===val);
+
+  if(activeFilter==="status")
+    res = res.filter(p=>(p.status||"").toLowerCase().includes(val));
 
   res.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
-  const box=document.getElementById("filterResult");
+  const box = document.getElementById("filterResult");
   box.innerHTML="";
+
   res.forEach(p=>{
     const d=document.createElement("div");
     d.className="filter-item";
