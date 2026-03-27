@@ -68,6 +68,7 @@ h2 { margin: 10px; }
   font-size: 22px;
 }
 
+/* garis turun */
 .couple::after {
   content: '';
   position: absolute;
@@ -175,23 +176,26 @@ h2 { margin: 10px; }
 let globalData = [];
 const id = new URLSearchParams(window.location.search).get('id');
 
-/* ===== FUNGSI NAMA PENDEK ===== */
+/* ===== FIX NAMA PENDEK (ANTI GELAR) ===== */
 function getNamaPendek(nama) {
-  if (!nama) return "";
+  if (!nama) return "-";
 
-  const gelar = ["h.", "hj.", "dr.", "drs.", "ir.", "kh.", "ust.", "ustadz", "habib"];
+  const gelar = [
+    "h", "h.", "hj", "hj.",
+    "dr", "dr.", "drs", "drs.",
+    "ir", "ir.", "kh", "kh.",
+    "ust", "ust.", "ustadz",
+    "habib", "r", "r."
+  ];
 
   let parts = nama.trim().split(" ");
 
-  if (parts.length === 1) return parts[0];
-
-  let first = parts[0].toLowerCase();
-
-  if (gelar.includes(first)) {
-    return parts[1] || parts[0];
+  // buang semua gelar di depan
+  while (parts.length > 1 && gelar.includes(parts[0].toLowerCase())) {
+    parts.shift();
   }
 
-  return parts[0];
+  return parts[0] || nama;
 }
 
 /* LOAD */
@@ -282,7 +286,7 @@ function createPerson(p) {
   return div;
 }
 
-/* POPUP (FULL DATA) */
+/* POPUP */
 function val(v){ return v ? v : "-"; }
 
 function openPopup(id) {
