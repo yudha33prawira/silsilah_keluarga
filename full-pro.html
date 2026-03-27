@@ -78,7 +78,6 @@ body {
   position:relative;
 }
 
-/* LINE HORIZONTAL */
 .children::before {
   content:'';
   position:absolute;
@@ -89,7 +88,6 @@ body {
   background:black;
 }
 
-/* LINE TO EACH CHILD */
 .child {
   position:relative;
 }
@@ -156,6 +154,7 @@ button {
   background:linear-gradient(135deg,#6a11cb,#2575fc);
   color:white;
   cursor:pointer;
+  margin:5px;
 }
 </style>
 </head>
@@ -166,11 +165,17 @@ button {
 
 <div class="toolbar">
   <button onclick="toggleRotate()">🔄 Rotate</button>
+  <button onclick="exportImage()">📸 PNG</button>
+  <button onclick="exportPDFPremium()">📄 PDF</button>
 </div>
 
 <div class="tree-wrapper">
   <div class="tree tree-rotate" id="tree"></div>
 </div>
+
+<!-- LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
 let dataGlobal=[];
@@ -261,7 +266,7 @@ function createFamily(person){
         let childDiv=document.createElement("div");
         childDiv.className="child";
 
-        childDiv.appendChild(createFamily(c)); // recursive
+        childDiv.appendChild(createFamily(c));
 
         childBox.appendChild(childDiv);
       });
@@ -299,16 +304,75 @@ function createPerson(p){
   return div;
 }
 
-/* ROTATE TOGGLE */
+/* ROTATE */
 function toggleRotate(){
   const tree=document.getElementById("tree");
   isRotate = !isRotate;
+  tree.classList.toggle("tree-rotate");
+}
 
-  if(isRotate){
-    tree.classList.add("tree-rotate");
-  } else {
-    tree.classList.remove("tree-rotate");
+/* EXPORT PNG */
+function exportImage(){
+  const tree = document.getElementById("tree");
+  tree.classList.remove("tree-rotate");
+
+  html2canvas(tree,{scale:3,useCORS:true}).then(canvas=>{
+    const link=document.createElement("a");
+    link.download="silsilah.png";
+    link.href=canvas.toDataURL();
+    link.click();
+
+    if(isRotate) tree.classList.add("tree-rotate");
+  });
+}
+
+/* EXPORT PDF PREMIUM */
+async function exportPDFPremium(){
+  const { jsPDF } = window.jspdf;
+  const tree = document.getElementById("tree");
+
+  tree.classList.remove("tree-rotate");
+
+  const canvas = await html2canvas(tree,{scale:2.5,useCORS:true});
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF('l','mm','a4');
+
+  const pageWidth=297;
+  const pageHeight=210;
+  const margin=10;
+
+  const imgWidth=pageWidth-(margin*2);
+  const imgHeight=canvas.height*imgWidth/canvas.width;
+
+  let heightLeft=imgHeight;
+  let position=0;
+  let page=1;
+
+  function headerFooter(){
+    pdf.setFontSize(12);
+    pdf.text("Silsilah Keluarga Besar", margin, 7);
+    pdf.setFontSize(10);
+    pdf.text("Halaman "+page, pageWidth-40, pageHeight-5);
   }
+
+  pdf.addImage(imgData,'PNG',margin,margin+5,imgWidth,imgHeight);
+  headerFooter();
+  heightLeft-=pageHeight;
+
+  while(heightLeft>0){
+    position=heightLeft-imgHeight;
+    pdf.addPage();
+    page++;
+    pdf.addImage(imgData,'PNG',margin,position+margin+5,imgWidth,imgHeight);
+    headerFooter();
+    heightLeft-=pageHeight;
+  }
+
+  const d=new Date();
+  pdf.save(`silsilah-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}.pdf`);
+
+  if(isRotate) tree.classList.add("tree-rotate");
 }
 </script>
 
