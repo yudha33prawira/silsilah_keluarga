@@ -15,13 +15,34 @@ body {
 
 .tree {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
+  flex-direction: row; /* horizontal untuk Gen-1 */
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  gap: 50px; /* jarak antar kepala keluarga */
+  flex-wrap: wrap;
 }
 
 .family-block {
-  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Garis vertikal antar kepala keluarga Gen-1 */
+.family-block::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -25px; /* setengah gap */
+  width: 2px;
+  height: 100%;
+  background: black;
+}
+
+.family-block:last-child::after {
+  display: none; /* blok terakhir tidak perlu garis */
 }
 
 .couple {
@@ -186,6 +207,12 @@ body {
 }
 
 @media (max-width: 600px) {
+  .tree {
+    flex-direction: column;
+  }
+  .family-block::after {
+    display: none;
+  }
   .children {
     grid-template-columns: 1fr;
   }
@@ -247,17 +274,7 @@ function init(data) {
   }
 
   // Loop tiap kepala keluarga Gen 1
-  roots.forEach((root, index) => {
-
-    // Tambahkan garis horizontal sebagai pemisah, kecuali yang pertama
-    if (index > 0) {
-      const hr = document.createElement("hr");
-      hr.style.width = "80%";
-      hr.style.margin = "40px auto";
-      hr.style.border = "1px solid black";
-      tree.appendChild(hr);
-    }
-
+  roots.forEach(root => {
     // Cari pasangan
     let pasanganList = [];
     if (root.pasangan) {
