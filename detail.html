@@ -60,6 +60,7 @@ h2 { margin: 10px; }
   position: relative;
 }
 
+/* ❤️ LOVE ICON */
 .love-icon {
   position: absolute;
   top: 40px;
@@ -130,7 +131,7 @@ h2 { margin: 10px; }
   padding: 20px;
   margin: 100px auto;
   width: 90%;
-  max-width: 300px;
+  max-width: 320px;
   border-radius: 10px;
 }
 
@@ -177,6 +178,7 @@ h2 { margin: 10px; }
 let globalData = [];
 const id = new URLSearchParams(window.location.search).get('id');
 
+/* LOAD DATA */
 fetch('data.json?v=' + Date.now())
 .then(res => res.json())
 .then(data => {
@@ -193,10 +195,15 @@ function init(data) {
 
   buildBreadcrumb(root, data);
 
-  let pasangan = data.filter(x => root.pasangan?.includes(x.nama));
+  let pasanganList = [];
 
-  if (!pasangan.length) createFamilyBlock(root, null);
-  else pasangan.forEach(p => createFamilyBlock(root, p));
+  if (root.pasangan) {
+    let list = root.pasangan.split("|").map(x => x.trim());
+    pasanganList = data.filter(x => list.includes(x.nama));
+  }
+
+  if (!pasanganList.length) createFamilyBlock(root, null);
+  else pasanganList.forEach(p => createFamilyBlock(root, p));
 }
 
 /* FAMILY */
@@ -260,7 +267,7 @@ function createPerson(p) {
   return div;
 }
 
-/* POPUP DETAIL (FULL DATA) */
+/* POPUP DETAIL (FULL DATA NORMAL LAGI) */
 function val(v){ return v ? v : "-"; }
 
 function openPopup(id) {
@@ -323,6 +330,8 @@ function searchName(e) {
 /* BREADCRUMB */
 function buildBreadcrumb(person, data) {
   const box = document.getElementById("breadcrumb");
+  box.innerHTML = "";
+
   let path = [];
   let current = person;
 
