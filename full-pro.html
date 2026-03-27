@@ -10,6 +10,23 @@ body {
   font-family: Arial;
   background:#f5f5f5;
   text-align:center;
+  margin:0;
+}
+
+/* WRAPPER ROTATE */
+.tree-wrapper {
+  width:100vw;
+  height:100vh;
+  overflow:auto;
+  position:relative;
+}
+
+.tree-rotate {
+  transform: rotate(-90deg);
+  transform-origin: top left;
+  position:absolute;
+  top:100%;
+  left:0;
 }
 
 /* TREE */
@@ -126,6 +143,20 @@ body {
   font-weight:bold;
   font-size:13px;
 }
+
+/* BUTTON */
+.toolbar {
+  margin:10px;
+}
+
+button {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  color:white;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -133,10 +164,17 @@ body {
 
 <h2>🌳 Full Silsilah (Pro)</h2>
 
-<div class="tree" id="tree"></div>
+<div class="toolbar">
+  <button onclick="toggleRotate()">🔄 Rotate</button>
+</div>
+
+<div class="tree-wrapper">
+  <div class="tree tree-rotate" id="tree"></div>
+</div>
 
 <script>
 let dataGlobal=[];
+let isRotate=true;
 
 /* ===== NAMA PENDEK ===== */
 function shortName(nama){
@@ -165,7 +203,7 @@ fetch('data.json?v='+Date.now())
   buildTree();
 });
 
-/* ROOT (GENERASI 1) */
+/* ROOT */
 function buildTree(){
   const tree=document.getElementById("tree");
 
@@ -176,7 +214,7 @@ function buildTree(){
   });
 }
 
-/* CREATE FAMILY (RECURSIVE 🔥) */
+/* RECURSIVE FAMILY */
 function createFamily(person){
 
   let wrapper=document.createElement("div");
@@ -223,7 +261,7 @@ function createFamily(person){
         let childDiv=document.createElement("div");
         childDiv.className="child";
 
-        childDiv.appendChild(createFamily(c)); // 🔥 RECURSIVE
+        childDiv.appendChild(createFamily(c)); // recursive
 
         childBox.appendChild(childDiv);
       });
@@ -259,6 +297,18 @@ function createPerson(p){
   `;
 
   return div;
+}
+
+/* ROTATE TOGGLE */
+function toggleRotate(){
+  const tree=document.getElementById("tree");
+  isRotate = !isRotate;
+
+  if(isRotate){
+    tree.classList.add("tree-rotate");
+  } else {
+    tree.classList.remove("tree-rotate");
+  }
 }
 </script>
 
