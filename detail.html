@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,7 +16,7 @@ body {
 
 h2 { margin: 10px; }
 
-/* ===== TOOLBAR ===== */
+/* TOOLBAR */
 .toolbar {
   display: flex;
   justify-content: center;
@@ -28,7 +29,6 @@ h2 { margin: 10px; }
   border-radius: 10px;
   border: none;
   color: white;
-  font-size: 16px;
   cursor: pointer;
 }
 
@@ -40,16 +40,11 @@ h2 { margin: 10px; }
   background: linear-gradient(135deg,#ff7e5f,#ff9966);
 }
 
-/* ===== TREE ===== */
+/* TREE */
 .tree {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px;
-}
-
-.family-block {
-  margin-bottom: 40px;
 }
 
 .couple {
@@ -107,7 +102,7 @@ h2 { margin: 10px; }
   color: gray;
 }
 
-/* ===== FILTER ===== */
+/* FILTER */
 .filter-panel {
   display: none;
   width: 90%;
@@ -151,7 +146,7 @@ h2 { margin: 10px; }
   cursor: pointer;
 }
 
-/* ===== POPUP ===== */
+/* POPUP */
 .search-popup, .popup {
   display: none;
   position: fixed;
@@ -183,12 +178,10 @@ h2 { margin: 10px; }
 <body>
 
 <h2 id="judul">Silsilah</h2>
-
-<div class="breadcrumb" id="breadcrumb"></div>
+<div id="breadcrumb"></div>
 
 <button onclick="history.back()">⬅ Kembali</button>
 
-<!-- TOOLBAR -->
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
   <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
@@ -225,7 +218,7 @@ h2 { margin: 10px; }
   </div>
 </div>
 
-<!-- POPUP -->
+<!-- POPUP DETAIL -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -263,7 +256,6 @@ function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
 
   const block=document.createElement("div");
-  block.className="family-block";
 
   const couple=document.createElement("div");
   couple.className="couple";
@@ -298,7 +290,7 @@ function createPerson(p){
   const has=punyaAnak(p);
 
   const div=document.createElement("div");
-  div.className="person "+((p.status||"").includes("Meninggal")?"meninggal":"");
+  div.className="person "+((p.status||"").toLowerCase().includes("meninggal")?"meninggal":"");
 
   div.innerHTML=`
     <img src="${p.foto}" onclick="openPopup('${p.id}')">
@@ -309,21 +301,45 @@ function createPerson(p){
   return div;
 }
 
-// POPUP
+/* ===== POPUP DETAIL FULL ===== */
+function val(v){
+  return v ? v : "-";
+}
+
 function openPopup(id){
-  const p=globalData.find(x=>x.id===id);
+  const p = globalData.find(x => x.id === id);
+  if (!p) return;
 
-  document.getElementById("popup").style.display="block";
-  document.getElementById("nama").innerText=p.nama;
-  document.getElementById("info").innerHTML=`Lahir: ${p.tanggal_lahir}<br>Status: ${p.status}`;
+  const hasChild = punyaAnak(p);
 
-  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("nama").innerText = p.nama;
+
+  document.getElementById("info").innerHTML = `
+    Lahir: ${val(p.tanggal_lahir)}<br>
+    Alamat: ${val(p.alamat_lahir)}<br>
+    Domisili: ${val(p.domisili)}<br>
+    Pasangan: ${val(p.pasangan)}<br>
+    Anak: ${val(p.jumlah_anak)}<br>
+    Status: ${val(p.status)}<br>
+    WA: ${val(p.wa)}<br>
+    Pekerjaan: ${val(p.pekerjaan)}
+  `;
+
+  const btn = document.getElementById("btnDetail");
+
+  if (hasChild) {
+    btn.style.display = "inline-block";
+    btn.onclick = () => goDetail(p.id);
+  } else {
+    btn.style.display = "none";
+  }
 }
 
 function closePopup(){ document.getElementById("popup").style.display="none"; }
 function goDetail(id){ window.location.href="detail.html?id="+id; }
 
-// SEARCH
+/* SEARCH */
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
 
@@ -334,7 +350,7 @@ function searchName(e){
   if(p) goDetail(p.id); else alert("Tidak ditemukan");
 }
 
-// FILTER
+/* FILTER */
 function toggleFilter(){
   const panel=document.getElementById("filterPanel");
   panel.style.display = (panel.style.display==="block")?"none":"block";
@@ -377,13 +393,13 @@ function applyFilter(val){
   res.forEach(p=>{
     const d=document.createElement("div");
     d.className="filter-item";
-    d.innerHTML=`${p.nama}<br><small>${p.tanggal_lahir}</small>`;
+    d.innerHTML=`${p.nama}<br><small>${val(p.tanggal_lahir)}</small>`;
     d.onclick=()=>goDetail(p.id);
     box.appendChild(d);
   });
 }
 
-// BREADCRUMB
+/* BREADCRUMB */
 function buildBreadcrumb(person,data){
   const container=document.getElementById("breadcrumb");
   let path=[], current=person;
@@ -407,3 +423,4 @@ function buildBreadcrumb(person,data){
 
 </body>
 </html>
+```
