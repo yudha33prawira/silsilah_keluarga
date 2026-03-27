@@ -9,24 +9,47 @@
 body {
   font-family: Arial;
   background:#f5f5f5;
-  text-align:center;
   margin:0;
+  overflow:hidden;
 }
 
-/* WRAPPER ROTATE */
-.tree-wrapper {
+/* TOOLBAR */
+.toolbar {
+  text-align:center;
+  padding:10px;
+}
+
+button {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  color:white;
+  cursor:pointer;
+  margin:5px;
+}
+
+/* VIEWPORT */
+.viewport {
   width:100vw;
-  height:100vh;
+  height:calc(100vh - 70px);
   overflow:auto;
   position:relative;
 }
 
-.tree-rotate {
-  transform: rotate(-90deg);
+/* SCALE WRAPPER */
+.scale-wrapper {
   transform-origin: top left;
-  position:absolute;
-  top:100%;
-  left:0;
+}
+
+/* ROTATE */
+.rotate {
+  transform: rotate(-90deg) scale(var(--scale));
+  transform-origin: top left;
+}
+
+.normal {
+  transform: scale(var(--scale));
 }
 
 /* TREE */
@@ -40,25 +63,15 @@ body {
   display:flex;
   flex-direction:column;
   align-items:center;
-  position:relative;
 }
 
 /* COUPLE */
 .couple {
   display:flex;
   gap:40px;
-  align-items:center;
   position:relative;
 }
 
-.love {
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  top:35px;
-}
-
-/* LINE DOWN */
 .couple::after {
   content:'';
   position:absolute;
@@ -67,7 +80,6 @@ body {
   width:2px;
   height:30px;
   background:black;
-  transform:translateX(-50%);
 }
 
 /* CHILDREN */
@@ -88,10 +100,6 @@ body {
   background:black;
 }
 
-.child {
-  position:relative;
-}
-
 .child::before {
   content:'';
   position:absolute;
@@ -100,7 +108,6 @@ body {
   width:2px;
   height:20px;
   background:black;
-  transform:translateX(-50%);
 }
 
 /* PERSON */
@@ -110,9 +117,10 @@ body {
   border-radius:12px;
   padding:10px;
   width:90px;
+  text-align:center;
 }
 
-.person img, .siluet {
+.person img,.siluet {
   width:70px;
   height:70px;
   border-radius:50%;
@@ -124,174 +132,124 @@ body {
   align-items:center;
   justify-content:center;
   font-size:30px;
-  animation:pulse 2s infinite;
 }
 
 .siluet.l { background:#2193b0; color:white; }
 .siluet.p { background:#ff758c; color:white; }
 
-@keyframes pulse {
-  0%{transform:scale(1);}
-  50%{transform:scale(1.1);}
-  100%{transform:scale(1);}
-}
-
 .name {
-  margin-top:5px;
+  font-size:12px;
   font-weight:bold;
-  font-size:13px;
-}
-
-/* TOOLBAR */
-.toolbar {
-  margin:10px;
-}
-
-button {
-  padding:10px 15px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:white;
-  cursor:pointer;
-  margin:5px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🌳 Full Silsilah (Pro)</h2>
-
 <div class="toolbar">
   <button onclick="toggleRotate()">🔄 Rotate</button>
+  <button onclick="autoScale()">⚡ Auto Fit</button>
   <button onclick="exportImage()">📸 PNG</button>
-  <button onclick="exportPDFPremium()">📄 PDF</button>
+  <button onclick="exportPDF()">📄 PDF</button>
 </div>
 
-<div class="tree-wrapper">
-  <div class="tree tree-rotate" id="tree"></div>
+<div class="viewport" id="viewport">
+  <div id="wrapper" class="scale-wrapper normal">
+    <div id="tree" class="tree"></div>
+  </div>
 </div>
 
-<!-- LIBRARY -->
+<!-- LIB -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
 let dataGlobal=[];
-let isRotate=true;
-
-/* ===== NAMA PENDEK ===== */
-function shortName(nama){
-  if(!nama) return "-";
-
-  let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
-  let parts=nama.split(" ");
-
-  for(let i=0;i<parts.length;i++){
-    let w=parts[i].toLowerCase();
-
-    if(gelar.includes(w)) continue;
-    if(w.length===2 && w.endsWith(".")) continue;
-
-    return parts[i];
-  }
-
-  return parts[0];
-}
+let isRotate=false;
 
 /* LOAD */
-fetch('data.json?v='+Date.now())
+fetch('data.json')
 .then(r=>r.json())
 .then(data=>{
   dataGlobal=data;
   buildTree();
+  setTimeout(autoScale,500);
 });
 
-/* ROOT */
+/* SHORT NAME */
+function shortName(nama){
+  return nama ? nama.split(" ")[0] : "-";
+}
+
+/* BUILD TREE */
 function buildTree(){
   const tree=document.getElementById("tree");
+  tree.innerHTML="";
 
-  let roots=dataGlobal.filter(p=>p.generasi==="1" && p.jenis_kelamin==="L");
+  let roots=dataGlobal.filter(p=>p.generasi==="1");
 
   roots.forEach(root=>{
     tree.appendChild(createFamily(root));
   });
 }
 
-/* RECURSIVE FAMILY */
+/* RECURSIVE */
 function createFamily(person){
-
-  let wrapper=document.createElement("div");
-  wrapper.className="family";
+  let wrap=document.createElement("div");
+  wrap.className="family";
 
   let pasanganList=[];
-
   if(person.pasangan){
-    let list=person.pasangan.split("|").map(x=>x.trim());
+    let list=person.pasangan.split("|");
     pasanganList=dataGlobal.filter(x=>list.includes(x.nama));
   }
 
   if(!pasanganList.length){
-    wrapper.appendChild(createPerson(person));
-    return wrapper;
+    wrap.appendChild(createPerson(person));
+    return wrap;
   }
 
   pasanganList.forEach(pasangan=>{
-
     let couple=document.createElement("div");
     couple.className="couple";
 
     couple.appendChild(createPerson(person));
-
-    let love=document.createElement("div");
-    love.className="love";
-    love.innerHTML="❤️";
-    couple.appendChild(love);
-
     couple.appendChild(createPerson(pasangan));
 
-    wrapper.appendChild(couple);
+    wrap.appendChild(couple);
 
     let children=dataGlobal.filter(x=>
-      (x.ayah===person.nama && x.ibu===pasangan.nama) ||
-      (x.ibu===person.nama && x.ayah===pasangan.nama)
+      (x.ayah===person.nama && x.ibu===pasangan.nama)
     );
 
     if(children.length){
-      let childBox=document.createElement("div");
-      childBox.className="children";
+      let box=document.createElement("div");
+      box.className="children";
 
       children.forEach(c=>{
-        let childDiv=document.createElement("div");
-        childDiv.className="child";
-
-        childDiv.appendChild(createFamily(c));
-
-        childBox.appendChild(childDiv);
+        let child=document.createElement("div");
+        child.className="child";
+        child.appendChild(createFamily(c));
+        box.appendChild(child);
       });
 
-      wrapper.appendChild(childBox);
+      wrap.appendChild(box);
     }
-
   });
 
-  return wrapper;
+  return wrap;
 }
 
 /* PERSON */
 function createPerson(p){
-
   let div=document.createElement("div");
   div.className="person";
 
   let foto="";
-
-  if(p.foto && p.foto.trim()!==""){
+  if(p.foto){
     foto=`<img src="${p.foto}">`;
   } else {
-    let g=(p.jenis_kelamin||"").toUpperCase();
-    foto = g==="L"
+    foto = p.jenis_kelamin==="L"
       ? `<div class="siluet l">👨</div>`
       : `<div class="siluet p">👩</div>`;
   }
@@ -300,99 +258,64 @@ function createPerson(p){
     ${foto}
     <div class="name">${shortName(p.nama)}</div>
   `;
-
   return div;
+}
+
+/* AUTO SCALE (ANTI KEPOTONG) */
+function autoScale(){
+  const tree=document.getElementById("tree");
+  const wrapper=document.getElementById("wrapper");
+
+  let scaleX = window.innerWidth / tree.scrollWidth;
+  let scaleY = window.innerHeight / tree.scrollHeight;
+
+  let scale = Math.min(scaleX, scaleY, 1);
+
+  wrapper.style.setProperty('--scale', scale);
 }
 
 /* ROTATE */
 function toggleRotate(){
-  const tree=document.getElementById("tree");
-  isRotate = !isRotate;
-  tree.classList.toggle("tree-rotate");
+  const wrapper=document.getElementById("wrapper");
+  isRotate=!isRotate;
+
+  wrapper.className = "scale-wrapper " + (isRotate ? "rotate" : "normal");
 }
 
 /* EXPORT PNG */
-async function exportImage(){
-  const tree = document.getElementById("tree");
+function exportImage(){
+  const tree=document.getElementById("tree");
 
-  tree.classList.remove("tree-rotate");
-
-  const canvas = await html2canvas(tree,{
-    scale:3,
-    useCORS:true,
-    scrollX:0,
-    scrollY:0,
-    windowWidth:document.body.scrollWidth,
-    windowHeight:document.body.scrollHeight
+  html2canvas(tree,{scale:3}).then(canvas=>{
+    let link=document.createElement("a");
+    link.download="silsilah.png";
+    link.href=canvas.toDataURL();
+    link.click();
   });
-
-  const link=document.createElement("a");
-  link.download="silsilah-full.png";
-  link.href=canvas.toDataURL("image/png");
-  link.click();
-
-  if(isRotate) tree.classList.add("tree-rotate");
 }
 
-/* EXPORT PDF PREMIUM */
-async function exportPDFPremium(){
+/* EXPORT PDF MULTI */
+async function exportPDF(){
   const { jsPDF } = window.jspdf;
-  const tree = document.getElementById("tree");
+  const tree=document.getElementById("tree");
 
-  tree.classList.remove("tree-rotate");
+  const canvas = await html2canvas(tree,{scale:2});
+  const img = canvas.toDataURL();
 
-  const canvas = await html2canvas(tree,{
-    scale:2.5,
-    useCORS:true,
-    scrollX:0,
-    scrollY:0,
-    windowWidth:document.body.scrollWidth,
-    windowHeight:document.body.scrollHeight
-  });
+  const pdf=new jsPDF('l','mm','a4');
 
-  const imgData = canvas.toDataURL("image/png");
+  let w=297;
+  let h=canvas.height*w/canvas.width;
 
-  const pdf = new jsPDF('l','mm','a4');
+  let y=0;
 
-  const pageWidth = 297;
-  const pageHeight = 210;
-  const margin = 10;
-
-  const usableWidth = pageWidth - margin*2;
-  const usableHeight = pageHeight - margin*2;
-
-  const imgHeight = canvas.height * usableWidth / canvas.width;
-
-  let y = 0;
-  let page = 1;
-
-  while(y < imgHeight){
-
-    if(page > 1) pdf.addPage();
-
-    pdf.addImage(
-      imgData,
-      'PNG',
-      margin,
-      margin - y,
-      usableWidth,
-      imgHeight
-    );
-
-    pdf.setFontSize(12);
-    pdf.text("Silsilah Keluarga Besar", margin, 7);
-
-    pdf.setFontSize(10);
-    pdf.text("Halaman " + page, pageWidth - 40, pageHeight - 5);
-
-    y += usableHeight;
-    page++;
+  while(y < h){
+    pdf.addImage(img,'PNG',0,-y,w,h);
+    y += 210;
+    if(y < h) pdf.addPage();
   }
 
-  const d=new Date();
-  pdf.save(`silsilah-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}.pdf`);
-
-  if(isRotate) tree.classList.add("tree-rotate");
+  pdf.save("silsilah.pdf");
 }
 </script>
 
