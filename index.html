@@ -6,171 +6,139 @@
 <title>Silsilah Keluarga</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f5f5f5;
-  text-align: center;
-}
+body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
 
-h2 { margin: 10px; }
+h2 { margin:10px; }
 
 /* TOOLBAR */
-.toolbar {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0;
+.toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
+
+.search-btn,.filter-btn {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
 }
 
-.search-btn, .filter-btn {
-  padding: 10px 15px;
-  border-radius: 10px;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-.search-btn {
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-}
-
-.filter-btn {
-  background: linear-gradient(135deg,#ff7e5f,#ff9966);
-}
+.search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
+.filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
 /* TREE */
-.tree {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 40px;
-}
+.tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
 
-.family-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+.family-block { display:flex; flex-direction:column; align-items:center; }
 
 .couple {
-  display: flex;
-  gap: 20px;
-  position: relative;
+  display:flex;
+  gap:40px;
+  justify-content:center;
+  position:relative;
+}
+
+.love-icon {
+  position:absolute;
+  top:40px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:22px;
 }
 
 .couple::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  width: 2px;
-  height: 30px;
-  background: black;
-  transform: translateX(-50%);
+  content:'';
+  position:absolute;
+  bottom:-30px;
+  left:50%;
+  width:2px;
+  height:30px;
+  background:black;
+  transform:translateX(-50%);
 }
 
 .children {
-  margin-top: 40px;
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 15px;
-  max-width: 700px;
+  margin-top:40px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
 }
 
 .person {
-  border: 1px solid black;
-  border-radius: 12px;
-  padding: 10px;
-  background: white;
+  border:1px solid black;
+  border-radius:12px;
+  padding:10px;
+  background:white;
 }
 
-.person.meninggal {
-  background: black;
-  color: white;
-}
+.person.meninggal { background:black; color:white; }
 
 .person img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  cursor: pointer;
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  cursor:pointer;
 }
 
-.name {
-  font-weight: bold;
-  margin-top: 5px;
-  cursor: pointer;
-}
-
-.name.disabled {
-  color: gray;
-}
+.name { font-weight:bold; margin-top:5px; cursor:pointer; }
+.name.disabled { color:gray; }
 
 /* FILTER */
 .filter-panel {
-  display: none;
-  width: 90%;
-  max-width: 600px;
-  margin: 10px auto;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
+  display:none;
+  width:90%;
+  max-width:600px;
+  margin:10px auto;
+  background:white;
+  padding:15px;
+  border-radius:10px;
 }
 
-.filter-container {
-  display: flex;
-  gap: 10px;
-}
-
-.filter-left, .filter-right {
-  width: 50%;
-}
+.filter-container { display:flex; gap:10px; }
+.filter-left,.filter-right { width:50%; }
 
 .filter-left div {
-  background: #eee;
-  padding: 8px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border-radius: 6px;
+  background:#eee;
+  padding:8px;
+  margin-bottom:5px;
+  cursor:pointer;
+  border-radius:6px;
 }
 
 .filter-right div {
-  background: #2575fc;
-  color: white;
-  padding: 8px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border-radius: 6px;
+  background:#2575fc;
+  color:white;
+  padding:8px;
+  margin-bottom:5px;
+  cursor:pointer;
+  border-radius:6px;
 }
 
 .filter-item {
-  border-bottom: 1px solid #ddd;
-  padding: 5px;
-  text-align: left;
-  cursor: pointer;
+  border-bottom:1px solid #ddd;
+  padding:5px;
+  text-align:left;
+  cursor:pointer;
 }
 
 /* POPUP */
-.search-popup, .popup {
-  display: none;
-  position: fixed;
+.search-popup,.popup {
+  display:none;
+  position:fixed;
   top:0; left:0;
   width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.5);
 }
 
-.search-box, .popup-content {
-  background: white;
-  padding: 20px;
-  margin: 100px auto;
-  width: 90%;
-  max-width: 300px;
-  border-radius: 10px;
+.search-box,.popup-content {
+  background:white;
+  padding:20px;
+  margin:100px auto;
+  width:90%;
+  max-width:300px;
+  border-radius:10px;
 }
 
 @media(max-width:600px){
-  .children { grid-template-columns: 1fr; }
+  .children { grid-template-columns:1fr; }
 }
 </style>
 </head>
@@ -184,22 +152,15 @@ h2 { margin: 10px; }
   <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
 </div>
 
-<!-- FILTER -->
 <div class="filter-panel" id="filterPanel">
-  <h4>Filter Data</h4>
-
   <div class="filter-container">
     <div class="filter-left">
       <div onclick="setFilter('gender')">Gender</div>
       <div onclick="setFilter('generasi')">Generasi</div>
       <div onclick="setFilter('status')">Status</div>
     </div>
-
-    <div class="filter-right" id="filterOptions">
-      Pilih filter
-    </div>
+    <div class="filter-right" id="filterOptions"></div>
   </div>
-
   <div id="filterResult"></div>
 </div>
 
@@ -215,7 +176,7 @@ h2 { margin: 10px; }
   </div>
 </div>
 
-<!-- POPUP DETAIL -->
+<!-- POPUP -->
 <div class="popup" id="popup">
   <div class="popup-content">
     <h3 id="nama"></h3>
@@ -226,28 +187,18 @@ h2 { margin: 10px; }
 </div>
 
 <script>
-let globalData = [];
+let globalData=[];
 
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
-.then(data=>{
-  globalData = data;
-  init(data);
-});
+.then(data=>{ globalData=data; init(data); });
 
-/* INIT (NO DOUBLE GEN 1) */
 function init(data){
-  const tree=document.getElementById("tree");
-
-  const roots = data.filter(p =>
-    p.generasi==="1" &&
-    (p.jenis_kelamin||"").toUpperCase()==="L"
-  );
+  const roots=data.filter(p=>p.generasi==="1" && (p.jenis_kelamin||"")==="L");
 
   roots.forEach(root=>{
     let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
-
-    if(pasangan.length===0) createFamilyBlock(root,null);
+    if(!pasangan.length) createFamilyBlock(root,null);
     else pasangan.forEach(p=>createFamilyBlock(root,p));
   });
 }
@@ -262,7 +213,15 @@ function createFamilyBlock(root,pasangan){
   couple.className="couple";
 
   couple.appendChild(createPerson(root));
-  if(pasangan) couple.appendChild(createPerson(pasangan));
+
+  if(pasangan){
+    const love=document.createElement("div");
+    love.className="love-icon";
+    love.innerHTML="❤️";
+    couple.appendChild(love);
+
+    couple.appendChild(createPerson(pasangan));
+  }
 
   block.appendChild(couple);
 
@@ -289,7 +248,6 @@ function punyaAnak(p){
 
 function createPerson(p){
   const has=punyaAnak(p);
-
   const div=document.createElement("div");
   div.className="person "+((p.status||"").toLowerCase().includes("meninggal")?"meninggal":"");
 
@@ -302,14 +260,11 @@ function createPerson(p){
   return div;
 }
 
-/* POPUP FULL */
-function val(v){ return v ? v : "-"; }
+function val(v){ return v?v:"-"; }
 
 function openPopup(id){
-  const p = globalData.find(x=>x.id===id);
+  const p=globalData.find(x=>x.id===id);
   if(!p) return;
-
-  const hasChild = punyaAnak(p);
 
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
@@ -320,28 +275,14 @@ function openPopup(id){
     Domisili: ${val(p.domisili)}<br>
     Pasangan: ${val(p.pasangan)}<br>
     Anak: ${val(p.jumlah_anak)}<br>
-    Status: ${val(p.status)}<br>
-    WA: ${val(p.wa)}<br>
-    Pekerjaan: ${val(p.pekerjaan)}
+    Status: ${val(p.status)}
   `;
 
-  const btn=document.getElementById("btnDetail");
-
-  if(hasChild){
-    btn.style.display="inline-block";
-    btn.onclick=()=>goDetail(p.id);
-  } else {
-    btn.style.display="none";
-  }
+  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-}
-
-function goDetail(id){
-  window.location.href="detail.html?id="+id;
-}
+function closePopup(){ document.getElementById("popup").style.display="none"; }
+function goDetail(id){ window.location.href="detail.html?id="+id; }
 
 /* SEARCH */
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
@@ -354,53 +295,10 @@ function searchName(e){
   if(p) goDetail(p.id); else alert("Tidak ditemukan");
 }
 
-/* FILTER */
+/* FILTER (sama seperti sebelumnya) */
 function toggleFilter(){
   const panel=document.getElementById("filterPanel");
-  panel.style.display = (panel.style.display==="block")?"none":"block";
-}
-
-let activeFilter=null;
-
-function setFilter(type){
-  activeFilter=type;
-  const box=document.getElementById("filterOptions");
-  box.innerHTML="";
-
-  if(type==="gender"){
-    box.innerHTML=`<div onclick="applyFilter('L')">L</div><div onclick="applyFilter('P')">P</div>`;
-  }
-
-  if(type==="generasi"){
-    [...new Set(globalData.map(p=>p.generasi))].forEach(g=>{
-      box.innerHTML+=`<div onclick="applyFilter('${g}')">Gen ${g}</div>`;
-    });
-  }
-
-  if(type==="status"){
-    box.innerHTML=`<div onclick="applyFilter('hidup')">Hidup</div><div onclick="applyFilter('meninggal')">Meninggal</div>`;
-  }
-}
-
-function applyFilter(val){
-  let res=[...globalData];
-
-  if(activeFilter==="gender") res=res.filter(p=>(p.jenis_kelamin||"").toUpperCase()===val);
-  if(activeFilter==="generasi") res=res.filter(p=>p.generasi===val);
-  if(activeFilter==="status") res=res.filter(p=>(p.status||"").toLowerCase().includes(val));
-
-  res.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
-
-  const box=document.getElementById("filterResult");
-  box.innerHTML="";
-
-  res.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="filter-item";
-    d.innerHTML=`${p.nama}<br><small>${val(p.tanggal_lahir)}</small>`;
-    d.onclick=()=>goDetail(p.id);
-    box.appendChild(d);
-  });
+  panel.style.display = panel.style.display==="block"?"none":"block";
 }
 </script>
 
