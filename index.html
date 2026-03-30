@@ -11,7 +11,7 @@ h2 { margin:10px; }
 
 .toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
 
-.search-btn,.filter-btn,.full-btn {
+.search-btn,.filter-btn {
   padding:10px 15px;
   border:none;
   border-radius:10px;
@@ -21,7 +21,6 @@ h2 { margin:10px; }
 
 .search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
 .filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
-.full-btn { background:linear-gradient(135deg,#11998e,#38ef7d); }
 
 /* FILTER */
 .filter-panel {
@@ -174,7 +173,6 @@ h2 { margin:10px; }
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
   <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
-  <button onclick="goFull()" class="full-btn">🌳 Full Silsilah</button>
 </div>
 
 <div class="filter-panel" id="filterPanel">
@@ -214,27 +212,20 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* ===== NAMA PENDEK FIX FINAL ===== */
 function shortName(nama){
   if(!nama) return "-";
-
   let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
   let parts=nama.trim().split(/\s+/);
 
   for(let i=0;i<parts.length;i++){
     let w=parts[i].toLowerCase().replace(/\./g,"");
-
     if(gelar.includes(w)) continue;
-
     if(parts[i].length<=3 && parts[i].includes(".")) continue;
-
     return parts[i];
   }
-
   return parts[0];
 }
 
-/* LOAD */
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{ globalData=data; init(data); });
@@ -265,7 +256,6 @@ function createFamilyBlock(root,pasangan){
     love.className="love-icon";
     love.innerHTML="❤️";
     couple.appendChild(love);
-
     couple.appendChild(createPerson(pasangan));
   }
 
@@ -275,8 +265,6 @@ function createFamilyBlock(root,pasangan){
     (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
     (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
-
-  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
   if(children.length){
     const box=document.createElement("div");
@@ -288,41 +276,17 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
-function punyaAnak(p){
-  return globalData.some(x=>x.ayah===p.nama||x.ibu===p.nama);
-}
-
-/* PERSON + SILUET */
 function createPerson(p){
-  const has=punyaAnak(p);
-  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
-
   const div=document.createElement("div");
-  div.className="person "+(isMeninggal?"meninggal":"");
+  div.className="person";
 
-  let fotoHTML="";
+  let fotoHTML = p.foto
+    ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
+    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
 
-  if(p.foto && p.foto.trim()!==""){
-    fotoHTML=`<img src="${p.foto}" onclick="openPopup('${p.id}')">`;
-  } else {
-    let gender=(p.jenis_kelamin||"").toUpperCase();
-    fotoHTML = gender==="L"
-      ? `<div class="siluet l" onclick="openPopup('${p.id}')">👨</div>`
-      : `<div class="siluet p" onclick="openPopup('${p.id}')">👩</div>`;
-  }
-
-  div.innerHTML=`
-    ${fotoHTML}
-    <div class="name ${!has?'disabled':''}">${shortName(p.nama)}</div>
-  `;
-
-  if(has) div.querySelector('.name').onclick=()=>goDetail(p.id);
-
+  div.innerHTML = fotoHTML + `<div class="name">${shortName(p.nama)}</div>`;
   return div;
 }
-
-/* POPUP */
-function val(v){ return v?v:"-"; }
 
 function openPopup(id){
   const p=globalData.find(x=>x.id===id);
@@ -330,23 +294,13 @@ function openPopup(id){
 
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
-
-  document.getElementById("info").innerHTML=`
-    Lahir: ${val(p.tanggal_lahir)}<br>
-    Alamat: ${val(p.alamat_lahir)}<br>
-    Domisili: ${val(p.domisili)}<br>
-    Pasangan: ${val(p.pasangan)}<br>
-    Anak: ${val(p.jumlah_anak)}<br>
-    Status: ${val(p.status)}
-  `;
-
-  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
+  document.getElementById("info").innerHTML="Status: "+(p.status||"-");
 }
 
-function closePopup(){ document.getElementById("popup").style.display="none"; }
-function goDetail(id){ window.location.href="detail.html?id="+id; }
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
 
-/* SEARCH */
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
 
@@ -354,57 +308,12 @@ function searchName(e){
   if(e && e.key!=="Enter") return;
   let v=document.getElementById("searchInput").value.toLowerCase();
   let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) goDetail(p.id); else alert("Tidak ditemukan");
+  if(p) alert("Ketemu: "+p.nama); else alert("Tidak ditemukan");
 }
 
-/* FILTER */
 function toggleFilter(){
   const panel=document.getElementById("filterPanel");
   panel.style.display = panel.style.display==="block"?"none":"block";
-}
-
-function setFilter(type){
-  const box=document.getElementById("filterOptions");
-  box.innerHTML="";
-
-  let options=[];
-
-  if(type==="gender") options=["L","P"];
-  if(type==="status") options=[...new Set(globalData.map(x=>x.status))];
-  if(type==="generasi") options=[...new Set(globalData.map(x=>x.generasi))];
-
-  options.forEach(val=>{
-    const div=document.createElement("div");
-    div.innerText=val;
-    div.onclick=()=>applyFilter(type,val);
-    box.appendChild(div);
-  });
-}
-
-function applyFilter(type,value){
-  const result=document.getElementById("filterResult");
-  result.innerHTML="";
-
-  let data=globalData.filter(p=>{
-    if(type==="gender") return p.jenis_kelamin===value;
-    if(type==="status") return p.status===value;
-    if(type==="generasi") return p.generasi===value;
-  });
-
-  data.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
-
-  data.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="filter-item";
-    div.innerText=shortName(p.nama)+" ("+p.tanggal_lahir+")";
-    div.onclick=()=>goDetail(p.id);
-    result.appendChild(div);
-  });
-}
-
-/* FULL PAGE */
-function goFull(){
-  window.location.href="full-pro.html";
 }
 </script>
 
