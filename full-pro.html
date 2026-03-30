@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Silsilah Ultimate FIX</title>
 
 <style>
-body { margin:0; font-family:Arial; background:#f5f5f5; overflow:hidden; }
+body {
+  margin:0;
+  font-family:Arial;
+  background:#f5f5f5;
+  overflow:hidden;
+}
 
 .toolbar {
   text-align:center;
@@ -96,14 +101,24 @@ button {
   width:70px;
   text-align:center;
   cursor:pointer;
+  transition:0.2s;
 }
 
-.person.active { background:yellow; }
+.person:hover {
+  transform:scale(1.1);
+}
 
-.siluet {
+.person.active {
+  background:yellow;
+}
+
+.person img, .siluet {
   width:50px;
   height:50px;
   border-radius:50%;
+}
+
+.siluet {
   display:flex;
   align-items:center;
   justify-content:center;
@@ -113,7 +128,11 @@ button {
 .siluet.l { background:#2193b0; color:white; }
 .siluet.p { background:#ff758c; color:white; }
 
-.name { font-size:10px; margin-top:3px; font-weight:bold; }
+.name {
+  font-size:10px;
+  margin-top:3px;
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -131,23 +150,31 @@ button {
 </div>
 
 <script>
-/* DATA LANGSUNG */
+/* ================= DATA LANGSUNG ================= */
 let dataGlobal = [
-  { nama:"Kakek", generasi:"1", jenis_kelamin:"L", pasangan:["Nenek"] },
-  { nama:"Nenek", generasi:"1", jenis_kelamin:"P", pasangan:["Kakek"] },
+  { nama:"Budi", generasi:"1", jenis_kelamin:"L", pasangan:["Siti"] },
+  { nama:"Siti", generasi:"1", jenis_kelamin:"P", pasangan:["Budi"] },
 
-  { nama:"Ayah", ayah:"Kakek", jenis_kelamin:"L", pasangan:["Ibu"] },
-  { nama:"Ibu", jenis_kelamin:"P", pasangan:["Ayah"] },
+  { nama:"Andi", ayah:"Budi", generasi:"2", jenis_kelamin:"L", pasangan:["Rina"] },
+  { nama:"Rina", generasi:"2", jenis_kelamin:"P", pasangan:["Andi"] },
 
-  { nama:"Saya", ayah:"Ayah", jenis_kelamin:"L" },
-  { nama:"Adik", ayah:"Ayah", jenis_kelamin:"P" }
+  { nama:"Dewi", ayah:"Budi", generasi:"2", jenis_kelamin:"P" },
+
+  { nama:"Rizky", ayah:"Andi", generasi:"3", jenis_kelamin:"L" }
 ];
 
+/* ================= VAR ================= */
 let scale=1, posX=0, posY=0;
 
 const viewport = document.getElementById("viewport");
 const canvas = document.getElementById("canvas");
 const tree = document.getElementById("tree");
+
+/* ================= INIT ================= */
+buildTree();
+setTimeout(autoFit,300);
+
+/* ================= FUNCTION ================= */
 
 function shortName(n){
   return n ? n.split(" ")[0] : "-";
@@ -156,6 +183,7 @@ function shortName(n){
 function buildTree(){
   tree.innerHTML="";
   let roots=dataGlobal.filter(p=>p.generasi==="1");
+
   roots.forEach(r=>{
     tree.appendChild(createFamily(r));
   });
@@ -188,6 +216,7 @@ function createFamily(p){
 
     children.forEach(c=>{
       let d=document.createElement("div");
+      d.className="child";
       d.appendChild(createFamily(c));
       box.appendChild(d);
     });
@@ -201,25 +230,30 @@ function createFamily(p){
 function createPerson(p){
   let div=document.createElement("div");
   div.className="person";
+
   div.onclick=()=>highlight(p.nama);
 
-  let icon = p.jenis_kelamin==='L'?'👨':'👩';
+  let foto = p.foto
+    ? `<img src="${p.foto}">`
+    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}">
+        ${p.jenis_kelamin==='L'?'👨':'👩'}
+      </div>`;
 
-  div.innerHTML = `
-    <div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}">${icon}</div>
-    <div class="name">${shortName(p.nama)}</div>
-  `;
+  div.innerHTML = foto + `<div class="name">${shortName(p.nama)}</div>`;
   return div;
 }
 
 function highlight(nama){
   document.querySelectorAll(".person").forEach(x=>x.classList.remove("active"));
+
   document.querySelectorAll(".person").forEach(x=>{
     if(x.innerText.includes(shortName(nama))){
       x.classList.add("active");
     }
   });
 }
+
+/* ================= ZOOM & DRAG ================= */
 
 viewport.addEventListener("wheel", e=>{
   e.preventDefault();
@@ -249,12 +283,16 @@ function updateTransform(){
   canvas.style.transform = `translate(${posX}px,${posY}px) scale(${scale})`;
 }
 
+/* ================= FIT ================= */
+
 function autoFit(){
-  const rect = tree.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
+
   const scaleX = viewport.clientWidth / rect.width;
   const scaleY = viewport.clientHeight / rect.height;
 
   scale = Math.min(scaleX, scaleY) * 0.9;
+
   posX = (viewport.clientWidth - rect.width * scale) / 2;
   posY = (viewport.clientHeight - rect.height * scale) / 2;
 
@@ -262,12 +300,11 @@ function autoFit(){
 }
 
 function resetView(){
-  scale=1; posX=0; posY=0;
+  scale=1;
+  posX=0;
+  posY=0;
   updateTransform();
 }
-
-buildTree();
-setTimeout(autoFit, 300);
 </script>
 
 </body>
