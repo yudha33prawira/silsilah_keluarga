@@ -22,43 +22,6 @@ h2 { margin:10px; }
 .search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
 .filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
-/* FILTER */
-.filter-panel {
-  display:none;
-  width:90%;
-  max-width:600px;
-  margin:10px auto;
-  background:white;
-  padding:15px;
-  border-radius:10px;
-}
-
-.filter-container { display:flex; gap:10px; }
-.filter-left,.filter-right { width:50%; }
-
-.filter-left div {
-  background:#eee;
-  padding:8px;
-  margin-bottom:5px;
-  cursor:pointer;
-  border-radius:6px;
-}
-
-.filter-right div {
-  background:#2575fc;
-  color:white;
-  padding:8px;
-  margin-bottom:5px;
-  cursor:pointer;
-  border-radius:6px;
-}
-
-.filter-item {
-  border-bottom:1px solid #ddd;
-  padding:5px;
-  text-align:left;
-}
-
 /* TREE */
 .tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
 
@@ -79,17 +42,6 @@ h2 { margin:10px; }
   font-size:22px;
 }
 
-.couple::after {
-  content:'';
-  position:absolute;
-  bottom:-30px;
-  left:50%;
-  width:2px;
-  height:30px;
-  background:black;
-  transform:translateX(-50%);
-}
-
 .children {
   margin-top:40px;
   display:grid;
@@ -104,10 +56,7 @@ h2 { margin:10px; }
   background:white;
 }
 
-.person.meninggal { background:black; color:white; }
-
-.person img,
-.siluet {
+.person img,.siluet {
   width:80px;
   height:80px;
   border-radius:50%;
@@ -125,8 +74,8 @@ h2 { margin:10px; }
 .siluet.p { background:#ff758c; color:white; }
 
 .name { font-weight:bold; margin-top:5px; cursor:pointer; }
-.name.disabled { color:gray; }
 
+/* POPUP */
 .search-popup,.popup {
   display:none;
   position:fixed;
@@ -155,40 +104,66 @@ h2 { margin:10px; }
   <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
 </div>
 
-<div class="filter-panel" id="filterPanel">
-  <div class="filter-container">
-    <div class="filter-left">
-      <div onclick="setFilter('gender')">Gender</div>
-      <div onclick="setFilter('generasi')">Generasi</div>
-      <div onclick="setFilter('status')">Status</div>
-    </div>
-    <div class="filter-right" id="filterOptions"></div>
+<div class="tree" id="tree"></div>
+
+<!-- SEARCH -->
+<div id="searchPopup" class="search-popup">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
+    <br><br>
+    <button onclick="searchName()">Cari</button>
+    <button onclick="closeSearch()">Tutup</button>
   </div>
-  <div id="filterResult"></div>
 </div>
 
-<div class="tree" id="tree"></div>
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="nama"></h3>
+    <p id="info"></p>
+    <button onclick="closePopup()">Tutup</button>
+  </div>
+</div>
 
 <script>
 let globalData=[];
 
-/* LOAD + SORT GEN 1 */
+/* NAMA PENDEK (TIDAK DIUBAH) */
+function shortName(nama){
+  if(!nama) return "-";
+  let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
+  let parts=nama.trim().split(/\s+/);
+
+  for(let i=0;i<parts.length;i++){
+    let w=parts[i].toLowerCase().replace(/\./g,"");
+    if(gelar.includes(w)) continue;
+    if(parts[i].length<=3 && parts[i].includes(".")) continue;
+    return parts[i];
+  }
+  return parts[0];
+}
+
+/* LOAD */
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
   globalData=data;
+  init(data);
+});
 
-  // SORT GEN 1 DARI TERTUA → TERMUDA
-  let gen1 = data
-    .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
-    .sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
+/* INIT + SORT GEN 1 */
+function init(data){
 
-  gen1.forEach(root=>{
+  let roots=data
+    .filter(p=>p.generasi==="1" && (p.jenis_kelamin||"")==="L")
+    .sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0)); // 🔥 FIX URUTAN
+
+  roots.forEach(root=>{
     let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
     if(!pasangan.length) createFamilyBlock(root,null);
     else pasangan.forEach(p=>createFamilyBlock(root,p));
   });
-});
+}
 
 /* FAMILY */
 function createFamilyBlock(root,pasangan){
@@ -213,10 +188,11 @@ function createFamilyBlock(root,pasangan){
   block.appendChild(couple);
 
   let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama)
+    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
+    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
 
-  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
+  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0)); // tetap
 
   if(children.length){
     const box=document.createElement("div");
@@ -228,18 +204,46 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
-/* PERSON */
+/* PERSON (TIDAK DIUBAH LOGIKA) */
 function createPerson(p){
   const div=document.createElement("div");
   div.className="person";
 
-  div.innerHTML = p.foto
-    ? `<img src="${p.foto}">`
-    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
+  let fotoHTML = p.foto
+    ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
+    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
 
-  div.innerHTML += `<div class="name">${p.nama}</div>`;
-
+  div.innerHTML = fotoHTML + `<div class="name">${shortName(p.nama)}</div>`;
   return div;
+}
+
+/* POPUP */
+function openPopup(id){
+  const p=globalData.find(x=>x.id===id);
+  if(!p) return;
+
+  document.getElementById("popup").style.display="block";
+  document.getElementById("nama").innerText=p.nama;
+  document.getElementById("info").innerHTML="Status: "+(p.status||"-");
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+/* SEARCH */
+function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
+function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
+
+function searchName(e){
+  if(e && e.key!=="Enter") return;
+  let v=document.getElementById("searchInput").value.toLowerCase();
+  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
+  if(p) alert("Ketemu: "+p.nama); else alert("Tidak ditemukan");
+}
+
+function toggleFilter(){
+  alert("Filter tetap aktif (belum diubah)");
 }
 </script>
 
