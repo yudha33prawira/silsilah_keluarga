@@ -987,7 +987,7 @@
   },
   {
     "id": "rizki",
-    "nama": "M Rizki Y",
+    "nama": "Rizki Y",
     "generasi": "4",
     "jenis_kelamin": "L",
     "ayah": "Ido Rahman",
@@ -1774,7 +1774,7 @@
     "jenis_kelamin": "P",
     "ayah": "Sumadi Wongsodimedjo",
     "ibu": "Siti Sunarjah",
-    "pasangan": "Anom wasono",
+    "pasangan": "Anom wasono|Unknow",
     "jumlah_anak": "4",
     "status": "Meninggal",
     "tanggal_lahir": "1956",
@@ -1783,6 +1783,23 @@
     "wa": "",
     "pekerjaan": "",
     "foto": "images/p.jpg"
+  },
+  {
+    "id": "unknow2",
+    "nama": "Unknow",
+    "generasi": "",
+    "jenis_kelamin": "L",
+    "ayah": "",
+    "ibu": "",
+    "pasangan": "Yannie E. Sumaryanie",
+    "jumlah_anak": "",
+    "status": "",
+    "tanggal_lahir": "",
+    "alamat_lahir": "",
+    "domisili": "",
+    "wa": "",
+    "pekerjaan": "",
+    "foto": "images/l.jpg"
   },
   {
     "id": "anom",
