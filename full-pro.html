@@ -1,19 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Silsilah Ultimate FIX</title>
 
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:#f5f5f5;
-  overflow:hidden;
-}
+body { margin:0; font-family:Arial; background:#f5f5f5; overflow:hidden; }
 
-/* TOOLBAR */
 .toolbar {
   text-align:center;
   padding:10px;
@@ -33,7 +27,6 @@ button {
   cursor:pointer;
 }
 
-/* VIEWPORT */
 .viewport {
   width:100vw;
   height:100vh;
@@ -41,31 +34,26 @@ button {
   position:relative;
 }
 
-/* CANVAS FIX */
 #canvas {
   position:absolute;
   transform-origin:0 0;
   min-width:max-content;
   min-height:max-content;
-  transition: transform 0.3s ease;
   cursor:grab;
 }
 
-/* TREE */
 .tree {
   display:flex;
   justify-content:center;
   padding-top:80px;
 }
 
-/* FAMILY */
 .family {
   display:flex;
   flex-direction:column;
   align-items:center;
 }
 
-/* COUPLE */
 .couple {
   display:flex;
   gap:20px;
@@ -82,16 +70,11 @@ button {
   background:black;
 }
 
-/* CHILDREN */
 .children {
   display:flex;
   flex-direction:column;
   gap:15px;
   margin-top:25px;
-}
-
-.child {
-  position:relative;
 }
 
 .child::before {
@@ -105,7 +88,6 @@ button {
   transform:translateX(-50%);
 }
 
-/* PERSON */
 .person {
   background:white;
   border:1px solid black;
@@ -114,27 +96,14 @@ button {
   width:70px;
   text-align:center;
   cursor:pointer;
-  transition:0.2s;
 }
 
-.person:hover {
-  transform:scale(1.1);
-}
+.person.active { background:yellow; }
 
-/* HIGHLIGHT */
-.person.active {
-  background:yellow;
-}
-
-/* FOTO */
-.person img, .siluet {
+.siluet {
   width:50px;
   height:50px;
   border-radius:50%;
-}
-
-/* SILUET */
-.siluet {
   display:flex;
   align-items:center;
   justify-content:center;
@@ -144,11 +113,7 @@ button {
 .siluet.l { background:#2193b0; color:white; }
 .siluet.p { background:#ff758c; color:white; }
 
-.name {
-  font-size:10px;
-  margin-top:3px;
-  font-weight:bold;
-}
+.name { font-size:10px; margin-top:3px; font-weight:bold; }
 </style>
 </head>
 
@@ -157,8 +122,6 @@ button {
 <div class="toolbar">
   <button onclick="resetView()">Reset</button>
   <button onclick="autoFit()">Auto Fit</button>
-  <button onclick="exportPNG()">PNG</button>
-  <button onclick="exportPDF()">PDF</button>
 </div>
 
 <div class="viewport" id="viewport">
@@ -167,43 +130,37 @@ button {
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
 <script>
-let dataGlobal=[];
+/* DATA LANGSUNG */
+let dataGlobal = [
+  { nama:"Kakek", generasi:"1", jenis_kelamin:"L", pasangan:["Nenek"] },
+  { nama:"Nenek", generasi:"1", jenis_kelamin:"P", pasangan:["Kakek"] },
+
+  { nama:"Ayah", ayah:"Kakek", jenis_kelamin:"L", pasangan:["Ibu"] },
+  { nama:"Ibu", jenis_kelamin:"P", pasangan:["Ayah"] },
+
+  { nama:"Saya", ayah:"Ayah", jenis_kelamin:"L" },
+  { nama:"Adik", ayah:"Ayah", jenis_kelamin:"P" }
+];
+
 let scale=1, posX=0, posY=0;
 
 const viewport = document.getElementById("viewport");
 const canvas = document.getElementById("canvas");
 const tree = document.getElementById("tree");
 
-/* LOAD */
-fetch('data.json')
-.then(r=>r.json())
-.then(data=>{
-  dataGlobal=data;
-  buildTree();
-
-  setTimeout(()=>{ autoFit(); }, 300);
-});
-
-/* SHORT NAME */
 function shortName(n){
   return n ? n.split(" ")[0] : "-";
 }
 
-/* BUILD TREE */
 function buildTree(){
   tree.innerHTML="";
   let roots=dataGlobal.filter(p=>p.generasi==="1");
-
   roots.forEach(r=>{
     tree.appendChild(createFamily(r));
   });
 }
 
-/* RECURSIVE */
 function createFamily(p){
   let wrap=document.createElement("div");
   wrap.className="family";
@@ -231,7 +188,6 @@ function createFamily(p){
 
     children.forEach(c=>{
       let d=document.createElement("div");
-      d.className="child";
       d.appendChild(createFamily(c));
       box.appendChild(d);
     });
@@ -242,22 +198,20 @@ function createFamily(p){
   return wrap;
 }
 
-/* PERSON */
 function createPerson(p){
   let div=document.createElement("div");
   div.className="person";
-
   div.onclick=()=>highlight(p.nama);
 
-  let foto = p.foto
-    ? `<img src="${p.foto}">`
-    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
+  let icon = p.jenis_kelamin==='L'?'👨':'👩';
 
-  div.innerHTML = foto + `<div class="name">${shortName(p.nama)}</div>`;
+  div.innerHTML = `
+    <div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}">${icon}</div>
+    <div class="name">${shortName(p.nama)}</div>
+  `;
   return div;
 }
 
-/* HIGHLIGHT */
 function highlight(nama){
   document.querySelectorAll(".person").forEach(x=>x.classList.remove("active"));
   document.querySelectorAll(".person").forEach(x=>{
@@ -267,7 +221,6 @@ function highlight(nama){
   });
 }
 
-/* ZOOM */
 viewport.addEventListener("wheel", e=>{
   e.preventDefault();
   scale += e.deltaY * -0.001;
@@ -275,7 +228,6 @@ viewport.addEventListener("wheel", e=>{
   updateTransform();
 });
 
-/* DRAG */
 let isDown=false, startX, startY;
 
 viewport.addEventListener("mousedown", e=>{
@@ -293,57 +245,29 @@ viewport.addEventListener("mousemove", e=>{
   updateTransform();
 });
 
-/* UPDATE */
 function updateTransform(){
   canvas.style.transform = `translate(${posX}px,${posY}px) scale(${scale})`;
 }
 
-/* AUTO FIT FIX */
 function autoFit(){
-  const rect = canvas.getBoundingClientRect();
-
+  const rect = tree.getBoundingClientRect();
   const scaleX = viewport.clientWidth / rect.width;
   const scaleY = viewport.clientHeight / rect.height;
 
   scale = Math.min(scaleX, scaleY) * 0.9;
-
   posX = (viewport.clientWidth - rect.width * scale) / 2;
   posY = (viewport.clientHeight - rect.height * scale) / 2;
 
   updateTransform();
 }
 
-/* RESET */
 function resetView(){
-  scale=1;
-  posX=0;
-  posY=0;
+  scale=1; posX=0; posY=0;
   updateTransform();
 }
 
-/* EXPORT PNG */
-function exportPNG(){
-  html2canvas(tree,{scale:3}).then(c=>{
-    let a=document.createElement("a");
-    a.href=c.toDataURL();
-    a.download="tree.png";
-    a.click();
-  });
-}
-
-/* EXPORT PDF */
-async function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  const canvasImg = await html2canvas(tree,{scale:2});
-  const img=canvasImg.toDataURL();
-
-  const pdf=new jsPDF('p','mm','a4');
-  let w=210;
-  let h=canvasImg.height*w/canvasImg.width;
-
-  pdf.addImage(img,'PNG',0,0,w,h);
-  pdf.save("tree.pdf");
-}
+buildTree();
+setTimeout(autoFit, 300);
 </script>
 
 </body>
