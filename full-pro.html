@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Silsilah Ultimate</title>
+<title>Silsilah Ultimate FIX</title>
 
 <style>
 body {
@@ -41,9 +41,13 @@ button {
   position:relative;
 }
 
+/* CANVAS FIX */
 #canvas {
   position:absolute;
   transform-origin:0 0;
+  min-width:max-content;
+  min-height:max-content;
+  transition: transform 0.3s ease;
   cursor:grab;
 }
 
@@ -84,6 +88,10 @@ button {
   flex-direction:column;
   gap:15px;
   margin-top:25px;
+}
+
+.child {
+  position:relative;
 }
 
 .child::before {
@@ -166,13 +174,18 @@ button {
 let dataGlobal=[];
 let scale=1, posX=0, posY=0;
 
+const viewport = document.getElementById("viewport");
+const canvas = document.getElementById("canvas");
+const tree = document.getElementById("tree");
+
 /* LOAD */
 fetch('data.json')
 .then(r=>r.json())
 .then(data=>{
   dataGlobal=data;
   buildTree();
-  autoFit();
+
+  setTimeout(()=>{ autoFit(); }, 300);
 });
 
 /* SHORT NAME */
@@ -180,9 +193,9 @@ function shortName(n){
   return n ? n.split(" ")[0] : "-";
 }
 
-/* TREE */
+/* BUILD TREE */
 function buildTree(){
-  const tree=document.getElementById("tree");
+  tree.innerHTML="";
   let roots=dataGlobal.filter(p=>p.generasi==="1");
 
   roots.forEach(r=>{
@@ -280,25 +293,35 @@ viewport.addEventListener("mousemove", e=>{
   updateTransform();
 });
 
+/* UPDATE */
 function updateTransform(){
   canvas.style.transform = `translate(${posX}px,${posY}px) scale(${scale})`;
 }
 
-/* AUTO FIT */
+/* AUTO FIT FIX */
 function autoFit(){
-  scale=0.5;
-  posX=50;
-  posY=50;
+  const rect = canvas.getBoundingClientRect();
+
+  const scaleX = viewport.clientWidth / rect.width;
+  const scaleY = viewport.clientHeight / rect.height;
+
+  scale = Math.min(scaleX, scaleY) * 0.9;
+
+  posX = (viewport.clientWidth - rect.width * scale) / 2;
+  posY = (viewport.clientHeight - rect.height * scale) / 2;
+
   updateTransform();
 }
 
 /* RESET */
 function resetView(){
-  scale=1; posX=0; posY=0;
+  scale=1;
+  posX=0;
+  posY=0;
   updateTransform();
 }
 
-/* EXPORT */
+/* EXPORT PNG */
 function exportPNG(){
   html2canvas(tree,{scale:3}).then(c=>{
     let a=document.createElement("a");
@@ -308,6 +331,7 @@ function exportPNG(){
   });
 }
 
+/* EXPORT PDF */
 async function exportPDF(){
   const { jsPDF } = window.jspdf;
   const canvasImg = await html2canvas(tree,{scale:2});
