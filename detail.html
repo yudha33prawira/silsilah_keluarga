@@ -418,22 +418,12 @@ function openPopup(id){
   `;
 
   document.getElementById("btnWA").onclick=()=>{
-  if(p.wa){
-    closePopup(); // 🔥 tutup popup dulu
-    setTimeout(()=>{
-      window.open("https://wa.me/"+p.wa);
-    },200);
-  } else {
-    alert("No WA tidak tersedia");
-  }
-};
+    if(p.wa) window.open("https://wa.me/"+p.wa);
+    else alert("No WA tidak tersedia");
+  };
 
-document.getElementById("btnDetail").onclick=()=>{
-  closePopup(); // 🔥 tutup popup dulu
-  setTimeout(()=>{
-    goDetail(p.id);
-  },200);
-};
+  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
+}
 
 function closePopup(){
   document.getElementById("popup").style.display="none";
