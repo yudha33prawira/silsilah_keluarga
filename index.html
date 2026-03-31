@@ -174,12 +174,35 @@ button {
   max-width:300px;
   border-radius:10px;
 }
+
+.search-popup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+}
+
+.toolbar {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px 0;
+  z-index: 1;
+  position: relative;
+}
+
 </style>
 </head>
 
 <body>
 
 <h2>Silsilah Keluarga</h2>
+
+<div class="toolbar">
+  <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
+  <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
+</div>
 
 <div class="tree" id="tree"></div>
 
