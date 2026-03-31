@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,40 +6,39 @@
 <title>Silsilah Keluarga</title>
 
 <style>
-body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
+body { font-family: Arial; background:#f5f5f5; margin:0; text-align:center; }
+
 h2 { margin:10px; }
 
-.toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
+/* TOOLBAR */
+.toolbar {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px;
+}
 
-.search-btn,.filter-btn {
+button {
   padding:10px 15px;
   border:none;
   border-radius:10px;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
   color:white;
   cursor:pointer;
 }
-
-.search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
-.filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
 /* TREE */
 .tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
 
 .family-block { display:flex; flex-direction:column; align-items:center; }
 
-.couple {
-  display:flex;
-  gap:40px;
-  justify-content:center;
-  position:relative;
-}
+.couple { display:flex; gap:40px; position:relative; }
 
 .love-icon {
   position:absolute;
   top:40px;
   left:50%;
   transform:translateX(-50%);
-  font-size:22px;
 }
 
 .children {
@@ -50,6 +48,7 @@ h2 { margin:10px; }
   gap:15px;
 }
 
+/* PERSON */
 .person {
   border:1px solid black;
   border-radius:12px;
@@ -57,7 +56,6 @@ h2 { margin:10px; }
   background:white;
 }
 
-/* ✅ MENINGGAL */
 .person.meninggal {
   background:black;
   color:white;
@@ -86,22 +84,75 @@ h2 { margin:10px; }
   cursor:pointer;
 }
 
-/* POPUP */
-.search-popup,.popup {
+/* POPUP MODERN */
+.popup {
   display:none;
   position:fixed;
   top:0; left:0;
   width:100%; height:100%;
-  background:rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.6);
+  overflow:auto;
 }
 
-.search-box,.popup-content {
+.popup-box {
   background:white;
-  padding:20px;
-  margin:100px auto;
+  margin:40px auto;
   width:90%;
-  max-width:300px;
-  border-radius:10px;
+  max-width:400px;
+  border-radius:15px;
+  overflow:hidden;
+  text-align:left;
+}
+
+/* HEADER FOTO */
+.popup-header {
+  text-align:center;
+  padding:20px;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  color:white;
+}
+
+.popup-header img,
+.popup-avatar {
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  margin-bottom:10px;
+}
+
+.popup-avatar {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:50px;
+  background:white;
+  color:black;
+}
+
+/* CONTENT */
+.popup-body {
+  padding:15px;
+}
+
+.section {
+  margin-bottom:15px;
+}
+
+.section-title {
+  font-weight:bold;
+  margin-bottom:5px;
+  color:#2575fc;
+}
+
+/* BUTTON AREA */
+.popup-footer {
+  padding:15px;
+  text-align:center;
+}
+
+.btn-wa {
+  background:#25D366;
+  margin-bottom:5px;
 }
 </style>
 </head>
@@ -110,41 +161,27 @@ h2 { margin:10px; }
 
 <h2>Silsilah Keluarga</h2>
 
-<div class="toolbar">
-  <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-</div>
-
 <div class="tree" id="tree"></div>
 
-<!-- SEARCH -->
-<div id="searchPopup" class="search-popup">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
-    <br><br>
-    <button onclick="searchName()">Cari</button>
-    <button onclick="closeSearch()">Tutup</button>
-  </div>
-</div>
-
 <!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
+<div id="popup" class="popup">
+  <div class="popup-box">
+
+    <div class="popup-header" id="popupHeader"></div>
+
+    <div class="popup-body" id="popupBody"></div>
+
+    <div class="popup-footer">
+      <button id="btnWA" class="btn-wa">📞 WhatsApp</button><br>
+      <button id="btnDetail">📄 Detail</button><br><br>
+      <button onclick="closePopup()">Tutup</button>
+    </div>
+
   </div>
 </div>
 
 <script>
 let globalData=[];
-
-/* NAMA PENDEK */
-function shortName(nama){
-  if(!nama) return "-";
-  let parts=nama.trim().split(/\s+/);
-  return parts[0];
-}
 
 /* LOAD */
 fetch('data.json?v='+Date.now())
@@ -156,9 +193,7 @@ fetch('data.json?v='+Date.now())
 
 /* INIT */
 function init(data){
-  let roots=data
-    .filter(p=>p.generasi==="1" && (p.jenis_kelamin||"")==="L")
-    .sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
+  let roots=data.filter(p=>p.generasi==="1" && p.jenis_kelamin==="L");
 
   roots.forEach(root=>{
     let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
@@ -180,7 +215,7 @@ function createFamilyBlock(root,pasangan){
   couple.appendChild(createPerson(root));
 
   if(pasangan){
-    const love=document.createElement("div");
+    let love=document.createElement("div");
     love.className="love-icon";
     love.innerHTML="❤️";
     couple.appendChild(love);
@@ -190,14 +225,11 @@ function createFamilyBlock(root,pasangan){
   block.appendChild(couple);
 
   let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
-    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
+    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama)
   );
 
-  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
-
   if(children.length){
-    const box=document.createElement("div");
+    let box=document.createElement("div");
     box.className="children";
     children.forEach(c=>box.appendChild(createPerson(c)));
     block.appendChild(box);
@@ -206,29 +238,25 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
-/* DETAIL */
-function goDetail(id){
-  window.location.href="detail.html?id="+id;
-}
-
 /* PERSON */
 function createPerson(p){
-
   const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
 
   const div=document.createElement("div");
   div.className="person "+(isMeninggal?"meninggal":"");
 
-  let fotoHTML = p.foto
+  let foto = p.foto
     ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
     : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
 
-  div.innerHTML = `
-    ${fotoHTML}
-    <div class="name" onclick="goDetail('${p.id}')">${shortName(p.nama)}</div>
-  `;
+  div.innerHTML = foto + `<div class="name" onclick="goDetail('${p.id}')">${p.nama.split(" ")[0]}</div>`;
 
   return div;
+}
+
+/* DETAIL */
+function goDetail(id){
+  window.location.href="detail.html?id="+id;
 }
 
 /* POPUP */
@@ -239,17 +267,49 @@ function openPopup(id){
   if(!p) return;
 
   document.getElementById("popup").style.display="block";
-  document.getElementById("nama").innerText=p.nama;
 
-  /* ✅ BIODATA LENGKAP */
-  document.getElementById("info").innerHTML=`
-    Lahir: ${val(p.tanggal_lahir)}<br>
-    Alamat: ${val(p.alamat_lahir)}<br>
-    Domisili: ${val(p.domisili)}<br>
-    Pasangan: ${val(p.pasangan)}<br>
-    Anak: ${val(p.jumlah_anak)}<br>
-    Status: ${val(p.status)}
+  /* HEADER FOTO */
+  let header = p.foto
+    ? `<img src="${p.foto}"><br>${p.nama}`
+    : `<div class="popup-avatar">${p.jenis_kelamin==='L'?'👨':'👩'}</div>${p.nama}`;
+
+  document.getElementById("popupHeader").innerHTML=header;
+
+  /* BODY */
+  document.getElementById("popupBody").innerHTML=`
+    <div class="section">
+      <div class="section-title">👤 Biodata</div>
+      Jenis Kelamin: ${val(p.jenis_kelamin)}<br>
+      Status: ${val(p.status)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">👨‍👩‍👧 Keluarga</div>
+      Ayah: ${val(p.ayah)}<br>
+      Ibu: ${val(p.ibu)}<br>
+      Pasangan: ${val(p.pasangan)}<br>
+      Anak: ${val(p.jumlah_anak)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">📍 Lahir</div>
+      Tahun: ${val(p.tanggal_lahir)}<br>
+      Tempat: ${val(p.alamat_lahir)}<br>
+      Domisili: ${val(p.domisili)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">📞 Kontak</div>
+      WA: ${val(p.wa)}<br>
+      Pekerjaan: ${val(p.pekerjaan)}
+    </div>
   `;
+
+  /* BUTTON WA */
+  document.getElementById("btnWA").onclick=()=>{
+    if(p.wa) window.open("https://wa.me/"+p.wa);
+    else alert("No WA tidak tersedia");
+  };
 
   document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
@@ -257,19 +317,7 @@ function openPopup(id){
 function closePopup(){
   document.getElementById("popup").style.display="none";
 }
-
-/* SEARCH */
-function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
-function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
-
-function searchName(e){
-  if(e && e.key!=="Enter") return;
-  let v=document.getElementById("searchInput").value.toLowerCase();
-  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) goDetail(p.id); else alert("Tidak ditemukan");
-}
 </script>
 
 </body>
 </html>
-```
