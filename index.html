@@ -17,20 +17,6 @@ body.lock { overflow:hidden; }
 
 h2 { margin:10px; }
 
-/* TOOLBAR */
-.toolbar {
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:10px;
-}
-
-.toolbar input, .toolbar select {
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
 /* TREE */
 .tree {
   display:flex;
@@ -45,6 +31,7 @@ h2 { margin:10px; }
   align-items:center;
 }
 
+  
 .couple {
   display:flex;
   gap:40px;
@@ -146,7 +133,6 @@ h2 { margin:10px; }
   background:white;
   color:black;
 }
-
 button {
   padding: 10px 15px;
   border: none;
@@ -182,17 +168,6 @@ button {
 
 <h2>Silsilah Keluarga</h2>
 
-<!-- SEARCH + FILTER -->
-<div class="toolbar">
-  <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="applyFilter()">
-  
-  <select id="filterGender" onchange="applyFilter()">
-    <option value="">Semua</option>
-    <option value="L">Laki-laki</option>
-    <option value="P">Perempuan</option>
-  </select>
-</div>
-
 <div class="tree" id="tree"></div>
 
 <!-- POPUP -->
@@ -219,14 +194,11 @@ fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
   globalData=data;
-  init(globalData);
+  init(data);
 });
 
-/* INIT */
+/* INIT + SORT */
 function init(data){
-  const tree=document.getElementById("tree");
-  tree.innerHTML="";
-
   let roots = data
     .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
     .sort((a,b)=>
@@ -285,33 +257,24 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
-/* SEARCH + FILTER */
-function applyFilter(){
-  let keyword = document.getElementById("searchInput").value.toLowerCase();
-  let gender = document.getElementById("filterGender").value;
-
-  let filtered = globalData.filter(p=>{
-    let cocokNama = (p.nama || "").toLowerCase().includes(keyword);
-    let cocokGender = gender ? p.jenis_kelamin === gender : true;
-
-    return cocokNama && cocokGender;
-  });
-
-  init(filtered);
-}
-
-/* SHORT NAME */
+/* ===== FIX NAMA ===== */
 function shortName(nama){
   if(!nama) return "-";
 
-  const gelar=["h","h.","hj","hj.","dr","dr.","drs","drs.","ir","ir.","kh","kh.","ust","ust.","ustadz","habib","r","r."];
+  const gelar=[
+    "h","h.","hj","hj.","dr","dr.","drs","drs.",
+    "ir","ir.","kh","kh.","ust","ust.","ustadz",
+    "habib","r","r."
+  ];
 
   let parts=nama.trim().split(/\s+/);
 
   for(let i=0;i<parts.length;i++){
     let word=parts[i].toLowerCase();
+
     if(gelar.includes(word)) continue;
     if(parts[i].includes(".")) continue;
+
     return parts[i];
   }
 
