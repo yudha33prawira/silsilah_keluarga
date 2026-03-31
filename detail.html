@@ -447,10 +447,22 @@ function searchName(e) {
   if (e && e.key !== "Enter") return;
 
   let v = document.getElementById("searchInput").value.toLowerCase();
+
+  if(!v){
+    alert("Masukkan nama dulu");
+    return;
+  }
+
   let p = globalData.find(x => x.nama.toLowerCase().includes(v));
 
-  if (p) goDetail(p.id);
-  else alert("Tidak ditemukan");
+  if (p){
+    closeSearch(); // 🔥 tutup popup dulu
+    setTimeout(()=>{
+      goDetail(p.id);
+    },200);
+  } else {
+    alert("Tidak ditemukan");
+  }
 }
 
 /* BREADCRUMB */
