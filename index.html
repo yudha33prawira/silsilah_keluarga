@@ -401,7 +401,12 @@ function openPopup(id){
     else alert("No WA tidak tersedia");
   };
 
-  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
+  document.getElementById("btnDetail").onclick=()=>{
+  closePopup(); // 🔥 tutup popup dulu
+  setTimeout(()=>{
+    goDetail(p.id);
+  },200);
+};
 }
 
 function closePopup(){
