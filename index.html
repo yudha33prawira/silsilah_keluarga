@@ -13,10 +13,7 @@ body {
   text-align:center;
 }
 
-/* LOCK BODY SAAT POPUP */
-body.lock {
-  overflow: hidden;
-}
+body.lock { overflow:hidden; }
 
 h2 { margin:10px; }
 
@@ -68,7 +65,6 @@ h2 { margin:10px; }
   color:white;
 }
 
-/* FOTO */
 .person img,.siluet {
   width:80px;
   height:80px;
@@ -93,18 +89,16 @@ h2 { margin:10px; }
   cursor:pointer;
 }
 
-/* ===== POPUP FIX SCROLL ===== */
+/* POPUP */
 .popup {
   display:none;
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.6);
   z-index:999;
-
-  overflow-y:auto; /* 🔥 penting */
+  overflow-y:auto;
 }
 
-/* BOX */
 .popup-box {
   background:white;
   margin:40px auto;
@@ -115,7 +109,6 @@ h2 { margin:10px; }
   text-align:left;
 }
 
-/* HEADER */
 .popup-header {
   text-align:center;
   padding:20px;
@@ -140,10 +133,7 @@ h2 { margin:10px; }
   color:black;
 }
 
-/* CONTENT */
-.popup-body {
-  padding:15px;
-}
+.popup-body { padding:15px; }
 
 .section { margin-bottom:15px; }
 
@@ -176,7 +166,6 @@ h2 { margin:10px; }
   <div class="popup-box" onclick="event.stopPropagation()">
 
     <div class="popup-header" id="popupHeader"></div>
-
     <div class="popup-body" id="popupBody"></div>
 
     <div class="popup-footer">
@@ -199,9 +188,8 @@ fetch('data.json?v='+Date.now())
   init(data);
 });
 
-/* ===== INIT + SORT GEN 1 ===== */
+/* INIT + SORT */
 function init(data){
-
   let roots = data
     .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
     .sort((a,b)=>
@@ -219,7 +207,7 @@ function init(data){
   });
 }
 
-/* ===== FAMILY ===== */
+/* FAMILY */
 function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
 
@@ -253,16 +241,38 @@ function createFamilyBlock(root,pasangan){
   if(children.length){
     let box=document.createElement("div");
     box.className="children";
-
     children.forEach(c=>box.appendChild(createPerson(c)));
-
     block.appendChild(box);
   }
 
   tree.appendChild(block);
 }
 
-/* ===== PERSON ===== */
+/* ===== FIX NAMA ===== */
+function shortName(nama){
+  if(!nama) return "-";
+
+  const gelar=[
+    "h","h.","hj","hj.","dr","dr.","drs","drs.",
+    "ir","ir.","kh","kh.","ust","ust.","ustadz",
+    "habib","r","r."
+  ];
+
+  let parts=nama.trim().split(/\s+/);
+
+  for(let i=0;i<parts.length;i++){
+    let word=parts[i].toLowerCase();
+
+    if(gelar.includes(word)) continue;
+    if(parts[i].includes(".")) continue;
+
+    return parts[i];
+  }
+
+  return parts[0];
+}
+
+/* PERSON */
 function createPerson(p){
   const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
 
@@ -281,18 +291,12 @@ function createPerson(p){
   return div;
 }
 
-/* SHORT NAME */
-function shortName(nama){
-  if(!nama) return "-";
-  return nama.split(" ")[0];
-}
-
 /* DETAIL */
 function goDetail(id){
   window.location.href="detail.html?id="+id;
 }
 
-/* ===== POPUP ===== */
+/* POPUP */
 function val(v){ return v ? v : "-"; }
 
 function openPopup(id){
@@ -300,7 +304,7 @@ function openPopup(id){
   if(!p) return;
 
   document.getElementById("popup").style.display="block";
-  document.body.classList.add("lock"); // 🔥 lock scroll
+  document.body.classList.add("lock");
 
   let header = p.foto
     ? `<img src="${p.foto}"><br>${p.nama}`
@@ -345,9 +349,9 @@ function openPopup(id){
   document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
-function closePopup(e){
+function closePopup(){
   document.getElementById("popup").style.display="none";
-  document.body.classList.remove("lock"); // 🔥 unlock scroll
+  document.body.classList.remove("lock");
 }
 </script>
 
