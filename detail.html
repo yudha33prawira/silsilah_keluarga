@@ -394,28 +394,43 @@ function goDetail(id){
 }
 
 /* BREADCRUMB */
-function buildBreadcrumb(person,data){
+function buildBreadcrumb(person){
+
   const box=document.getElementById("breadcrumb");
   box.innerHTML="";
 
-  let path=[];
+  // ===== GARIS AYAH =====
+  let ayahPath=[];
   let current=person;
 
   while(current){
-    path.unshift(current);
-    current=data.find(x=>x.nama===current.ayah || x.nama===current.ibu);
+    ayahPath.unshift(current);
+    current = globalData.find(x=>x.nama===current.ayah);
   }
 
-  path.forEach((p,i)=>{
-    const span=document.createElement("span");
-    span.innerText=shortName(p.nama);
-    span.onclick=()=>goDetail(p.id);
+  // ===== GARIS IBU =====
+  let ibuPath=[];
+  current=person;
 
-    box.appendChild(span);
+  while(current){
+    ibuPath.unshift(current);
+    current = globalData.find(x=>x.nama===current.ibu);
+  }
 
-    if(i<path.length-1)
-      box.appendChild(document.createTextNode(" > "));
+  // ===== RENDER =====
+  box.innerHTML += "<div><b>👨 Garis Ayah:</b> ";
+  ayahPath.forEach((p,i)=>{
+    box.innerHTML += `<span onclick="goDetail('${p.id}')">${shortName(p.nama)}</span>`;
+    if(i<ayahPath.length-1) box.innerHTML += " > ";
   });
+  box.innerHTML += "</div>";
+
+  box.innerHTML += "<div style='margin-top:5px'><b>👩 Garis Ibu:</b> ";
+  ibuPath.forEach((p,i)=>{
+    box.innerHTML += `<span onclick="goDetail('${p.id}')">${shortName(p.nama)}</span>`;
+    if(i<ibuPath.length-1) box.innerHTML += " > ";
+  });
+  box.innerHTML += "</div>";
 }
 </script>
 
