@@ -415,9 +415,21 @@ function closeSearch(){ document.getElementById("searchPopup").style.display="no
 
 function searchName(e){
   if(e && e.key!=="Enter") return;
+
   let v=document.getElementById("searchInput").value.toLowerCase();
+
+  if(!v){
+    alert("Masukkan nama dulu");
+    return;
+  }
+
   let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) alert("Ketemu: "+p.nama); else alert("Tidak ditemukan");
+
+  if(p){
+    window.location.href="detail.html?id="+p.id;
+  } else {
+    alert("Tidak ditemukan");
+  }
 }
 
 function toggleFilter(){
