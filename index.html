@@ -17,6 +17,17 @@ body.lock { overflow:hidden; }
 
 h2 { margin:10px; }
 
+.search-btn,.filter-btn {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
+
+.search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
+.filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
+
 /* TREE */
 .tree {
   display:flex;
@@ -161,6 +172,14 @@ button {
   background:#25D366;
   color:white;
 }
+.search-box,.popup-content {
+  background:white;
+  padding:20px;
+  margin:100px auto;
+  width:90%;
+  max-width:300px;
+  border-radius:10px;
+}
 </style>
 </head>
 
@@ -169,6 +188,16 @@ button {
 <h2>Silsilah Keluarga</h2>
 
 <div class="tree" id="tree"></div>
+
+<!-- SEARCH -->
+<div id="searchPopup" class="search-popup">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
+    <br><br>
+    <button onclick="searchName()">Cari</button>
+    <button onclick="closeSearch()">Tutup</button>
+  </div>
+</div>
 
 <!-- POPUP -->
 <div id="popup" class="popup" onclick="closePopup(event)">
@@ -361,6 +390,21 @@ function openPopup(id){
 function closePopup(){
   document.getElementById("popup").style.display="none";
   document.body.classList.remove("lock");
+}
+
+/* SEARCH */
+function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
+function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
+
+function searchName(e){
+  if(e && e.key!=="Enter") return;
+  let v=document.getElementById("searchInput").value.toLowerCase();
+  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
+  if(p) alert("Ketemu: "+p.nama); else alert("Tidak ditemukan");
+}
+
+function toggleFilter(){
+  alert("Filter tetap aktif (belum diubah)");
 }
 </script>
 
