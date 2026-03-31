@@ -15,6 +15,7 @@ body {
 
 h2 { margin: 10px; }
 
+/* BREADCRUMB */
 .breadcrumb {
   margin-bottom: 10px;
   font-size: 14px;
@@ -33,7 +34,7 @@ h2 { margin: 10px; }
   margin: 10px 0;
 }
 
-.search-btn {
+button {
   padding: 10px 15px;
   border: none;
   border-radius: 10px;
@@ -49,14 +50,11 @@ h2 { margin: 10px; }
   align-items: center;
 }
 
-.family-block {
-  margin-bottom: 40px;
-}
+.family-block { margin-bottom: 40px; }
 
 .couple {
   display: flex;
   gap: 40px;
-  justify-content: center;
   position: relative;
 }
 
@@ -65,10 +63,9 @@ h2 { margin: 10px; }
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 22px;
 }
 
-/* garis turun */
+/* garis */
 .couple::after {
   content: '';
   position: absolute;
@@ -77,7 +74,6 @@ h2 { margin: 10px; }
   width: 2px;
   height: 30px;
   background: black;
-  transform: translateX(-50%);
 }
 
 .children {
@@ -87,6 +83,7 @@ h2 { margin: 10px; }
   gap: 15px;
 }
 
+/* PERSON */
 .person {
   border: 1px solid black;
   border-radius: 12px;
@@ -99,12 +96,22 @@ h2 { margin: 10px; }
   color: white;
 }
 
-.person img {
+.person img, .siluet {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   cursor: pointer;
 }
+
+.siluet {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+}
+
+.siluet.l { background:#2193b0; color:white; }
+.siluet.p { background:#ff758c; color:white; }
 
 .name {
   font-weight: bold;
@@ -116,257 +123,279 @@ h2 { margin: 10px; }
   color: gray;
 }
 
-/* POPUP */
-.search-popup, .popup {
-  display: none;
-  position: fixed;
+/* POPUP MODERN */
+.popup {
+  display:none;
+  position:fixed;
   top:0; left:0;
   width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.6);
+  overflow:auto;
 }
 
-.search-box, .popup-content {
-  background: white;
-  padding: 20px;
-  margin: 100px auto;
-  width: 90%;
-  max-width: 320px;
-  border-radius: 10px;
+.popup-box {
+  background:white;
+  margin:40px auto;
+  width:90%;
+  max-width:400px;
+  border-radius:15px;
+  overflow:hidden;
+  text-align:left;
 }
 
-@media(max-width:600px){
-  .children { grid-template-columns: 1fr; }
+.popup-header {
+  text-align:center;
+  padding:20px;
+  background:linear-gradient(135deg,#6a11cb,#2575fc);
+  color:white;
+}
+
+.popup-header img,
+.popup-avatar {
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  margin-bottom:10px;
+}
+
+.popup-avatar {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:50px;
+  background:white;
+  color:black;
+}
+
+.popup-body {
+  padding:15px;
+}
+
+.section {
+  margin-bottom:15px;
+}
+
+.section-title {
+  font-weight:bold;
+  margin-bottom:5px;
+  color:#2575fc;
+}
+
+.popup-footer {
+  padding:15px;
+  text-align:center;
+}
+
+.btn-wa {
+  background:#25D366;
 }
 </style>
 </head>
 
 <body>
 
-<h2 id="judul">Silsilah</h2>
+<h2 id="judul">Detail Silsilah</h2>
 <div class="breadcrumb" id="breadcrumb"></div>
 
 <div class="toolbar">
   <button onclick="history.back()">⬅ Kembali</button>
-  <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
 </div>
 
 <div class="tree" id="tree"></div>
 
-<!-- SEARCH -->
-<div id="searchPopup" class="search-popup">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
-    <br><br>
-    <button onclick="searchName()">Cari</button>
-    <button onclick="closeSearch()">Tutup</button>
-  </div>
-</div>
-
 <!-- POPUP -->
-<div class="popup" id="popup">
-  <div class="popup-content">
-    <h3 id="nama"></h3>
-    <p id="info"></p>
-    <button id="btnDetail">Lihat Detail</button><br><br>
-    <button onclick="closePopup()">Tutup</button>
+<div id="popup" class="popup">
+  <div class="popup-box">
+
+    <div class="popup-header" id="popupHeader"></div>
+    <div class="popup-body" id="popupBody"></div>
+
+    <div class="popup-footer">
+      <button id="btnWA" class="btn-wa">📞 WhatsApp</button><br>
+      <button id="btnDetail">📄 Lihat Silsilah</button><br><br>
+      <button onclick="closePopup()">Tutup</button>
+    </div>
+
   </div>
 </div>
 
 <script>
-let globalData = [];
+let globalData=[];
 const id = new URLSearchParams(window.location.search).get('id');
 
-/* ===== FIX NAMA PENDEK (ANTI GELAR) ===== */
-function getNamaPendek(nama) {
-  if (!nama) return "-";
-
-  const gelar = [
-    "h", "h.", "hj", "hj.",
-    "dr", "dr.", "drs", "drs.",
-    "ir", "ir.", "kh", "kh.",
-    "ust", "ust.", "ustadz",
-    "habib", "r", "r."
-  ];
-
-  let parts = nama.trim().split(" ");
-
-  // buang semua gelar di depan
-  while (parts.length > 1 && gelar.includes(parts[0].toLowerCase())) {
-    parts.shift();
-  }
-
-  return parts[0] || nama;
-}
-
 /* LOAD */
-fetch('data.json?v=' + Date.now())
-.then(res => res.json())
-.then(data => {
-  globalData = data;
+fetch('data.json?v='+Date.now())
+.then(r=>r.json())
+.then(data=>{
+  globalData=data;
   init(data);
 });
 
+/* NAMA PENDEK */
+function shortName(nama){
+  if(!nama) return "-";
+  return nama.split(" ")[0];
+}
+
 /* INIT */
-function init(data) {
-  const root = data.find(p => p.id === id);
-  if (!root) return;
+function init(data){
+  const root=data.find(p=>p.id===id);
+  if(!root) return;
 
-  document.getElementById("judul").innerText = "Silsilah " + getNamaPendek(root.nama);
+  document.getElementById("judul").innerText="Silsilah "+shortName(root.nama);
 
-  buildBreadcrumb(root, data);
+  buildBreadcrumb(root,data);
 
-  let pasanganList = [];
-  if (root.pasangan) {
-    let list = root.pasangan.split("|").map(x => x.trim());
-    pasanganList = data.filter(x => list.includes(x.nama));
+  let pasanganList=[];
+  if(root.pasangan){
+    let list=root.pasangan.split("|").map(x=>x.trim());
+    pasanganList=data.filter(x=>list.includes(x.nama));
   }
 
-  if (!pasanganList.length) createFamilyBlock(root, null);
-  else pasanganList.forEach(p => createFamilyBlock(root, p));
+  if(!pasanganList.length) createFamilyBlock(root,null);
+  else pasanganList.forEach(p=>createFamilyBlock(root,p));
 }
 
 /* FAMILY */
-function createFamilyBlock(root, pasangan) {
-  const tree = document.getElementById("tree");
+function createFamilyBlock(root,pasangan){
+  const tree=document.getElementById("tree");
 
-  const block = document.createElement("div");
-  block.className = "family-block";
+  const block=document.createElement("div");
+  block.className="family-block";
 
-  const couple = document.createElement("div");
-  couple.className = "couple";
+  const couple=document.createElement("div");
+  couple.className="couple";
 
   couple.appendChild(createPerson(root));
 
-  if (pasangan) {
-    const love = document.createElement("div");
-    love.className = "love-icon";
-    love.innerHTML = "❤️";
+  if(pasangan){
+    const love=document.createElement("div");
+    love.className="love-icon";
+    love.innerHTML="❤️";
     couple.appendChild(love);
-
     couple.appendChild(createPerson(pasangan));
   }
 
   block.appendChild(couple);
 
-  let children = globalData.filter(x =>
-    (x.ayah === root.nama && pasangan && x.ibu === pasangan.nama) ||
-    (x.ibu === root.nama && pasangan && x.ayah === pasangan.nama)
+  let children=globalData.filter(x=>
+    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
+    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
 
   children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
-  if (children.length) {
-    const box = document.createElement("div");
-    box.className = "children";
-    children.forEach(c => box.appendChild(createPerson(c)));
+  if(children.length){
+    const box=document.createElement("div");
+    box.className="children";
+    children.forEach(c=>box.appendChild(createPerson(c)));
     block.appendChild(box);
   }
 
   tree.appendChild(block);
 }
 
-/* UTIL */
-function punyaAnak(p) {
-  return globalData.some(x => x.ayah === p.nama || x.ibu === p.nama);
-}
+/* PERSON */
+function createPerson(p){
 
-function createPerson(p) {
-  const has = punyaAnak(p);
+  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
 
-  const div = document.createElement("div");
-  div.className = "person " + ((p.status||"").toLowerCase().includes("meninggal") ? "meninggal" : "");
+  const div=document.createElement("div");
+  div.className="person "+(isMeninggal?"meninggal":"");
+
+  let foto = p.foto
+    ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
+    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
 
   div.innerHTML = `
-    <img src="${p.foto}" onclick="openPopup('${p.id}')">
-    <div class="name ${!has ? 'disabled' : ''}">${getNamaPendek(p.nama)}</div>
+    ${foto}
+    <div class="name" onclick="goDetail('${p.id}')">${shortName(p.nama)}</div>
   `;
-
-  if (has) div.querySelector('.name').onclick = () => goDetail(p.id);
 
   return div;
 }
 
-/* POPUP */
+/* POPUP FULL BIODATA */
 function val(v){ return v ? v : "-"; }
 
-function openPopup(id) {
-  const p = globalData.find(x => x.id === id);
-  if (!p) return;
+function openPopup(id){
+  const p=globalData.find(x=>x.id===id);
+  if(!p) return;
 
-  const hasChild = punyaAnak(p);
+  document.getElementById("popup").style.display="block";
 
-  document.getElementById("popup").style.display = "block";
-  document.getElementById("nama").innerText = p.nama;
+  let header = p.foto
+    ? `<img src="${p.foto}"><br>${p.nama}`
+    : `<div class="popup-avatar">${p.jenis_kelamin==='L'?'👨':'👩'}</div>${p.nama}`;
 
-  document.getElementById("info").innerHTML = `
-    Lahir: ${val(p.tanggal_lahir)}<br>
-    Alamat Lahir: ${val(p.alamat_lahir)}<br>
-    Domisili: ${val(p.domisili)}<br>
-    Pasangan: ${val(p.pasangan)}<br>
-    Jumlah Anak: ${val(p.jumlah_anak)}<br>
-    Status: ${val(p.status)}<br>
-    WA: ${val(p.wa)}<br>
-    Pekerjaan: ${val(p.pekerjaan)}
+  document.getElementById("popupHeader").innerHTML=header;
+
+  document.getElementById("popupBody").innerHTML=`
+    <div class="section">
+      <div class="section-title">👤 Biodata</div>
+      Jenis Kelamin: ${val(p.jenis_kelamin)}<br>
+      Status: ${val(p.status)}<br>
+      Pekerjaan: ${val(p.pekerjaan)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">👨‍👩‍👧 Keluarga</div>
+      Ayah: ${val(p.ayah)}<br>
+      Ibu: ${val(p.ibu)}<br>
+      Pasangan: ${val(p.pasangan)}<br>
+      Anak: ${val(p.jumlah_anak)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">📍 Lahir</div>
+      Tahun: ${val(p.tanggal_lahir)}<br>
+      Tempat: ${val(p.alamat_lahir)}<br>
+      Domisili: ${val(p.domisili)}
+    </div>
+
+    <div class="section">
+      <div class="section-title">📞 Kontak</div>
+      WA: ${val(p.wa)}
+    </div>
   `;
 
-  const btn = document.getElementById("btnDetail");
+  document.getElementById("btnWA").onclick=()=>{
+    if(p.wa) window.open("https://wa.me/"+p.wa);
+    else alert("No WA tidak tersedia");
+  };
 
-  if (hasChild) {
-    btn.style.display = "inline-block";
-    btn.onclick = () => goDetail(p.id);
-  } else {
-    btn.style.display = "none";
-  }
+  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
+function closePopup(){
+  document.getElementById("popup").style.display="none";
 }
 
-function goDetail(id) {
-  window.location.href = "detail.html?id=" + id;
-}
-
-/* SEARCH */
-function openSearch() {
-  document.getElementById("searchPopup").style.display = "block";
-}
-
-function closeSearch() {
-  document.getElementById("searchPopup").style.display = "none";
-}
-
-function searchName(e) {
-  if (e && e.key !== "Enter") return;
-
-  let v = document.getElementById("searchInput").value.toLowerCase();
-  let p = globalData.find(x => x.nama.toLowerCase().includes(v));
-
-  if (p) goDetail(p.id);
-  else alert("Tidak ditemukan");
+function goDetail(id){
+  window.location.href="detail.html?id="+id;
 }
 
 /* BREADCRUMB */
-function buildBreadcrumb(person, data) {
-  const box = document.getElementById("breadcrumb");
-  box.innerHTML = "";
+function buildBreadcrumb(person,data){
+  const box=document.getElementById("breadcrumb");
+  box.innerHTML="";
 
-  let path = [];
-  let current = person;
+  let path=[];
+  let current=person;
 
-  while (current) {
+  while(current){
     path.unshift(current);
-    current = data.find(x => x.nama === current.ayah || x.nama === current.ibu);
+    current=data.find(x=>x.nama===current.ayah || x.nama===current.ibu);
   }
 
   path.forEach((p,i)=>{
-    const span = document.createElement("span");
-    span.innerText = getNamaPendek(p.nama);
-    span.onclick = () => goDetail(p.id);
+    const span=document.createElement("span");
+    span.innerText=shortName(p.nama);
+    span.onclick=()=>goDetail(p.id);
 
     box.appendChild(span);
 
-    if (i < path.length - 1)
+    if(i<path.length-1)
       box.appendChild(document.createTextNode(" > "));
   });
 }
