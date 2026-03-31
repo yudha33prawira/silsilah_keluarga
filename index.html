@@ -6,37 +6,31 @@
 <title>Silsilah Keluarga</title>
 
 <style>
-body {
-  font-family: Arial;
-  background:#f5f5f5;
-  margin:0;
-  text-align:center;
-}
-
+body { font-family: Arial; background:#f5f5f5; margin:0; text-align:center; }
 body.lock { overflow:hidden; }
 
 h2 { margin:10px; }
 
-/* TREE */
-.tree {
+/* TOOLBAR */
+.toolbar {
   display:flex;
-  flex-wrap:wrap;
   justify-content:center;
-  gap:40px;
+  gap:10px;
+  margin:10px;
 }
 
-.family-block {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+input {
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
 
-  
-.couple {
-  display:flex;
-  gap:40px;
-  position:relative;
-}
+/* TREE */
+.tree { display:flex; flex-wrap:wrap; justify-content:center; gap:40px; }
+
+.family-block { display:flex; flex-direction:column; align-items:center; }
+
+.couple { display:flex; gap:40px; position:relative; }
 
 .love-icon {
   position:absolute;
@@ -45,7 +39,6 @@ h2 { margin:10px; }
   transform:translateX(-50%);
 }
 
-/* CHILDREN */
 .children {
   margin-top:40px;
   display:grid;
@@ -53,17 +46,11 @@ h2 { margin:10px; }
   gap:15px;
 }
 
-/* PERSON */
 .person {
   border:1px solid black;
   border-radius:12px;
   padding:10px;
   background:white;
-}
-
-.person.meninggal {
-  background:black;
-  color:white;
 }
 
 .person img,.siluet {
@@ -81,14 +68,7 @@ h2 { margin:10px; }
   font-size:40px;
 }
 
-.siluet.l { background:#2193b0; color:white; }
-.siluet.p { background:#ff758c; color:white; }
-
-.name {
-  font-weight:bold;
-  margin-top:5px;
-  cursor:pointer;
-}
+.name { font-weight:bold; margin-top:5px; cursor:pointer; }
 
 /* POPUP */
 .popup {
@@ -106,61 +86,9 @@ h2 { margin:10px; }
   width:90%;
   max-width:400px;
   border-radius:15px;
-  overflow:hidden;
-  text-align:left;
-}
-
-.popup-header {
-  text-align:center;
-  padding:20px;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:white;
-}
-
-.popup-header img,
-.popup-avatar {
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  margin-bottom:10px;
-}
-
-.popup-avatar {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:50px;
-  background:white;
-  color:black;
-}
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-  color: white;
-  cursor: pointer;
 }
 
 .popup-body { padding:15px; }
-
-.section { margin-bottom:15px; }
-
-.section-title {
-  font-weight:bold;
-  margin-bottom:5px;
-  color:#2575fc;
-}
-
-.popup-footer {
-  padding:15px;
-  text-align:center;
-}
-
-.btn-wa {
-  background:#25D366;
-  color:white;
-}
 </style>
 </head>
 
@@ -168,28 +96,22 @@ button {
 
 <h2>Silsilah Keluarga</h2>
 
+<div class="toolbar">
+  <input type="text" id="search" placeholder="Cari nama...">
+  <button onclick="doSearch()">🔍 Cari</button>
+</div>
+
 <div class="tree" id="tree"></div>
 
-<!-- POPUP -->
-<div id="popup" class="popup" onclick="closePopup(event)">
+<div id="popup" class="popup" onclick="closePopup()">
   <div class="popup-box" onclick="event.stopPropagation()">
-
-    <div class="popup-header" id="popupHeader"></div>
     <div class="popup-body" id="popupBody"></div>
-
-    <div class="popup-footer">
-      <button id="btnWA" class="btn-wa">📞 WhatsApp</button><br>
-      <button id="btnDetail">📄 Detail</button><br><br>
-      <button onclick="closePopup()">Tutup</button>
-    </div>
-
   </div>
 </div>
 
 <script>
 let globalData=[];
 
-/* LOAD */
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
@@ -197,170 +119,75 @@ fetch('data.json?v='+Date.now())
   init(data);
 });
 
-/* INIT + SORT */
 function init(data){
-  let roots = data
-    .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
-    .sort((a,b)=>
-      parseInt(a.tanggal_lahir||9999) - parseInt(b.tanggal_lahir||9999)
-    );
+  const tree=document.getElementById("tree");
+  tree.innerHTML="";
 
-  roots.forEach(root=>{
-    let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
-
-    if(!pasangan.length){
-      createFamilyBlock(root,null);
-    } else {
-      pasangan.forEach(p=>createFamilyBlock(root,p));
-    }
+  data.forEach(p=>{
+    tree.appendChild(createPerson(p));
   });
 }
 
-/* FAMILY */
-function createFamilyBlock(root,pasangan){
-  const tree=document.getElementById("tree");
+/* ===== SEARCH ===== */
+function doSearch(){
+  let key=document.getElementById("search").value.toLowerCase();
 
-  const block=document.createElement("div");
-  block.className="family-block";
-
-  const couple=document.createElement("div");
-  couple.className="couple";
-
-  couple.appendChild(createPerson(root));
-
-  if(pasangan){
-    let love=document.createElement("div");
-    love.className="love-icon";
-    love.innerHTML="❤️";
-    couple.appendChild(love);
-    couple.appendChild(createPerson(pasangan));
-  }
-
-  block.appendChild(couple);
-
-  let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
-    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
+  let result=globalData.filter(p=>
+    p.nama.toLowerCase().includes(key)
   );
 
-  children.sort((a,b)=>
-    parseInt(a.tanggal_lahir||9999) - parseInt(b.tanggal_lahir||9999)
-  );
-
-  if(children.length){
-    let box=document.createElement("div");
-    box.className="children";
-    children.forEach(c=>box.appendChild(createPerson(c)));
-    block.appendChild(box);
-  }
-
-  tree.appendChild(block);
+  init(result);
 }
 
-/* ===== FIX NAMA ===== */
+/* ===== NAMA FIX ===== */
 function shortName(nama){
   if(!nama) return "-";
 
-  const gelar=[
-    "h","h.","hj","hj.","dr","dr.","drs","drs.",
-    "ir","ir.","kh","kh.","ust","ust.","ustadz",
-    "habib","r","r."
-  ];
-
-  let parts=nama.trim().split(/\s+/);
-
-  for(let i=0;i<parts.length;i++){
-    let word=parts[i].toLowerCase();
-
-    if(gelar.includes(word)) continue;
-    if(parts[i].includes(".")) continue;
-
-    return parts[i];
-  }
-
-  return parts[0];
+  return nama
+    .split(" ")
+    .find(x => !x.includes("."));
 }
 
 /* PERSON */
 function createPerson(p){
-  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
-
   const div=document.createElement("div");
-  div.className="person "+(isMeninggal?"meninggal":"");
+  div.className="person";
 
-  let foto = p.foto
-    ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
-    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
-
-  div.innerHTML = `
-    ${foto}
+  div.innerHTML=`
+    <div onclick="openPopup('${p.id}')">
+      ${p.foto ? `<img src="${p.foto}">` : "👤"}
+    </div>
     <div class="name" onclick="goDetail('${p.id}')">${shortName(p.nama)}</div>
   `;
 
   return div;
 }
 
-/* DETAIL */
-function goDetail(id){
-  window.location.href="detail.html?id="+id;
-}
-
 /* POPUP */
-function val(v){ return v ? v : "-"; }
-
 function openPopup(id){
   const p=globalData.find(x=>x.id===id);
-  if(!p) return;
 
   document.getElementById("popup").style.display="block";
   document.body.classList.add("lock");
 
-  let header = p.foto
-    ? `<img src="${p.foto}"><br>${p.nama}`
-    : `<div class="popup-avatar">${p.jenis_kelamin==='L'?'👨':'👩'}</div>${p.nama}`;
-
-  document.getElementById("popupHeader").innerHTML=header;
-
   document.getElementById("popupBody").innerHTML=`
-    <div class="section">
-      <div class="section-title">👤 Biodata</div>
-      Jenis Kelamin: ${val(p.jenis_kelamin)}<br>
-      Status: ${val(p.status)}<br>
-      Pekerjaan: ${val(p.pekerjaan)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">👨‍👩‍👧 Keluarga</div>
-      Ayah: ${val(p.ayah)}<br>
-      Ibu: ${val(p.ibu)}<br>
-      Pasangan: ${val(p.pasangan)}<br>
-      Anak: ${val(p.jumlah_anak)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">📍 Lahir</div>
-      Tahun: ${val(p.tanggal_lahir)}<br>
-      Tempat: ${val(p.alamat_lahir)}<br>
-      Domisili: ${val(p.domisili)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">📞 Kontak</div>
-      WA: ${val(p.wa)}
-    </div>
+    <b>${p.nama}</b><br><br>
+    Status: ${p.status || "-"}<br>
+    Pekerjaan: ${p.pekerjaan || "-"}
   `;
-
-  document.getElementById("btnWA").onclick=()=>{
-    if(p.wa) window.open("https://wa.me/"+p.wa);
-    else alert("No WA tidak tersedia");
-  };
-
-  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
 function closePopup(){
   document.getElementById("popup").style.display="none";
   document.body.classList.remove("lock");
+}
+
+function goDetail(id){
+  let history = JSON.parse(localStorage.getItem("history")||"[]");
+  history.push(id);
+  localStorage.setItem("history",JSON.stringify(history));
+
+  window.location.href="detail.html?id="+id;
 }
 </script>
 
