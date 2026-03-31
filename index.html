@@ -426,10 +426,10 @@ function searchName(e){
   let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
 
   if(p){
+    closeSearch();
     window.location.href="detail.html?id="+p.id;
   } else {
     alert("Tidak ditemukan");
-    closeSearch();
   }
 }
 
