@@ -73,7 +73,11 @@ h2 { margin:10px; }
 .siluet.l { background:#2193b0; color:white; }
 .siluet.p { background:#ff758c; color:white; }
 
-.name { font-weight:bold; margin-top:5px; cursor:pointer; }
+.name {
+  font-weight:bold;
+  margin-top:5px;
+  cursor:pointer;
+}
 
 /* POPUP */
 .search-popup,.popup {
@@ -121,6 +125,7 @@ h2 { margin:10px; }
   <div class="popup-content">
     <h3 id="nama"></h3>
     <p id="info"></p>
+    <button id="btnDetail">Lihat Detail</button><br><br>
     <button onclick="closePopup()">Tutup</button>
   </div>
 </div>
@@ -128,7 +133,6 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
-/* NAMA PENDEK (TIDAK DIUBAH) */
 function shortName(nama){
   if(!nama) return "-";
   let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
@@ -143,7 +147,6 @@ function shortName(nama){
   return parts[0];
 }
 
-/* LOAD */
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
@@ -151,12 +154,10 @@ fetch('data.json?v='+Date.now())
   init(data);
 });
 
-/* INIT + SORT GEN 1 */
 function init(data){
-
   let roots=data
     .filter(p=>p.generasi==="1" && (p.jenis_kelamin||"")==="L")
-    .sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0)); // 🔥 FIX URUTAN
+    .sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
   roots.forEach(root=>{
     let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
@@ -165,7 +166,6 @@ function init(data){
   });
 }
 
-/* FAMILY */
 function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
 
@@ -192,7 +192,7 @@ function createFamilyBlock(root,pasangan){
     (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
 
-  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0)); // tetap
+  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
 
   if(children.length){
     const box=document.createElement("div");
@@ -204,7 +204,10 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
-/* PERSON (TIDAK DIUBAH LOGIKA) */
+function goDetail(id){
+  window.location.href="detail.html?id="+id;
+}
+
 function createPerson(p){
   const div=document.createElement("div");
   div.className="person";
@@ -213,11 +216,14 @@ function createPerson(p){
     ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
     : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
 
-  div.innerHTML = fotoHTML + `<div class="name">${shortName(p.nama)}</div>`;
+  div.innerHTML = `
+    ${fotoHTML}
+    <div class="name" onclick="goDetail('${p.id}')">${shortName(p.nama)}</div>
+  `;
+
   return div;
 }
 
-/* POPUP */
 function openPopup(id){
   const p=globalData.find(x=>x.id===id);
   if(!p) return;
@@ -225,13 +231,14 @@ function openPopup(id){
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
   document.getElementById("info").innerHTML="Status: "+(p.status||"-");
+
+  document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
 
 function closePopup(){
   document.getElementById("popup").style.display="none";
 }
 
-/* SEARCH */
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
 
@@ -239,7 +246,7 @@ function searchName(e){
   if(e && e.key!=="Enter") return;
   let v=document.getElementById("searchInput").value.toLowerCase();
   let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-  if(p) alert("Ketemu: "+p.nama); else alert("Tidak ditemukan");
+  if(p) goDetail(p.id); else alert("Tidak ditemukan");
 }
 
 function toggleFilter(){
