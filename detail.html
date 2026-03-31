@@ -13,6 +13,11 @@ body {
   text-align: center;
 }
 
+/* LOCK BODY */
+body.lock {
+  overflow: hidden;
+}
+
 h2 { margin: 10px; }
 
 /* BREADCRUMB */
@@ -20,7 +25,6 @@ h2 { margin: 10px; }
   margin-bottom: 10px;
   font-size: 14px;
 }
-
 .breadcrumb span {
   cursor: pointer;
   color: blue;
@@ -30,8 +34,7 @@ h2 { margin: 10px; }
 .toolbar {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin: 10px 0;
+  margin: 10px;
 }
 
 button {
@@ -74,8 +77,10 @@ button {
   width: 2px;
   height: 30px;
   background: black;
+  transform: translateX(-50%);
 }
 
+/* CHILDREN */
 .children {
   margin-top: 40px;
   display: grid;
@@ -96,10 +101,12 @@ button {
   color: white;
 }
 
-.person img, .siluet {
+/* FOTO */
+.person img,.siluet {
   width: 80px;
   height: 80px;
   border-radius: 50%;
+  object-fit: cover;
   cursor: pointer;
 }
 
@@ -119,18 +126,15 @@ button {
   cursor: pointer;
 }
 
-.name.disabled {
-  color: gray;
-}
-
-/* POPUP MODERN */
+/* ===== POPUP FIX ===== */
 .popup {
   display:none;
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  inset:0;
   background:rgba(0,0,0,0.6);
-  overflow:auto;
+  z-index:999;
+
+  overflow-y:auto; /* 🔥 ini kunci scroll */
 }
 
 .popup-box {
@@ -167,13 +171,9 @@ button {
   color:black;
 }
 
-.popup-body {
-  padding:15px;
-}
+.popup-body { padding:15px; }
 
-.section {
-  margin-bottom:15px;
-}
+.section { margin-bottom:15px; }
 
 .section-title {
   font-weight:bold;
@@ -188,6 +188,7 @@ button {
 
 .btn-wa {
   background:#25D366;
+  color:white;
 }
 </style>
 </head>
@@ -204,8 +205,8 @@ button {
 <div class="tree" id="tree"></div>
 
 <!-- POPUP -->
-<div id="popup" class="popup">
-  <div class="popup-box">
+<div id="popup" class="popup" onclick="closePopup(event)">
+  <div class="popup-box" onclick="event.stopPropagation()">
 
     <div class="popup-header" id="popupHeader"></div>
     <div class="popup-body" id="popupBody"></div>
@@ -231,10 +232,24 @@ fetch('data.json?v='+Date.now())
   init(data);
 });
 
-/* NAMA PENDEK */
+/* ===== NAMA TANPA GELAR ===== */
 function shortName(nama){
   if(!nama) return "-";
-  return nama.split(" ")[0];
+
+  // hapus titik (S.M.R jadi SMR)
+  nama = nama.replace(/\./g,'');
+
+  const gelar = [
+    "h","hj","dr","drs","ir","kh","ust","habib","r"
+  ];
+
+  let parts = nama.split(" ");
+
+  while(parts.length>1 && gelar.includes(parts[0].toLowerCase())){
+    parts.shift();
+  }
+
+  return parts[0];
 }
 
 /* INIT */
@@ -283,7 +298,9 @@ function createFamilyBlock(root,pasangan){
     (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
   );
 
-  children.sort((a,b)=>(a.tanggal_lahir||0)-(b.tanggal_lahir||0));
+  children.sort((a,b)=>
+    parseInt(a.tanggal_lahir||9999) - parseInt(b.tanggal_lahir||9999)
+  );
 
   if(children.length){
     const box=document.createElement("div");
@@ -297,7 +314,6 @@ function createFamilyBlock(root,pasangan){
 
 /* PERSON */
 function createPerson(p){
-
   const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
 
   const div=document.createElement("div");
@@ -315,7 +331,7 @@ function createPerson(p){
   return div;
 }
 
-/* POPUP FULL BIODATA */
+/* POPUP */
 function val(v){ return v ? v : "-"; }
 
 function openPopup(id){
@@ -323,6 +339,7 @@ function openPopup(id){
   if(!p) return;
 
   document.getElementById("popup").style.display="block";
+  document.body.classList.add("lock");
 
   let header = p.foto
     ? `<img src="${p.foto}"><br>${p.nama}`
@@ -369,6 +386,7 @@ function openPopup(id){
 
 function closePopup(){
   document.getElementById("popup").style.display="none";
+  document.body.classList.remove("lock");
 }
 
 function goDetail(id){
