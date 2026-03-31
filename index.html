@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -56,6 +57,12 @@ h2 { margin:10px; }
   background:white;
 }
 
+/* ✅ MENINGGAL */
+.person.meninggal {
+  background:black;
+  color:white;
+}
+
 .person img,.siluet {
   width:80px;
   height:80px;
@@ -105,7 +112,6 @@ h2 { margin:10px; }
 
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-  <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
 </div>
 
 <div class="tree" id="tree"></div>
@@ -133,20 +139,14 @@ h2 { margin:10px; }
 <script>
 let globalData=[];
 
+/* NAMA PENDEK */
 function shortName(nama){
   if(!nama) return "-";
-  let gelar=["h","hj","dr","ir","kh","ust","ustadz","r","r."];
   let parts=nama.trim().split(/\s+/);
-
-  for(let i=0;i<parts.length;i++){
-    let w=parts[i].toLowerCase().replace(/\./g,"");
-    if(gelar.includes(w)) continue;
-    if(parts[i].length<=3 && parts[i].includes(".")) continue;
-    return parts[i];
-  }
   return parts[0];
 }
 
+/* LOAD */
 fetch('data.json?v='+Date.now())
 .then(r=>r.json())
 .then(data=>{
@@ -154,6 +154,7 @@ fetch('data.json?v='+Date.now())
   init(data);
 });
 
+/* INIT */
 function init(data){
   let roots=data
     .filter(p=>p.generasi==="1" && (p.jenis_kelamin||"")==="L")
@@ -166,6 +167,7 @@ function init(data){
   });
 }
 
+/* FAMILY */
 function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
 
@@ -204,13 +206,18 @@ function createFamilyBlock(root,pasangan){
   tree.appendChild(block);
 }
 
+/* DETAIL */
 function goDetail(id){
   window.location.href="detail.html?id="+id;
 }
 
+/* PERSON */
 function createPerson(p){
+
+  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
+
   const div=document.createElement("div");
-  div.className="person";
+  div.className="person "+(isMeninggal?"meninggal":"");
 
   let fotoHTML = p.foto
     ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
@@ -224,13 +231,25 @@ function createPerson(p){
   return div;
 }
 
+/* POPUP */
+function val(v){ return v ? v : "-"; }
+
 function openPopup(id){
   const p=globalData.find(x=>x.id===id);
   if(!p) return;
 
   document.getElementById("popup").style.display="block";
   document.getElementById("nama").innerText=p.nama;
-  document.getElementById("info").innerHTML="Status: "+(p.status||"-");
+
+  /* ✅ BIODATA LENGKAP */
+  document.getElementById("info").innerHTML=`
+    Lahir: ${val(p.tanggal_lahir)}<br>
+    Alamat: ${val(p.alamat_lahir)}<br>
+    Domisili: ${val(p.domisili)}<br>
+    Pasangan: ${val(p.pasangan)}<br>
+    Anak: ${val(p.jumlah_anak)}<br>
+    Status: ${val(p.status)}
+  `;
 
   document.getElementById("btnDetail").onclick=()=>goDetail(p.id);
 }
@@ -239,6 +258,7 @@ function closePopup(){
   document.getElementById("popup").style.display="none";
 }
 
+/* SEARCH */
 function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
 function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
 
@@ -248,11 +268,8 @@ function searchName(e){
   let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
   if(p) goDetail(p.id); else alert("Tidak ditemukan");
 }
-
-function toggleFilter(){
-  alert("Filter tetap aktif (belum diubah)");
-}
 </script>
 
 </body>
 </html>
+```
