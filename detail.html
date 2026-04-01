@@ -511,10 +511,12 @@ function buildBreadcrumb(person){
     );
 
     if(suami){
-      // 🔥 LANGSUNG ganti posisi ibu dengan suami (Titi tidak masuk)
-      current = suami;
-      continue;
-    }
+  if(!visited.has(suami.id)){   // 🔥 anti dobel + anti loop
+    result.unshift(suami);      // 🔥 MASUKKAN SUAMI KE HASIL
+  }
+  current = suami;
+  continue;
+}
 
     // 🔥 kalau tidak punya suami → baru tampilkan
     result.unshift(current);
