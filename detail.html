@@ -518,6 +518,8 @@ function buildBreadcrumb(person){
   return result;
 }
 
+const ibuPath = getGarisIbu(person.id);
+
   // ===== RENDER =====
   box.innerHTML += "<div><b>👨 Garis Ayah:</b> ";
   ayahPath.forEach((p,i)=>{
