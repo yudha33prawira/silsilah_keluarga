@@ -6,7 +6,22 @@
 <title>Silsilah Keluarga</title>
 
 <style>
-body { font-family: Arial; background:#f5f5f5; text-align:center; margin:0; }
+body {
+  font-family: Arial;
+  margin: 0;
+  text-align: center;
+
+  background: linear-gradient(-45deg, #6a11cb, #2575fc, #00c6ff, #6a11cb);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+}
+
+/* animasi */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 h2 { margin:10px; }
 
 .toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
@@ -95,6 +110,20 @@ h2 { margin:10px; }
   cursor:pointer;
 }
 
+.person, .popup-box, .search-box {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.person {
+  transition: 0.3s;
+}
+
+.person:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
 /* POPUP */
 .popup {
   display:none;
@@ -166,6 +195,14 @@ button {
   background:#25D366;
   color:white;
 }
+
+/* ANIMASI BACKGROUND */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .search-box,.popup-content {
   background:white;
   padding:20px;
