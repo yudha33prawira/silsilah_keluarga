@@ -485,23 +485,23 @@ function buildBreadcrumb(person){
   let result = [];
   let current = globalData.find(x=>x.id===id);
 
-  let lewatIbuLangsung = true; // 🔥 penanda langkah pertama
+  let step = 0;
 
   while(current){
 
-    result.unshift(current.nama);
+    result.unshift(current);
 
-    // 🔥 langkah pertama: wajib ke ibu dulu
-    if(lewatIbuLangsung){
+    // 🔥 step 0 & 1 → wajib lewat ibu dulu
+    if(step < 2){
       let ibu = globalData.find(x=>x.nama === current.ibu);
       if(!ibu) break;
 
       current = ibu;
-      lewatIbuLangsung = false;
+      step++;
       continue;
     }
 
-    // 🔥 setelah itu: cek suami dari current
+    // 🔥 setelah itu → cek suami (kepala keluarga)
     let suami = globalData.find(x => 
       current.pasangan?.includes(x.nama)
     );
