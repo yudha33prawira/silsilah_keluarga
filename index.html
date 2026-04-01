@@ -504,20 +504,21 @@ function toggleFilter(){
 
 function applyFilter(){
 
-const fGenerasi = document.getElementById("fGenerasi").value;
-
-// 🔥 kalau isi generasi → render ulang khusus generasi itu
-if(fGenerasi){
-  renderByGenerasi(fGenerasi);
-  closeFilter();
-  return;
-}
-
   const fHidup = document.getElementById("fHidup").checked;
   const fLaki = document.getElementById("fLaki").checked;
   const fPerempuan = document.getElementById("fPerempuan").checked;
+  const fGenerasi = document.getElementById("fGenerasi").value;
 
-  // 🔥 1. FILTER SEMUA PERSON (TERMASUK ANAK)
+  // 🔥 1. RESET TAMPILAN DULU
+  document.getElementById("tree").innerHTML = "";
+  init(globalData);
+
+  // 🔥 2. KHUSUS GENERASI → tampilkan hanya generasi itu
+  if(fGenerasi){
+    renderByGenerasi(fGenerasi);
+  }
+
+  // 🔥 3. FILTER SEMUA PERSON
   document.querySelectorAll(".person").forEach(el=>{
     let id = el.getAttribute("data-id");
     let data = globalData.find(x => x.id === id);
@@ -526,6 +527,7 @@ if(fGenerasi){
 
     let show = true;
 
+    // hidup
     if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
       show = false;
     }
@@ -536,6 +538,7 @@ if(fGenerasi){
       if(fPerempuan && data.jenis_kelamin !== "P") show = false;
     }
 
+    // generasi (tetap dicek biar aman)
     if(fGenerasi && data.generasi !== fGenerasi){
       show = false;
     }
@@ -543,7 +546,7 @@ if(fGenerasi){
     el.style.display = show ? "block" : "none";
   });
 
-  // 🔥 2. RAPIIIN COUPLE + LOVE
+  // 🔥 4. RAPIIIN COUPLE + LOVE
   document.querySelectorAll(".couple").forEach(couple=>{
     let persons = couple.querySelectorAll(".person");
     let love = couple.querySelector(".love-icon");
@@ -561,7 +564,7 @@ if(fGenerasi){
     }
   });
 
-  // 🔥 3. FIX CHILDREN (INI YANG BIKIN GEN 3+ BERES)
+  // 🔥 5. CHILDREN
   document.querySelectorAll(".children").forEach(childBox=>{
     let visibleChild = 0;
 
@@ -572,10 +575,9 @@ if(fGenerasi){
     childBox.style.display = visibleChild ? "grid" : "none";
   });
 
-  // 🔥 4. FIX FAMILY BLOCK (biar gak ada kosong)
+  // 🔥 6. FAMILY BLOCK
   document.querySelectorAll(".family-block").forEach(block=>{
     let visible = block.querySelectorAll(".person:not([style*='display: none'])");
-
     block.style.display = visible.length ? "flex" : "none";
   });
 
