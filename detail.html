@@ -9,8 +9,11 @@
 body {
   font-family: Arial;
   margin: 0;
-  background: #f5f5f5;
   text-align: center;
+
+  background: linear-gradient(-45deg, #6a11cb, #2575fc, #00c6ff, #6a11cb);
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
 }
 
 /* LOCK BODY */
@@ -98,6 +101,21 @@ button {
 }
 
 /* PERSON */
+
+.person, .popup-box, .search-box {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.person {
+  transition: 0.3s;
+}
+
+.person:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
 .person {
   border: 1px solid black;
   border-radius: 12px;
@@ -220,6 +238,14 @@ button {
   background:#25D366;
   color:white;
 }
+
+/* ANIMASI BACKGROUND */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 </style>
 </head>
 
@@ -476,17 +502,9 @@ function buildBreadcrumb(person){
   let current=person;
 
   while(current){
-  ayahPath.unshift(current);
-
-  let next = globalData.find(x=>x.nama===current.ayah);
-
-  if(!next){
-    ayahPath.unshift({ id:"0", nama:"Unknow" }); // 🔥 TAMBAH INI
-    break;
+    ayahPath.unshift(current);
+    current = globalData.find(x=>x.nama===current.ayah);
   }
-
-  current = next;
-}
 
   // ===== GARIS IBU =====
   function getGarisIbu(id){
@@ -503,19 +521,15 @@ function buildBreadcrumb(person){
 
     // 🔥 step 0 & 1 → tetap tampilkan (Yudha & Yuliarsih)
     if(step < 2){
-  result.unshift(current);
+      result.unshift(current);
 
-  let ibu = globalData.find(x=>x.nama === current.ibu);
+      let ibu = globalData.find(x=>x.nama === current.ibu);
+      if(!ibu) break;
 
-  if(!ibu){
-    result.unshift({ id:"0", nama:"Unknow" }); // ✅ TAMBAH INI
-    break;
-  }
-
-  current = ibu;
-  step++;
-  continue;
-}
+      current = ibu;
+      step++;
+      continue;
+    }
 
     // 🔥 setelah itu → cek suami
     let suami = globalData.find(x => 
@@ -523,22 +537,16 @@ function buildBreadcrumb(person){
     );
 
     if(suami){
-  if(!visited.has(suami.id)){   // 🔥 anti dobel + anti loop
-    result.unshift(suami);      // 🔥 MASUKKAN SUAMI KE HASIL
-  }
-  current = suami;
-  continue;
-}
+      // 🔥 LANGSUNG ganti posisi ibu dengan suami (Titi tidak masuk)
+      current = suami;
+      continue;
+    }
 
     // 🔥 kalau tidak punya suami → baru tampilkan
     result.unshift(current);
 
     let ibu = globalData.find(x=>x.nama === current.ibu);
-
-if(!ibu){
-  result.unshift({ id:"0", nama:"Unknow" }); // 🔥 TAMBAH INI
-  break;
-}
+    if(!ibu) break;
 
     current = ibu;
   }
@@ -551,32 +559,17 @@ const ibuPath = getGarisIbu(person.id);
   // ===== RENDER =====
   box.innerHTML += "<div><b>👨 Garis Ayah:</b> ";
   ayahPath.forEach((p,i)=>{
-
-  if(p.id === "0"){
-    box.innerHTML += `<span>${p.nama}</span>`;
-  } else {
     box.innerHTML += `<span onclick="goDetail('${p.id}')">${shortName(p.nama)}</span>`;
-  }
-
-  if(i<ayahPath.length-1) box.innerHTML += " > ";
-});
-
+    if(i<ayahPath.length-1) box.innerHTML += " > ";
+  });
   box.innerHTML += "</div>";
 
   box.innerHTML += "<div style='margin-top:5px'><b>👩 Garis Ibu:</b> ";
-
-ibuPath.forEach((p,i)=>{
-
-  if(p.id === "0"){
-    box.innerHTML += `<span>${p.nama}</span>`;
-  } else {
+  ibuPath.forEach((p,i)=>{
     box.innerHTML += `<span onclick="goDetail('${p.id}')">${shortName(p.nama)}</span>`;
-  }
-
-  if(i < ibuPath.length - 1) box.innerHTML += " > ";
-});
-
-box.innerHTML += "</div>";
+    if(i<ibuPath.length-1) box.innerHTML += " > ";
+  });
+  box.innerHTML += "</div>";
 }
 </script>
 
