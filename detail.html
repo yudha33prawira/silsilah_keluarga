@@ -520,7 +520,7 @@ function buildBreadcrumb(person){
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    // 🔥 selalu tampilkan diri sendiri
+    // 🔥 tampilkan diri sendiri
     if(isFirst){
       result.unshift(current);
       isFirst = false;
@@ -536,22 +536,16 @@ function buildBreadcrumb(person){
       continue;
     }
 
-    // 🔥 cek apakah ibu punya suami
-    let suami = globalData.find(x =>
-      current.pasangan && current.pasangan.includes(x.nama)
-    );
+    // 🔥 ambil suami = AYAH dari current
+    let suami = globalData.find(x => x.nama === current.ayah);
 
     if(suami){
-      // 🔥 langsung pakai suami (ibu tidak ditampilkan)
-      if(!visited.has(suami.id)){
-        result.unshift(suami);
-      }
-
+      result.unshift(suami);
       current = suami;
       continue;
     }
 
-    // 🔥 kalau tidak punya suami → tampilkan ibu
+    // 🔥 fallback (kalau tidak ada ayah)
     result.unshift(current);
 
     let ibu = globalData.find(x=>x.nama === current.ibu);
