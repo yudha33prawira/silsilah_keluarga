@@ -521,17 +521,16 @@ function buildBreadcrumb(person){
   let current = globalData.find(x=>x.id===id);
 
   let visited = new Set();
-  let first = true;
+  let step = 0;
 
   while(current){
 
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    // 🔥 selalu tampilkan diri sendiri (Yudha)
-    if(first){
+    // 🔥 STEP 0 & 1 → tampil normal (anak + ibu)
+    if(step <= 1){
       result.unshift(current);
-      first = false;
 
       let ibu = globalData.find(x=>x.nama === current.ibu);
 
@@ -541,24 +540,26 @@ function buildBreadcrumb(person){
       }
 
       current = ibu;
+      step++;
       continue;
     }
 
-    // 🔥 kalau perempuan → ambil suaminya (kepala keluarga)
-    if(current.jenis_kelamin === "P"){
+    // 🔥 MULAI STEP 2 (nenek) → ambil suami
+    if(step === 2 && current.jenis_kelamin === "P"){
 
       let suami = globalData.find(x =>
         current.pasangan && current.pasangan.includes(x.nama)
       );
 
-      if(suami && !visited.has(suami.id)){
+      if(suami){
         result.unshift(suami);
-        current = suami; // 🔥 LANJUT DARI SUAMI
+        current = suami; // lanjut dari suami
+        step++;
         continue;
       }
     }
 
-    // 🔥 kalau laki-laki → tampilkan lalu naik ke ayahnya
+    // 🔥 SELANJUTNYA → jalur ayah
     result.unshift(current);
 
     let ayah = globalData.find(x=>x.nama === current.ayah);
@@ -569,6 +570,7 @@ function buildBreadcrumb(person){
     }
 
     current = ayah;
+    step++;
   }
 
   return result;
