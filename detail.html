@@ -560,8 +560,8 @@ const ibuPath = getGarisIbu(person.id);
   box.innerHTML += "</div>";
 
   box.innerHTML += "<div style='margin-top:5px'><b>👩 Garis Ibu:</b> ";
-  ibuPath.forEach((p,i)=>{
-    ibuPath.forEach((p,i)=>{
+
+ibuPath.forEach((p,i)=>{
 
   if(p.id === "0"){
     box.innerHTML += `<span>${p.nama}</span>`;
@@ -569,10 +569,10 @@ const ibuPath = getGarisIbu(person.id);
     box.innerHTML += `<span onclick="goDetail('${p.id}')">${shortName(p.nama)}</span>`;
   }
 
-  if(i<ibuPath.length-1) box.innerHTML += " > ";
+  if(i < ibuPath.length - 1) box.innerHTML += " > ";
 });
 
-  box.innerHTML += "</div>";
+box.innerHTML += "</div>";
 }
 </script>
 
