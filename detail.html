@@ -503,15 +503,19 @@ function buildBreadcrumb(person){
 
     // 🔥 step 0 & 1 → tetap tampilkan (Yudha & Yuliarsih)
     if(step < 2){
-      result.unshift(current);
+  result.unshift(current);
 
-      let ibu = globalData.find(x=>x.nama === current.ibu);
-      if(!ibu) break;
+  let ibu = globalData.find(x=>x.nama === current.ibu);
 
-      current = ibu;
-      step++;
-      continue;
-    }
+  if(!ibu){
+    result.unshift({ id:"0", nama:"Unknow" }); // ✅ TAMBAH INI
+    break;
+  }
+
+  current = ibu;
+  step++;
+  continue;
+}
 
     // 🔥 setelah itu → cek suami
     let suami = globalData.find(x => 
