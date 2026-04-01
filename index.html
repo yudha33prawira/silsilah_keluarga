@@ -563,9 +563,25 @@ function applyFilter(){
       love.style.display = (visibleCount === 2) ? "block" : "none";
     }
   });
+  // 🔥 SORT COUPLE
+  document.querySelectorAll(".couple").forEach(couple=>{
+  sortByUmur(couple);
+});
 
-  // 🔥 5. CHILDREN
+  // 🔥 5. CHILDREN + SORT UMUR
   document.querySelectorAll(".children").forEach(childBox=>{
+
+  // 🔥 SORT
+  sortByUmur(childBox);
+
+  let visibleChild = 0;
+
+  childBox.querySelectorAll(".person").forEach(p=>{
+    if(p.style.display !== "none") visibleChild++;
+  });
+
+  childBox.style.display = visibleChild ? "grid" : "none";
+});
     let visibleChild = 0;
 
     childBox.querySelectorAll(".person").forEach(p=>{
@@ -582,6 +598,31 @@ function applyFilter(){
   });
 
   closeFilter(); // 🔥 auto close
+}
+
+function sortByUmur(container){
+
+  let persons = Array.from(container.querySelectorAll(".person"));
+
+  persons.sort((a,b)=>{
+    let idA = a.getAttribute("data-id");
+    let idB = b.getAttribute("data-id");
+
+    let dataA = globalData.find(x=>x.id===idA);
+    let dataB = globalData.find(x=>x.id===idB);
+
+    let thA = parseInt(dataA?.tanggal_lahir);
+    let thB = parseInt(dataB?.tanggal_lahir);
+
+    // 🔥 kalau kosong → taruh paling bawah
+    if(!thA) return 1;
+    if(!thB) return -1;
+
+    return thA - thB; // dari tua ke muda
+  });
+
+  // 🔥 tempel ulang urutan
+  persons.forEach(p => container.appendChild(p));
 }
 
 function resetFilter(){
