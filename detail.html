@@ -481,13 +481,42 @@ function buildBreadcrumb(person){
   }
 
   // ===== GARIS IBU =====
-  let ibuPath=[];
-  current=person;
+  function getGarisIbu(id){
+  let result = [];
+  let current = globalData.find(x=>x.id===id);
+
+  let lewatIbuLangsung = true; // 🔥 penanda langkah pertama
 
   while(current){
-    ibuPath.unshift(current);
-    current = globalData.find(x=>x.nama===current.ibu);
+
+    result.unshift(current.nama);
+
+    // 🔥 langkah pertama: wajib ke ibu dulu
+    if(lewatIbuLangsung){
+      let ibu = globalData.find(x=>x.nama === current.ibu);
+      if(!ibu) break;
+
+      current = ibu;
+      lewatIbuLangsung = false;
+      continue;
+    }
+
+    // 🔥 setelah itu: cek suami dari current
+    let suami = globalData.find(x => 
+      current.pasangan?.includes(x.nama)
+    );
+
+    if(suami){
+      current = suami;
+    } else {
+      let ibu = globalData.find(x=>x.nama === current.ibu);
+      if(!ibu) break;
+      current = ibu;
+    }
   }
+
+  return result;
+}
 
   // ===== RENDER =====
   box.innerHTML += "<div><b>👨 Garis Ayah:</b> ";
