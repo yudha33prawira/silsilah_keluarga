@@ -508,45 +508,58 @@ function buildBreadcrumb(person){
 
   // ===== GARIS IBU =====
   function getGarisIbu(id){
+
   let result = [];
   let current = globalData.find(x=>x.id===id);
 
   let visited = new Set();
-  let step = 0;
+  let isFirst = true;
 
   while(current){
 
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    // 🔥 step 0 & 1 → tetap tampilkan (Yudha & Yuliarsih)
-    if(step < 2){
+    // 🔥 selalu tampilkan diri sendiri
+    if(isFirst){
       result.unshift(current);
+      isFirst = false;
 
       let ibu = globalData.find(x=>x.nama === current.ibu);
-      if(!ibu) break;
+
+      if(!ibu){
+        result.unshift({ id:"0", nama:"Unknow" });
+        break;
+      }
 
       current = ibu;
-      step++;
       continue;
     }
 
-    // 🔥 setelah itu → cek suami
-    let suami = globalData.find(x => 
-      current.pasangan?.includes(x.nama)
+    // 🔥 cek apakah ibu punya suami
+    let suami = globalData.find(x =>
+      current.pasangan && current.pasangan.includes(x.nama)
     );
 
     if(suami){
-      // 🔥 LANGSUNG ganti posisi ibu dengan suami (Titi tidak masuk)
+      // 🔥 langsung pakai suami (ibu tidak ditampilkan)
+      if(!visited.has(suami.id)){
+        result.unshift(suami);
+      }
+
       current = suami;
       continue;
     }
 
-    // 🔥 kalau tidak punya suami → baru tampilkan
+    // 🔥 kalau tidak punya suami → tampilkan ibu
     result.unshift(current);
 
     let ibu = globalData.find(x=>x.nama === current.ibu);
-    if(!ibu) break;
+
+    if(!ibu){
+      result.unshift({ id:"0", nama:"Unknow" });
+      break;
+    }
 
     current = ibu;
   }
