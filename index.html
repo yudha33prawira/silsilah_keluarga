@@ -362,6 +362,7 @@ function createPerson(p){
 
   const div=document.createElement("div");
   div.className="person "+(isMeninggal?"meninggal":"");
+  div.setAttribute("data-id", p.id); // 🔥 WAJIB
 
   let foto = p.foto
     ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
@@ -537,12 +538,16 @@ function resetFilter(){
     el.style.display="block";
   });
 
+  document.querySelectorAll(".couple").forEach(el=>{
+    el.style.display="flex"; // 🔥 penting
+  });
+
   document.getElementById("fHidup").checked=false;
   document.getElementById("fLaki").checked=false;
   document.getElementById("fPerempuan").checked=false;
   document.getElementById("fGenerasi").value="";
 
-  closeFilter(); // 🔥 auto close
+  closeFilter();
 }
 </script>
 
