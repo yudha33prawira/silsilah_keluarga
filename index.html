@@ -291,6 +291,26 @@ function init(data){
   });
 }
 
+function renderByGenerasi(gen){
+  const tree = document.getElementById("tree");
+  tree.innerHTML = ""; // 🔥 hapus tampilan lama
+
+  let dataGen = globalData.filter(x => x.generasi === gen);
+
+  dataGen.forEach(p=>{
+    const block = document.createElement("div");
+    block.className = "family-block";
+
+    const couple = document.createElement("div");
+    couple.className = "couple";
+
+    couple.appendChild(createPerson(p));
+
+    block.appendChild(couple);
+    tree.appendChild(block);
+  });
+}
+
 /* FAMILY */
 function createFamilyBlock(root,pasangan){
   const tree=document.getElementById("tree");
@@ -483,10 +503,19 @@ function toggleFilter(){
 }
 
 function applyFilter(){
+
+const fGenerasi = document.getElementById("fGenerasi").value;
+
+// 🔥 kalau isi generasi → render ulang khusus generasi itu
+if(fGenerasi){
+  renderByGenerasi(fGenerasi);
+  closeFilter();
+  return;
+}
+
   const fHidup = document.getElementById("fHidup").checked;
   const fLaki = document.getElementById("fLaki").checked;
   const fPerempuan = document.getElementById("fPerempuan").checked;
-  const fGenerasi = document.getElementById("fGenerasi").value;
 
   // 🔥 1. FILTER SEMUA PERSON (TERMASUK ANAK)
   document.querySelectorAll(".person").forEach(el=>{
@@ -566,6 +595,8 @@ function resetFilter(){
   document.getElementById("fLaki").checked=false;
   document.getElementById("fPerempuan").checked=false;
   document.getElementById("fGenerasi").value="";
+  document.getElementById("tree").innerHTML = "";
+  init(globalData); // 🔥 kembali ke tampilan awal
 
   closeFilter();
 }
