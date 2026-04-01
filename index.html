@@ -487,37 +487,47 @@ function applyFilter(){
   const fPerempuan = document.getElementById("fPerempuan").checked;
   const fGenerasi = document.getElementById("fGenerasi").value;
 
-  document.querySelectorAll(".person").forEach(el=>{
-    let show = true;
+document.querySelectorAll(".couple").forEach(couple=>{
+  let persons = couple.querySelectorAll(".person");
 
-    // 🔥 ambil data dari globalData
-    let nama = el.innerText.trim().toLowerCase();
-    let data = globalData.find(x => shortName(x.nama).toLowerCase() === nama);
+  let showCouple = false;
+
+  persons.forEach(el=>{
+    let id = el.getAttribute("data-id");
+    let data = globalData.find(x => x.id === id);
 
     if(!data) return;
 
-    // ===== FILTER HIDUP =====
+    let show = true;
+
+    // FILTER HIDUP
     if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
       show = false;
     }
 
-    // ===== FILTER LAKI =====
+    // LAKI
     if(fLaki && data.jenis_kelamin !== "L"){
       show = false;
     }
 
-    // ===== FILTER PEREMPUAN =====
+    // PEREMPUAN
     if(fPerempuan && data.jenis_kelamin !== "P"){
       show = false;
     }
 
-    // ===== FILTER GENERASI =====
+    // GENERASI
     if(fGenerasi && data.generasi !== fGenerasi){
       show = false;
     }
 
     el.style.display = show ? "block" : "none";
+
+    if(show) showCouple = true;
   });
+
+  // 🔥 kalau dua-duanya hilang → sembunyikan 1 blok pasangan
+  couple.style.display = showCouple ? "flex" : "none";
+});
 
   closeFilter(); // 🔥 auto close
 }
