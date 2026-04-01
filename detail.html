@@ -485,9 +485,15 @@ function buildBreadcrumb(person){
   let result = [];
   let current = globalData.find(x=>x.id===id);
 
+  let visited = new Set(); // 🔥 TARUH DI SINI
+
   let step = 0;
 
   while(current){
+
+    // 🔥 ANTI LOOP (taruh PALING ATAS dalam while)
+    if(visited.has(current.id)) break;
+    visited.add(current.id);
 
     result.unshift(current);
 
@@ -501,7 +507,7 @@ function buildBreadcrumb(person){
       continue;
     }
 
-    // 🔥 setelah itu → cek suami (kepala keluarga)
+    // 🔥 setelah itu → cek suami
     let suami = globalData.find(x => 
       current.pasangan?.includes(x.nama)
     );
