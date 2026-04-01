@@ -201,7 +201,7 @@ button {
 
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-  <button onclick="toggleFilter()" class="filter-btn">📑 Filter</button>
+  <button onclick="openFilter()" class="filter-btn">📑 Filter</button>
 </div>
 
 <div class="tree" id="tree"></div>
@@ -474,6 +474,11 @@ function openFilter(){
 
 function closeFilter(){
   document.getElementById("filterPopup").style.display="none";
+}
+
+function toggleFilter(){
+  let el = document.getElementById("filterPopup");
+  el.style.display = (el.style.display === "block") ? "none" : "block";
 }
 
 function applyFilter(){
