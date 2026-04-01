@@ -586,14 +586,6 @@ function applyFilter(){
 
   childBox.style.display = visibleChild ? "grid" : "none";
 });
-    let visibleChild = 0;
-
-    childBox.querySelectorAll(".person").forEach(p=>{
-      if(p.style.display !== "none") visibleChild++;
-    });
-
-    childBox.style.display = visibleChild ? "grid" : "none";
-  });
 
   // 🔥 6. FAMILY BLOCK
   document.querySelectorAll(".family-block").forEach(block=>{
