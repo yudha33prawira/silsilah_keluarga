@@ -502,9 +502,17 @@ function buildBreadcrumb(person){
   let current=person;
 
   while(current){
-    ayahPath.unshift(current);
-    current = globalData.find(x=>x.nama===current.ayah);
+  ayahPath.unshift(current);
+
+  let next = globalData.find(x=>x.nama===current.ayah);
+
+  if(!next){
+    ayahPath.unshift({ id:"0", nama:"Unknow" });
+    break;
   }
+
+  current = next;
+}
 
   // ===== GARIS IBU =====
   function getGarisIbu(id){
@@ -520,8 +528,7 @@ function buildBreadcrumb(person){
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    // 🔥 STEP 0 = Yudha
-    // 🔥 STEP 1 = Ibu kandung (WAJIB tampil)
+    // ✅ STEP 0 & 1 WAJIB ASLI (tidak boleh diganti)
     if(step < 2){
       result.unshift(current);
 
@@ -537,16 +544,17 @@ function buildBreadcrumb(person){
       continue;
     }
 
-    // 🔥 mulai dari atas → boleh ganti dengan suami
+    // 🔥 ambil AYAH dari current (ini SUAMI)
     let suami = globalData.find(x => x.nama === current.ayah);
 
-    if(suami && !visited.has(suami.id)){
+    if(suami){
       result.unshift(suami);
-      current = suami;
-      continue;
+
+      // 🔥 STOP setelah dapat suami (INI KUNCI BIAR TIDAK BALIK KE IBU LAGI)
+      break;
     }
 
-    // 🔥 fallback
+    // fallback (jarang kepakai)
     result.unshift(current);
 
     let ibu = globalData.find(x=>x.nama === current.ibu);
