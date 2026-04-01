@@ -593,6 +593,8 @@ function applyFilter(){
     block.style.display = visible.length ? "flex" : "none";
   });
 
+  sortTreeByUmur();
+
   closeFilter(); // 🔥 auto close
 }
 
@@ -619,6 +621,35 @@ function sortByUmur(container){
 
   // 🔥 tempel ulang urutan
   persons.forEach(p => container.appendChild(p));
+}
+
+function sortTreeByUmur(){
+
+  const tree = document.getElementById("tree");
+
+  let blocks = Array.from(tree.querySelectorAll(".family-block"));
+
+  blocks.sort((a,b)=>{
+
+    let personA = a.querySelector(".person");
+    let personB = b.querySelector(".person");
+
+    let idA = personA?.getAttribute("data-id");
+    let idB = personB?.getAttribute("data-id");
+
+    let dataA = globalData.find(x=>x.id===idA);
+    let dataB = globalData.find(x=>x.id===idB);
+
+    let thA = parseInt(dataA?.tanggal_lahir);
+    let thB = parseInt(dataB?.tanggal_lahir);
+
+    if(!thA) return 1;
+    if(!thB) return -1;
+
+    return thA - thB; // tua ke muda
+  });
+
+  blocks.forEach(b => tree.appendChild(b));
 }
 
 function resetFilter(){
