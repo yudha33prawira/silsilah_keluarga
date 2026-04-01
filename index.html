@@ -488,12 +488,8 @@ function applyFilter(){
   const fPerempuan = document.getElementById("fPerempuan").checked;
   const fGenerasi = document.getElementById("fGenerasi").value;
 
-document.querySelectorAll(".couple").forEach(couple=>{
-  let persons = couple.querySelectorAll(".person");
-
-  let showCouple = false;
-
-  persons.forEach(el=>{
+  // 🔥 FILTER SEMUA ORANG (TERMASUK ANAK)
+  document.querySelectorAll(".person").forEach(el=>{
     let id = el.getAttribute("data-id");
     let data = globalData.find(x => x.id === id);
 
@@ -501,7 +497,7 @@ document.querySelectorAll(".couple").forEach(couple=>{
 
     let show = true;
 
-    // FILTER HIDUP
+    // HIDUP
     if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
       show = false;
     }
@@ -522,13 +518,31 @@ document.querySelectorAll(".couple").forEach(couple=>{
     }
 
     el.style.display = show ? "block" : "none";
-
-    if(show) showCouple = true;
   });
 
-  // 🔥 kalau dua-duanya hilang → sembunyikan 1 blok pasangan
-  couple.style.display = showCouple ? "flex" : "none";
-});
+  // 🔥 RAPIIIN COUPLE + LOVE ICON
+  document.querySelectorAll(".couple").forEach(couple=>{
+    let persons = couple.querySelectorAll(".person");
+    let love = couple.querySelector(".love-icon");
+
+    let visibleCount = 0;
+
+    persons.forEach(p=>{
+      if(p.style.display !== "none") visibleCount++;
+    });
+
+    // kalau 0 → sembunyikan semua
+    if(visibleCount === 0){
+      couple.style.display = "none";
+    } else {
+      couple.style.display = "flex";
+    }
+
+    // ❤️ tampil hanya kalau 2 orang
+    if(love){
+      love.style.display = (visibleCount === 2) ? "block" : "none";
+    }
+  });
 
   closeFilter(); // 🔥 auto close
 }
