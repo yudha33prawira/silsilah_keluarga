@@ -513,17 +513,17 @@ function buildBreadcrumb(person){
   let current = globalData.find(x=>x.id===id);
 
   let visited = new Set();
-  let isFirst = true;
+  let step = 0;
 
   while(current){
 
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    // 🔥 tampilkan diri sendiri
-    if(isFirst){
+    // 🔥 STEP 0 = Yudha
+    // 🔥 STEP 1 = Ibu kandung (WAJIB tampil)
+    if(step < 2){
       result.unshift(current);
-      isFirst = false;
 
       let ibu = globalData.find(x=>x.nama === current.ibu);
 
@@ -533,19 +533,20 @@ function buildBreadcrumb(person){
       }
 
       current = ibu;
+      step++;
       continue;
     }
 
-    // 🔥 ambil suami = AYAH dari current
+    // 🔥 mulai dari atas → boleh ganti dengan suami
     let suami = globalData.find(x => x.nama === current.ayah);
 
-    if(suami){
+    if(suami && !visited.has(suami.id)){
       result.unshift(suami);
       current = suami;
       continue;
     }
 
-    // 🔥 fallback (kalau tidak ada ayah)
+    // 🔥 fallback
     result.unshift(current);
 
     let ibu = globalData.find(x=>x.nama === current.ibu);
