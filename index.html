@@ -299,9 +299,8 @@ button {
 </div>
 
 <script>
-window.onerror = function(msg){
-  alert("Error: " + msg);
-};
+// NONAKTIFKAN ALERT ERROR DI HP
+window.onerror = null;
 
 let globalData=[];
 
@@ -318,11 +317,11 @@ function init(data){
   let roots = data
     .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
     .sort((a,b)=>
-      parseInt(a.tanggal_lahir||9999) - parseInt(b.tanggal_lahir||9999)
+      parseInt(a.tanggal_lahir || "9999") - parseInt(b.tanggal_lahir || "9999")
     );
 
   roots.forEach(root=>{
-    let pasangan=data.filter(x=>root.pasangan?.includes(x.nama));
+    let pasangan=data.filter(x=>root.pasangan && root.pasangan.includes(x.nama));
 
     if(!pasangan.length){
       createFamilyBlock(root,null);
