@@ -485,20 +485,18 @@ function buildBreadcrumb(person){
   let result = [];
   let current = globalData.find(x=>x.id===id);
 
-  let visited = new Set(); // 🔥 TARUH DI SINI
-
+  let visited = new Set();
   let step = 0;
 
   while(current){
 
-    // 🔥 ANTI LOOP (taruh PALING ATAS dalam while)
     if(visited.has(current.id)) break;
     visited.add(current.id);
 
-    result.unshift(current);
-
-    // 🔥 step 0 & 1 → wajib lewat ibu dulu
+    // 🔥 step 0 & 1 → tetap tampilkan (Yudha & Yuliarsih)
     if(step < 2){
+      result.unshift(current);
+
       let ibu = globalData.find(x=>x.nama === current.ibu);
       if(!ibu) break;
 
@@ -513,12 +511,18 @@ function buildBreadcrumb(person){
     );
 
     if(suami){
+      // 🔥 LANGSUNG ganti posisi ibu dengan suami (Titi tidak masuk)
       current = suami;
-    } else {
-      let ibu = globalData.find(x=>x.nama === current.ibu);
-      if(!ibu) break;
-      current = ibu;
+      continue;
     }
+
+    // 🔥 kalau tidak punya suami → baru tampilkan
+    result.unshift(current);
+
+    let ibu = globalData.find(x=>x.nama === current.ibu);
+    if(!ibu) break;
+
+    current = ibu;
   }
 
   return result;
