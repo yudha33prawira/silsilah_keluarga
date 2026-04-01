@@ -488,7 +488,7 @@ function applyFilter(){
   const fPerempuan = document.getElementById("fPerempuan").checked;
   const fGenerasi = document.getElementById("fGenerasi").value;
 
-  // 🔥 FILTER SEMUA ORANG (TERMASUK ANAK)
+  // 🔥 1. FILTER SEMUA PERSON (TERMASUK ANAK)
   document.querySelectorAll(".person").forEach(el=>{
     let id = el.getAttribute("data-id");
     let data = globalData.find(x => x.id === id);
@@ -497,22 +497,16 @@ function applyFilter(){
 
     let show = true;
 
-    // HIDUP
     if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
       show = false;
     }
 
-    // LAKI
-    if(fLaki && data.jenis_kelamin !== "L"){
-      show = false;
+    // gender pintar
+    if(!(fLaki && fPerempuan)){
+      if(fLaki && data.jenis_kelamin !== "L") show = false;
+      if(fPerempuan && data.jenis_kelamin !== "P") show = false;
     }
 
-    // PEREMPUAN
-    if(fPerempuan && data.jenis_kelamin !== "P"){
-      show = false;
-    }
-
-    // GENERASI
     if(fGenerasi && data.generasi !== fGenerasi){
       show = false;
     }
@@ -520,7 +514,7 @@ function applyFilter(){
     el.style.display = show ? "block" : "none";
   });
 
-  // 🔥 RAPIIIN COUPLE + LOVE ICON
+  // 🔥 2. RAPIIIN COUPLE + LOVE
   document.querySelectorAll(".couple").forEach(couple=>{
     let persons = couple.querySelectorAll(".person");
     let love = couple.querySelector(".love-icon");
@@ -531,17 +525,29 @@ function applyFilter(){
       if(p.style.display !== "none") visibleCount++;
     });
 
-    // kalau 0 → sembunyikan semua
-    if(visibleCount === 0){
-      couple.style.display = "none";
-    } else {
-      couple.style.display = "flex";
-    }
+    couple.style.display = visibleCount ? "flex" : "none";
 
-    // ❤️ tampil hanya kalau 2 orang
     if(love){
       love.style.display = (visibleCount === 2) ? "block" : "none";
     }
+  });
+
+  // 🔥 3. FIX CHILDREN (INI YANG BIKIN GEN 3+ BERES)
+  document.querySelectorAll(".children").forEach(childBox=>{
+    let visibleChild = 0;
+
+    childBox.querySelectorAll(".person").forEach(p=>{
+      if(p.style.display !== "none") visibleChild++;
+    });
+
+    childBox.style.display = visibleChild ? "grid" : "none";
+  });
+
+  // 🔥 4. FIX FAMILY BLOCK (biar gak ada kosong)
+  document.querySelectorAll(".family-block").forEach(block=>{
+    let visible = block.querySelectorAll(".person:not([style*='display: none'])");
+
+    block.style.display = visible.length ? "flex" : "none";
   });
 
   closeFilter(); // 🔥 auto close
