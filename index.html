@@ -201,7 +201,7 @@ button {
 
 <div class="toolbar">
   <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-  <button onclick="toggleFilter()" class="filter-btn">🎛 Filter</button>
+  <button onclick="toggleFilter()" class="filter-btn">📑 Filter</button>
 </div>
 
 <div class="tree" id="tree"></div>
@@ -213,6 +213,35 @@ button {
     <br><br>
     <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
+  </div>
+</div>
+
+<!-- FILTER -->
+<div id="filterPopup" class="search-popup" onclick="closeFilter()">
+  <div class="search-box" onclick="event.stopPropagation()">
+
+    <p><b>Pilih Filter:</b></p>
+
+    <label>
+      <input type="checkbox" id="fHidup"> Yang masih hidup
+    </label><br><br>
+
+    <label>
+      <input type="checkbox" id="fLaki"> Laki-laki
+    </label><br><br>
+
+    <label>
+      <input type="checkbox" id="fPerempuan"> Perempuan
+    </label><br><br>
+
+    <label>
+      Generasi:
+      <input type="number" id="fGenerasi" placeholder="Contoh: 1">
+    </label><br><br>
+
+    <button onclick="applyFilter()">Terapkan</button><br><br>
+    <button onclick="resetFilter()">Reset</button>
+
   </div>
 </div>
 
@@ -438,8 +467,67 @@ function searchName(e){
   }
 }
 
-function toggleFilter(){
-  alert("Filter tetap aktif (belum diubah)");
+/* FILTER */
+function openFilter(){
+  document.getElementById("filterPopup").style.display="block";
+}
+
+function closeFilter(){
+  document.getElementById("filterPopup").style.display="none";
+}
+
+function applyFilter(){
+  const fHidup = document.getElementById("fHidup").checked;
+  const fLaki = document.getElementById("fLaki").checked;
+  const fPerempuan = document.getElementById("fPerempuan").checked;
+  const fGenerasi = document.getElementById("fGenerasi").value;
+
+  document.querySelectorAll(".person").forEach(el=>{
+    let show = true;
+
+    // 🔥 ambil data dari globalData
+    let nama = el.innerText.trim().toLowerCase();
+    let data = globalData.find(x => shortName(x.nama).toLowerCase() === nama);
+
+    if(!data) return;
+
+    // ===== FILTER HIDUP =====
+    if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
+      show = false;
+    }
+
+    // ===== FILTER LAKI =====
+    if(fLaki && data.jenis_kelamin !== "L"){
+      show = false;
+    }
+
+    // ===== FILTER PEREMPUAN =====
+    if(fPerempuan && data.jenis_kelamin !== "P"){
+      show = false;
+    }
+
+    // ===== FILTER GENERASI =====
+    if(fGenerasi && data.generasi !== fGenerasi){
+      show = false;
+    }
+
+    el.style.display = show ? "block" : "none";
+  });
+
+  closeFilter(); // 🔥 auto close
+}
+
+function resetFilter(){
+  document.querySelectorAll(".person").forEach(el=>{
+    el.style.display="block";
+  });
+
+  document.getElementById("fHidup").checked=false;
+  document.getElementById("fLaki").checked=false;
+  document.getElementById("fPerempuan").checked=false;
+  document.getElementById("fGenerasi").value="";
+
+  closeFilter(); // 🔥 auto close
 }
 </script>
 
