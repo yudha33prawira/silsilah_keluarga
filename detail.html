@@ -92,7 +92,7 @@ button {
   transition: 0.3s;
 }
 
-button:hover {
+.toolbar button:hover {
   background: rgba(255,255,255,0.35);
   transform: scale(1.05);
 }
@@ -382,6 +382,17 @@ button:active {
 .section {
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
+}
+
+/* ===== FIX HOVER BUTTON POPUP ===== */
+.search-box button:hover {
+  background: linear-gradient(135deg,#6a11cb,#2575fc) !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.search-box button:last-child:hover {
+  background: #777 !important;
 }
 
 </style>
