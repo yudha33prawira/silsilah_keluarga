@@ -335,6 +335,33 @@ button:active {
   transform: scale(0.95);
 }
 
+/* ===== FIX TOMBOL POPUP DETAIL ===== */
+.popup-footer button {
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
+  color: white;
+  width: 100%;
+  margin-top: 5px;
+}
+
+/* tombol WA tetap hijau */
+.popup-footer .btn-wa {
+  background: #25D366;
+}
+
+/* tombol tutup beda warna */
+.popup-footer button:last-child {
+  background: #777;
+}
+
+.popup-footer button {
+  font-weight: bold;
+}
+
+.popup-box {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  animation: fadeIn 0.3s ease;
+}
+
 </style>
 </head>
 
@@ -686,6 +713,7 @@ const ibuPath = getGarisIbu(person.id);
   });
   box.innerHTML += "</div>";
 }
+
 </script>
 
 </body>
