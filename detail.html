@@ -559,8 +559,10 @@ function buildBreadcrumb(person){
       }
     }
 
-    // 🔥 SELANJUTNYA → jalur ayah
+    // 🔥 SELANJUTNYA → jalur ayah (ANTI DOBEL)
+    if(!result.length || result[0].id !== current.id){
     result.unshift(current);
+}
 
     let ayah = globalData.find(x=>x.nama === current.ayah);
 
