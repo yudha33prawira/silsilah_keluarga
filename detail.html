@@ -21,16 +21,41 @@ body.lock {
   overflow: hidden;
 }
 
-h2 { margin: 10px; }
+h2 {
+  margin: 15px auto;
+  padding: 10px 20px;
+  display: inline-block;
+
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
 
 /* BREADCRUMB */
 .breadcrumb {
-  margin-bottom: 10px;
+  margin: 10px auto;
+  padding: 10px 15px;
+  display: inline-block;
+
   font-size: 14px;
+  color: white;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+
+  border-radius: 10px;
 }
+
 .breadcrumb span {
   cursor: pointer;
-  color: blue;
+  color: #ffd369;
+  font-weight: bold;
 }
 
 /* TOOLBAR */
@@ -126,6 +151,10 @@ button {
 .person.meninggal {
   background: black;
   color: white;
+}
+
+.person {
+  color: #222;
 }
 
 /* FOTO */
@@ -244,6 +273,14 @@ button {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+body {
+  color: white;
+}
+
+h2 {
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 
 </style>
