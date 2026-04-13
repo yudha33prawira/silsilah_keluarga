@@ -541,7 +541,7 @@
     "domisili": "Sidoarjo",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/mami.jpg"
+    "foto": "images/mami.png"
   },
   {
     "id": "papi",
@@ -558,7 +558,7 @@
     "domisili": "Sidoarjo",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/papi.jpg"
+    "foto": "images/papi.png"
   },
   {
     "id": "dina",
@@ -830,7 +830,7 @@
     "domisili": "Cikampek",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/joko.jpg"
+    "foto": "images/joko.png"
   },
   {
     "id": "menik",
@@ -1357,7 +1357,7 @@
     "domisili": "Bandung",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/unang.jpg"
+    "foto": "images/unang.png"
   },
   {
     "id": "neng",
@@ -1816,7 +1816,7 @@
     "domisili": "Klaten",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/anom.jpg"
+    "foto": "images/anom.png"
   },
   {
     "id": "dino",
@@ -1833,7 +1833,7 @@
     "domisili": "Jakarta",
     "wa": "",
     "pekerjaan": "",
-    "foto": "images/l.jpg"
+    "foto": "images/l.png"
   },
   {
     "id": "yoeke",
