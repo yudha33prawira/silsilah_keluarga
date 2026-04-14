@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Silsilah Keluarga</title>
+<div class="header">
+  <h2>Silsilah Keluarga</h2>
+</div>
 
 <style>
 body {
@@ -16,6 +18,33 @@ body {
   animation: gradientMove 12s ease infinite;
 }
 
+/* HEADER */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+h2 {
+  margin: 0;
+  padding: 10px 20px;
+  display: inline-block;
+
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+  
 /* animasi */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
@@ -33,9 +62,6 @@ h2 { margin:10px; }
   color:white;
   cursor:pointer;
 }
-
-.search-btn { background:linear-gradient(135deg,#6a11cb,#2575fc); }
-.filter-btn { background:linear-gradient(135deg,#ff7e5f,#ff9966); }
 
 /* TREE */
 .tree {
@@ -221,12 +247,33 @@ button {
 }
 
 .toolbar {
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin:10px 0;
-  z-index: 1;
-  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.toolbar button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.2);
+  color: white;
+
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.toolbar button:hover {
+  background: rgba(255,255,255,0.35);
+  transform: scale(1.05);
+}
+
+.toolbar button:active {
+  transform: scale(0.95);
 }
 
 </style>
@@ -298,6 +345,17 @@ button {
   </div>
 </div>
 
+.search-box button {
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
+  color: white;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.search-box button:last-child {
+  background: #777;
+}
+  
 <script>
 // NONAKTIFKAN ALERT ERROR DI HP
 window.onerror = null;
