@@ -297,6 +297,16 @@ button {
     <br><br>
     <button onclick="searchName()">Cari</button>
     <button onclick="closeSearch()">Tutup</button>
+    .search-box button {
+  background: linear-gradient(135deg,#6a11cb,#2575fc);
+  color: white;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.search-box button:last-child {
+  background: #777;
+}
   </div>
 </div>
 
@@ -345,17 +355,6 @@ button {
   </div>
 </div>
 
-.search-box button {
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-  color: white;
-  width: 100%;
-  margin-top: 5px;
-}
-
-.search-box button:last-child {
-  background: #777;
-}
-  
 <script>
 // NONAKTIFKAN ALERT ERROR DI HP
 window.onerror = null;
