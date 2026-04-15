@@ -4,9 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Detail Silsilah</title>
+<div class="running-text">
+  <div class="running-content">
+    ⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi
+  </div>
+</div>
 
 <style>
 
+/* RUNNING TEXT */
+.running-text {
+  width: 100%;
+  overflow: hidden;
+  margin-top: 10px;
+
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.running-content {
+  display: inline-block;
+  white-space: nowrap;
+
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 0;
+
+  animation: runningMove 25s linear infinite;
+letter-spacing: 0.5px;
+}
+
+/* animasi jalan */
+@keyframes runningMove {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+  .running-text:hover .running-content {
+  animation-play-state: paused;
+}
+  
 /* ===== FIX TOMBOL DI POPUP ===== */
 .search-box button {
   background: linear-gradient(135deg,#6a11cb,#2575fc);
