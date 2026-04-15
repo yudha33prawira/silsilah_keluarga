@@ -45,7 +45,12 @@
   100% { transform: translateX(-50%); }
 }
 
-  .running-text:hover .running-content {
+  .running-text:hover .running-track {
+  animation-play-state: paused;
+}
+
+/* support manual pause */
+.running-track.paused {
   animation-play-state: paused;
 }
   
@@ -818,6 +823,20 @@ const ibuPath = getGarisIbu(person.id);
   box.innerHTML += "</div>";
 }
 
+const running = document.querySelector(".running-track");
+
+if(running){
+  // saat disentuh → pause
+  running.addEventListener("touchstart", () => {
+    running.classList.add("paused");
+  });
+
+  // saat dilepas → jalan lagi
+  running.addEventListener("touchend", () => {
+    running.classList.remove("paused");
+  });
+}
+  
 </script>
 
 </body>
