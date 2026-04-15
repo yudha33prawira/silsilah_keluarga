@@ -442,6 +442,35 @@ button:active {
   background: #777 !important;
 }
 
+  /* ZOOM FOTO */
+.zoom-foto {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 2000;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.zoom-foto img {
+  max-width: 95%;
+  max-height: 90%;
+  border-radius: 10px;
+
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+  .zoom-foto {
+  cursor: zoom-out;
+}
+
 /* ===== WARNA JUDUL & BREADCRUMB ===== */
 
 h2 {
@@ -512,6 +541,11 @@ h2 {
     </div>
 
   </div>
+</div>
+
+  <!-- ZOOM FOTO -->
+<div id="zoomFoto" class="zoom-foto" onclick="closeZoom()">
+  <img id="zoomImg">
 </div>
 
 <script>
@@ -635,8 +669,8 @@ function openPopup(id){
   document.getElementById("popup").style.display="block";
   document.body.classList.add("lock");
 
-  let header = p.foto
-    ? `<img src="${p.foto}"><br>${p.nama}`
+ let header = p.foto
+  ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br>${p.nama}`
     : `<div class="popup-avatar">${p.jenis_kelamin==='L'?'👨':'👩'}</div>${p.nama}`;
 
   document.getElementById("popupHeader").innerHTML=header;
@@ -835,6 +869,18 @@ if(running){
   running.addEventListener("touchend", () => {
     running.classList.remove("paused");
   });
+}
+
+function openZoom(src){
+  const z = document.getElementById("zoomFoto");
+  const img = document.getElementById("zoomImg");
+
+  img.src = src;
+  z.style.display = "flex";
+}
+
+function closeZoom(){
+  document.getElementById("zoomFoto").style.display = "none";
 }
   
 </script>
