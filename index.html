@@ -10,8 +10,9 @@
 </div>
 
   <div class="running-text">
-  <div class="running-content">
-    ⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi, dan untuk data yang belum terisi atau ada kesalahan silahkan kirim ke pengedit untuk perbaikan datanya.
+  <div class="running-track">
+    <span>⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi, dan untuk data yang belum terisi atau ada kesalahan silahkan kirim ke pengedit untuk perbaikan datanya.</span>
+    <span>⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi, dan untuk data yang belum terisi atau ada kesalahan silahkan kirim ke pengedit untuk perbaikan datanya.</span>
   </div>
 </div>
 
@@ -83,22 +84,24 @@ h2 {
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
-.running-content {
-  display: inline-block;
-  white-space: nowrap;
+.running-track {
+  display: flex;
+  width: max-content;
 
-  color: #fff;
-  font-size: 14px;
-  padding: 8px 0;
-
-  animation: runningMove 18s linear infinite;
-letter-spacing: 0.5px;
+  animation: scrollLoop 35s linear infinite; /* 🔥 lebih pelan */
 }
 
-/* animasi jalan */
-@keyframes runningMove {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+.running-track span {
+  white-space: nowrap;
+  color: white;
+  font-size: 14px;
+  padding: 8px 30px; /* jarak antar teks */
+}
+
+/* animasi TANPA JEDA */
+@keyframes scrollLoop {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .running-text:hover .running-content {
