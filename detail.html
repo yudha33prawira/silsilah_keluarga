@@ -439,7 +439,8 @@ h2 {
 <div class="tree" id="tree"></div>
 
 <!-- SEARCH -->
-<div id="searchPopup" class="search-popup">
+<div id="searchPopup" class="search-popup" onclick="closeSearch()">
+  <div class="search-box" onclick="event.stopPropagation()">
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
     <br><br>
