@@ -416,8 +416,14 @@
 
   /**
    * BREADCRUMB YANG BENAR:
-   * - Garis Ayah: orang → ayah → ayah dari ayah → ... (lurus via ayah)
-   * - Garis Ibu: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ... (lurus via ayah dari garis ibu)
+   * Kedua garis (Ayah dan Ibu) ditampilkan dari YANG PALING TUA ke YANG PALING MUDA
+   * 
+   * - Garis Ayah: kakek buyut → kakek → ayah → orang
+   * - Garis Ibu: (ayah dari ibu dari ...) → ibu → orang
+   * 
+   * Contoh untuk Yudha:
+   * - Garis Ayah: Sumadi → Oyo → Yudha
+   * - Garis Ibu: Ngadiman → Yuliarsih → Yudha
    */
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
@@ -426,48 +432,52 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // ===== GARIS AYAH =====
-    let ayahPath = [];
+    // ===== GARIS AYAH (dari tua ke muda) =====
+    let ayahPath = []; // dari yang paling tua ke yang paling muda
     let currentAyah = person;
+    let ayahStack = [];
+    
+    // kumpulkan dari bawah ke atas (dari orang ke leluhur)
     while (currentAyah) {
-      ayahPath.unshift({ id: currentAyah.id, nama: currentAyah.nama });
+      ayahStack.push({ id: currentAyah.id, nama: currentAyah.nama });
       let ayahObj = globalFamily.find(p => p.nama === currentAyah.ayah);
       if (!ayahObj) break;
       currentAyah = ayahObj;
     }
+    // balik stack agar dari tua ke muda
+    ayahPath = ayahStack.reverse();
     
-    // ===== GARIS IBU =====
-    // Path: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ...
-    let ibuPath = [];
+    // ===== GARIS IBU (dari tua ke muda) =====
+    // Pola: (ayah dari ibu) → ibu → orang
+    // Kita kumpulkan dari orang ke atas, lalu balik
+    
+    let ibuStack = [];
     
     // Step 1: mulai dari orang
     let current = person;
+    ibuStack.push({ id: current.id, nama: current.nama });
     
     // Step 2: tambahkan ibu (jika ada)
     if (current.ibu) {
       let ibuObj = globalFamily.find(p => p.nama === current.ibu);
       if (ibuObj) {
-        ibuPath.push(ibuObj);
+        ibuStack.push({ id: ibuObj.id, nama: ibuObj.nama });
         current = ibuObj;
       } else {
-        ibuPath.push({ id: '0', nama: '?' });
+        ibuStack.push({ id: '0', nama: '?' });
       }
     }
     
-    // Step 3: selanjutnya telusuri AYAH dari current (bukan ibu lagi)
+    // Step 3: telusuri AYAH dari current (dan seterusnya) sampai habis
     while (current) {
       let ayahObj = globalFamily.find(p => p.nama === current.ayah);
       if (!ayahObj) break;
-      ibuPath.push(ayahObj);
+      ibuStack.push({ id: ayahObj.id, nama: ayahObj.nama });
       current = ayahObj;
     }
     
-    // Balik agar dari yang paling tua ke yang paling muda (orang ada di akhir)
-    // Tapi kita ingin tampil: Orang → Ibu → AyahIbu → AyahAyahIbu → ...
-    // Jadi tidak perlu dibalik, urutan sudah benar dari bawah ke atas
-    // Kita buat array final: [orang, ibu, ayah1, ayah2, ...]
-    let finalIbuPath = [person];
-    finalIbuPath.push(...ibuPath);
+    // balik ibuStack agar dari yang paling tua ke yang paling muda
+    let ibuPath = ibuStack.reverse();
     
     // Render Garis Ayah
     const ayahHtml = ayahPath.map((p, idx) => {
@@ -478,8 +488,8 @@
     }).join('');
     
     // Render Garis Ibu
-    const ibuHtml = finalIbuPath.map((p, idx) => {
-      if (idx === finalIbuPath.length - 1) {
+    const ibuHtml = ibuPath.map((p, idx) => {
+      if (idx === ibuPath.length - 1) {
         return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
       }
       return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
