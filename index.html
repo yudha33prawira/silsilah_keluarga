@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Silsilah Keluarga</title>
+  <title>Silsilah Keluarga - Pohon Keluarga</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -13,7 +13,7 @@
       background-size: 400% 400%;
       animation: gradientFlow 15s ease infinite;
       min-height: 100vh;
-      padding-bottom: 40px;
+      overflow-x: auto;
     }
     
     body.lock { overflow: hidden; }
@@ -24,11 +24,21 @@
       100% { background-position: 0% 50%; } 
     }
     
-    .hero { text-align: center; padding: 20px 16px 8px; }
+    /* SCROLLABLE TREE CONTAINER */
+    .tree-wrapper {
+      overflow-x: auto;
+      padding: 20px 30px;
+      cursor: grab;
+    }
+    .tree-wrapper:active {
+      cursor: grabbing;
+    }
+    
+    .hero { text-align: center; padding: 12px 16px 4px; }
     h1 {
-      font-size: 1.8rem; font-weight: 700;
+      font-size: 1.4rem; font-weight: 700;
       background: rgba(0,0,0,0.4); backdrop-filter: blur(12px);
-      display: inline-block; padding: 8px 24px; border-radius: 50px;
+      display: inline-block; padding: 6px 18px; border-radius: 50px;
       color: white; border: 1px solid rgba(255,255,255,0.2);
     }
     
@@ -37,224 +47,259 @@
       background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
       border-top: 1px solid rgba(255,255,255,0.2);
       border-bottom: 1px solid rgba(255,255,255,0.2);
-      margin: 12px 0;
+      margin: 6px 0;
     }
     .marquee-track {
       display: flex; width: max-content;
       animation: scrollText 38s linear infinite;
     }
-    .marquee-track span { white-space: nowrap; padding: 8px 36px; color: #fff9e0; font-size: 0.85rem; }
+    .marquee-track span { white-space: nowrap; padding: 5px 30px; color: #fff9e0; font-size: 0.7rem; }
     @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     .marquee-track:hover { animation-play-state: paused; }
     
     .toolbar {
-      display: flex; justify-content: center; gap: 16px; margin: 16px 0 20px; flex-wrap: wrap;
+      display: flex; justify-content: center; gap: 10px; margin: 10px 0 15px; flex-wrap: wrap;
     }
     .btn-glass {
       background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-      border: none; padding: 10px 24px; border-radius: 40px;
-      font-size: 1rem; font-weight: 600; color: white; cursor: pointer;
+      border: none; padding: 6px 16px; border-radius: 40px;
+      font-size: 0.8rem; font-weight: 600; color: white; cursor: pointer;
       transition: 0.2s;
     }
     .btn-glass:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
-    .btn-glass:active { transform: scale(0.98); }
     
-    .tree { display: flex; flex-direction: column; align-items: center; gap: 36px; padding: 10px 20px 40px; }
-    .family-card {
-      background: rgba(255,255,255,0.1); backdrop-filter: blur(4px);
-      border-radius: 32px; padding: 20px 12px 12px;
-      width: 100%; max-width: 800px; box-shadow: 0 12px 28px rgba(0,0,0,0.2);
-      transition: 0.2s;
+    /* ===== TREE STYLES - HIERARCHICAL ===== */
+    .tree {
+      display: flex;
+      justify-content: center;
+      min-width: max-content;
     }
-    .family-card.hidden-family { display: none; }
-    .couple-row {
-      display: flex; justify-content: center; align-items: center;
-      gap: 28px; position: relative; flex-wrap: wrap;
+    
+    /* Root level */
+    .tree-root {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .love-badge { font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-    .children-grid {
-      margin-top: 36px; display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 18px; justify-items: center;
-      border-top: 2px dashed rgba(255,255,240,0.4);
-      padding-top: 24px;
+    
+    /* Generasi 1 (kakek/nenek) */
+    .gen-1 {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+      position: relative;
     }
+    
+    /* Garis vertikal dari generasi ke generasi */
+    .tree-branch {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .children-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      position: relative;
+      margin-top: 25px;
+      padding-top: 15px;
+    }
+    
+    /* Garis penghubung vertikal */
+    .children-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 15px;
+      background: rgba(255,255,200,0.5);
+    }
+    
+    /* Garis horizontal antar saudara */
+    .children-container {
+      position: relative;
+    }
+    
+    .child-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* Garis horizontal penghubung antar saudara */
+    .children-container:not(:has(> :only-child))::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255,255,200,0.4);
+      z-index: 0;
+    }
+    
+    /* Garis vertikal ke setiap anak */
+    .child-item::before {
+      content: '';
+      position: absolute;
+      top: -23px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 23px;
+      background: rgba(255,255,200,0.5);
+      z-index: 1;
+    }
+    
+    /* Hapus garis pertama yang dobel */
+    .child-item:first-child::before {
+      left: 50%;
+      width: 2px;
+    }
+    
+    /* Person card lebih kecil */
     .person-card {
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(4px);
-      border-radius: 28px; padding: 14px 10px 10px;
-      width: 130px; text-align: center; cursor: pointer;
-      transition: 0.2s ease; box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(4px);
+      border-radius: 16px;
+      padding: 6px 8px;
+      width: 85px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
       border: 1px solid rgba(255,255,255,0.5);
     }
-    .person-card.meninggal { background: #2c2e3a; color: #e0e0e0; border-color: #555; }
-    .person-card:hover { transform: translateY(-6px); box-shadow: 0 14px 22px rgba(0,0,0,0.2); }
-    .person-card.hidden-person { display: none; }
-    .avatar {
-      width: 85px; height: 85px; border-radius: 50%; object-fit: cover;
-      margin: 0 auto 8px; display: block; border: 3px solid white;
+    .person-card.meninggal { background: #2c2e3a; color: #ccc; }
+    .person-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+    
+    .avatar-sm {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 4px;
+      display: block;
+      border: 2px solid white;
       cursor: pointer;
     }
-    .avatar-siluet {
-      width: 85px; height: 85px; border-radius: 50%; margin: 0 auto 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 52px; background: #d9e2ec;
+    .avatar-siluet-sm {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin: 0 auto 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      background: #d9e2ec;
       cursor: pointer;
     }
-    .avatar-siluet.l { background: #7aa2f7; color: white; }
-    .avatar-siluet.p { background: #f29bc4; color: white; }
-    .person-name { font-weight: 800; font-size: 1rem; margin-top: 5px; }
+    .avatar-siluet-sm.l { background: #7aa2f7; color: white; }
+    .avatar-siluet-sm.p { background: #f29bc4; color: white; }
+    
+    .person-name-sm {
+      font-weight: 700;
+      font-size: 0.7rem;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Couple (pasangan) diletakkan berdekatan */
+    .couple-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    .love-icon-sm {
+      font-size: 12px;
+      color: #ff99cc;
+    }
     
     /* BREADCRUMB */
     .breadcrumb-area {
       background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
-      border-radius: 32px; padding: 12px 20px; margin: 10px auto;
+      border-radius: 24px; padding: 6px 15px; margin: 6px auto;
       width: fit-content; max-width: 90%; text-align: center;
-      color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      color: white;
     }
     .bread-line {
-      font-size: 0.9rem; display: flex; flex-wrap: wrap;
-      justify-content: center; align-items: center; gap: 6px; margin: 6px 0;
+      font-size: 0.7rem; display: flex; flex-wrap: wrap;
+      justify-content: center; align-items: center; gap: 4px;
     }
-    .bread-line strong { margin-right: 8px; color: #ffd966; }
+    .bread-line strong { margin-right: 4px; color: #ffd966; font-size: 0.7rem; }
     .bread-line span {
-      cursor: pointer; color: #ffea9e; font-weight: 600;
-      background: rgba(0,0,0,0.3); padding: 4px 12px;
-      border-radius: 30px; transition: 0.2s;
+      cursor: pointer; color: #ffea9e; font-weight: 500;
+      background: rgba(0,0,0,0.3); padding: 2px 8px;
+      border-radius: 20px;
     }
-    .bread-line span:hover {
-      background: rgba(0,0,0,0.5); transform: scale(1.02);
-    }
-    .bread-arrow { color: rgba(255,255,255,0.5); font-size: 14px; margin: 0 2px; }
     
-    /* POPUP DETAIL */
-    .popup-overlay {
+    /* MODAL & POPUP (sama seperti sebelumnya) */
+    .popup-overlay, .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
       z-index: 1000; align-items: center; justify-content: center;
       padding: 20px;
     }
     .popup-container {
-      background: white; border-radius: 36px; max-width: 440px;
-      width: 100%; max-height: 85vh; overflow-y: auto;
-      animation: popFade 0.25s ease;
-      box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+      background: white; border-radius: 28px; max-width: 380px;
+      width: 100%; max-height: 80vh; overflow-y: auto;
     }
-    .popup-container::-webkit-scrollbar { width: 5px; }
-    .popup-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    .popup-container::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 16px; text-align: center; color: white; border-radius: 28px 28px 0 0; }
+    .popup-header img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; cursor: pointer; }
+    .popup-body { padding: 16px; color: #1e2a47; font-size: 0.85rem; }
+    .info-section { margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 4px; font-size: 0.85rem; }
+    .popup-footer { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .btn-wa, .btn-primary, .btn-close-popup {
+      padding: 8px; border-radius: 40px; font-weight: 600; font-size: 0.8rem;
+      cursor: pointer; border: none;
+    }
+    .btn-wa { background: #25D366; color: white; }
+    .btn-primary { background: #2c3e66; color: white; }
+    .btn-close-popup { background: #e2e8f0; color: #4a5568; }
     
-    @keyframes popFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 24px 20px; text-align: center; color: white; border-radius: 36px 36px 0 0; }
-    .popup-header img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid white; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
-    .popup-header img:hover { transform: scale(1.05); }
-    .popup-header strong { font-size: 1.3rem; display: block; margin-top: 5px; }
-    .popup-avatar-lg { width: 110px; height: 110px; border-radius: 50%; background: #cfddee; font-size: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
-    .popup-body { padding: 24px; color: #1e2a47; }
-    .info-section { margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
-    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 8px; font-size: 1rem; display: flex; align-items: center; gap: 6px; }
-    .info-section p { line-height: 1.5; color: #2d3748; }
-    
-    .popup-footer { padding: 8px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
-    .btn-wa { 
-      background: #25D366; color: white; border: none; padding: 14px;
-      border-radius: 50px; font-weight: 700; font-size: 1rem;
-      cursor: pointer; transition: 0.2s; display: flex;
-      align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-wa:hover { background: #1da15a; transform: scale(1.02); }
-    .btn-primary { 
-      background: #2c3e66; color: white; border: none; padding: 14px;
-      border-radius: 50px; font-weight: 700; font-size: 1rem;
-      cursor: pointer; transition: 0.2s; display: flex;
-      align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-primary:hover { background: #1f2f50; transform: scale(1.02); }
-    .btn-close-popup {
-      background: #e2e8f0; color: #4a5568; border: none; padding: 12px;
-      border-radius: 50px; font-weight: 600; font-size: 0.95rem;
-      cursor: pointer; transition: 0.2s; margin-top: 4px;
-    }
-    .btn-close-popup:hover { background: #cbd5e1; }
-    
-    /* MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-      z-index: 1100; align-items: center; justify-content: center;
-    }
     .modal-card {
-      background: white; border-radius: 32px; padding: 28px 24px;
-      width: 90%; max-width: 360px; text-align: center;
-      animation: modalSlide 0.2s ease;
-      box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+      background: white; border-radius: 28px; padding: 20px;
+      width: 90%; max-width: 320px; text-align: center;
     }
-    @keyframes modalSlide {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-card h3 {
-      font-size: 1.6rem; margin-bottom: 20px; color: #1e2a5e;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .modal-card input {
-      width: 100%; padding: 14px 18px; border-radius: 60px;
-      border: 2px solid #e0e7ff; font-size: 1rem; outline: none;
-      transition: 0.2s; margin-bottom: 16px;
-    }
-    .modal-card input:focus { border-color: #2a3f7e; box-shadow: 0 0 0 3px rgba(42,63,126,0.1); }
-    .modal-card button {
-      padding: 12px 20px; border-radius: 60px; font-weight: 600;
-      cursor: pointer; transition: 0.2s; border: none;
-      margin: 4px 0;
-    }
-    .btn-search { background: #2c3e66; color: white; width: 100%; }
-    .btn-search:hover { background: #1f2f50; transform: scale(1.02); }
-    .btn-close { background: #e2e8f0; color: #333; width: 100%; margin-top: 8px; }
-    .btn-close:hover { background: #cbd5e1; }
-    
-    .filter-group { text-align: left; margin: 16px 0; }
-    .filter-group label {
-      display: flex; align-items: center; gap: 10px;
-      margin: 12px 0; font-size: 1rem; color: #2d3748;
-      cursor: pointer;
-    }
-    .filter-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
-    .filter-group input[type="number"] {
-      width: 100%; padding: 10px; border-radius: 40px;
-      border: 2px solid #e0e7ff; margin-top: 8px;
-    }
-    .btn-apply { background: #2c3e66; color: white; width: 100%; margin-top: 10px; }
-    .btn-reset { background: #f59e0b; color: white; width: 100%; margin-top: 8px; }
+    .modal-card input { width: 100%; padding: 10px; border-radius: 40px; border: 1px solid #ccc; margin: 10px 0; }
+    .btn-search, .btn-apply { background: #2c3e66; color: white; width: 100%; padding: 8px; border-radius: 40px; margin: 4px 0; }
+    .btn-close { background: #e2e8f0; color: #333; width: 100%; padding: 8px; border-radius: 40px; margin-top: 6px; }
+    .btn-reset { background: #f59e0b; color: white; width: 100%; padding: 8px; border-radius: 40px; margin-top: 6px; }
+    .filter-group { text-align: left; margin: 12px 0; }
+    .filter-group label { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.85rem; }
     
     .zoom-layer {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
       z-index: 1200; align-items: center; justify-content: center; cursor: zoom-out;
     }
-    .zoom-layer img { max-width: 92%; max-height: 90%; border-radius: 20px; animation: zoomIn 0.2s ease; }
-    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .zoom-layer img { max-width: 90%; max-height: 90%; border-radius: 16px; }
     
-    /* Info filter aktif */
     .filter-info {
-      text-align: center; margin: 5px 0 15px;
-      color: #ffd966; font-size: 0.85rem;
+      text-align: center; margin: 5px auto 10px;
+      color: #ffd966; font-size: 0.7rem;
       background: rgba(0,0,0,0.3); display: inline-block;
-      padding: 4px 16px; border-radius: 30px;
-      backdrop-filter: blur(4px);
+      padding: 2px 12px; border-radius: 20px;
     }
-    .filter-container {
-      text-align: center;
-    }
-    
-    @media (max-width: 580px) { 
-      .person-card { width: 115px; } 
-      .avatar, .avatar-siluet { width: 70px; height: 70px; font-size: 42px; } 
-    }
+    .filter-container { text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="hero">
-  <h1 id="mainTitle">🌳 Silsilah Keluarga</h1>
+  <h1 id="mainTitle">🌳 Pohon Keluarga</h1>
 </div>
 <div class="marquee">
   <div class="marquee-track">
@@ -265,21 +310,23 @@
 
 <div class="toolbar">
   <button class="btn-glass" id="backBtn" style="display:none;">⬅ Kembali</button>
-  <button class="btn-glass" id="treeViewBtn">🌳 Tampilan Pohon Keluarga</button>
-  <button class="btn-glass" id="searchBtn">🔍 Cari Anggota</button>
-  <button class="btn-glass" id="filterBtn">📌 Filter & Generasi</button>
+  <button class="btn-glass" id="treeViewBtn">🌳 Tampilan Pohon</button>
+  <button class="btn-glass" id="searchBtn">🔍 Cari</button>
+  <button class="btn-glass" id="filterBtn">📌 Filter</button>
 </div>
 
 <div class="filter-container" id="filterInfoContainer"></div>
 
-<div id="treeContainer" class="tree"></div>
+<div class="tree-wrapper" id="treeWrapper">
+  <div id="treeContainer" class="tree"></div>
+</div>
 
 <!-- MODAL SEARCH -->
 <div id="searchModal" class="modal-overlay">
   <div class="modal-card">
-    <h3>🔍 Cari Anggota</h3>
-    <input type="text" id="searchInput" placeholder="Ketik nama lengkap..." autocomplete="off">
-    <button id="searchSubmitBtn" class="btn-search">Cari Sekarang</button>
+    <h3 style="font-size:1.2rem;">🔍 Cari Anggota</h3>
+    <input type="text" id="searchInput" placeholder="Ketik nama...">
+    <button id="searchSubmitBtn" class="btn-search">Cari</button>
     <button id="closeSearchBtn" class="btn-close">Tutup</button>
   </div>
 </div>
@@ -287,18 +334,16 @@
 <!-- MODAL FILTER -->
 <div id="filterModal" class="modal-overlay">
   <div class="modal-card">
-    <h3>🎛️ Filter Silsilah</h3>
+    <h3 style="font-size:1.2rem;">🎛️ Filter</h3>
     <div class="filter-group">
-      <label><input type="checkbox" id="filterHidup"> ✅ Hanya yang masih hidup</label>
+      <label><input type="checkbox" id="filterHidup"> ✅ Hanya yang hidup</label>
       <label><input type="checkbox" id="filterLaki"> 👨 Laki-laki</label>
       <label><input type="checkbox" id="filterPerempuan"> 👩 Perempuan</label>
-      <label>📊 Filter berdasarkan Generasi ke-
-        <input type="number" id="filterGenerasi" placeholder="1,2,3,4" style="width:100%; margin-top:8px;">
-      </label>
+      <label>📊 Generasi: <input type="number" id="filterGenerasi" placeholder="1-4" style="width:100%; margin-top:5px;"></label>
     </div>
-    <button id="applyFilterBtn" class="btn-apply">Terapkan Filter</button>
-    <button id="resetFilterBtn" class="btn-reset">Reset Semua</button>
-    <button id="closeFilterBtn" class="btn-close" style="margin-top:8px;">Tutup</button>
+    <button id="applyFilterBtn" class="btn-apply">Terapkan</button>
+    <button id="resetFilterBtn" class="btn-reset">Reset</button>
+    <button id="closeFilterBtn" class="btn-close">Tutup</button>
   </div>
 </div>
 
@@ -309,22 +354,19 @@
     <div class="popup-body" id="popupBody"></div>
     <div class="popup-footer">
       <button id="popupWaBtn" class="btn-wa">💬 WhatsApp</button>
-      <button id="popupSilsilahBtn" class="btn-primary">📖 Lihat Silsilah Lengkap</button>
+      <button id="popupSilsilahBtn" class="btn-primary">📖 Lihat Silsilah</button>
       <button id="closePopupBtn" class="btn-close-popup">Tutup</button>
     </div>
   </div>
 </div>
 
-<!-- ZOOM LAYER -->
 <div id="zoomLayer" class="zoom-layer" onclick="closeZoom()">
   <img id="zoomImage" src="" onclick="event.stopPropagation()">
 </div>
 
 <script>
   let globalFamily = [];
-  let currentViewMode = 'tree'; // 'tree' atau 'filtered'
-  let currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
-  
+  let currentRootId = null;
   const urlParams = new URLSearchParams(window.location.search);
   const detailId = urlParams.get('id');
 
@@ -337,176 +379,156 @@
     return parts[0];
   }
 
-  // ========== RENDER FULL TREE (Semua Generasi 1) ==========
-  function renderFullTree() {
+  // ========== MEMBANGUN POHON HIERARKIS ==========
+  function buildHierarchyTree(rootPerson) {
+    // Buat node untuk root
+    const node = {
+      person: rootPerson,
+      spouses: [],
+      children: []
+    };
+    
+    // Cari pasangan root
+    let spouseNames = rootPerson.pasangan ? rootPerson.pasangan.split('|').map(s=>s.trim()) : [];
+    let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
+    node.spouses = spouses;
+    
+    // Cari anak-anak dari root dan pasangan
+    let allChildrenIds = new Set();
+    
+    if (spouses.length > 0) {
+      spouses.forEach(spouse => {
+        let children = globalFamily.filter(c => 
+          (c.ayah === rootPerson.nama && c.ibu === spouse.nama) ||
+          (c.ibu === rootPerson.nama && c.ayah === spouse.nama)
+        );
+        children.forEach(ch => allChildrenIds.add(ch.id));
+      });
+    } else {
+      let children = globalFamily.filter(c => c.ayah === rootPerson.nama || c.ibu === rootPerson.nama);
+      children.forEach(ch => allChildrenIds.add(ch.id));
+    }
+    
+    // Rekursif untuk setiap anak
+    node.children = Array.from(allChildrenIds).map(id => {
+      let childPerson = globalFamily.find(p => p.id === id);
+      return childPerson ? buildHierarchyTree(childPerson) : null;
+    }).filter(c => c);
+    
+    return node;
+  }
+  
+  function renderHierarchyTree(node, level = 0) {
+    if (!node) return null;
+    
+    const container = document.createElement('div');
+    container.className = 'tree-branch';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+    
+    // Tampilkan person dan pasangan dalam satu baris
+    const personWrapper = document.createElement('div');
+    personWrapper.className = 'couple-group';
+    
+    // Person utama
+    personWrapper.appendChild(createSmallPersonCard(node.person));
+    
+    // Pasangan
+    if (node.spouses && node.spouses.length > 0) {
+      node.spouses.forEach(spouse => {
+        const loveSpan = document.createElement('span');
+        loveSpan.className = 'love-icon-sm';
+        loveSpan.innerHTML = '❤️';
+        loveSpan.style.margin = '0 4px';
+        personWrapper.appendChild(loveSpan);
+        personWrapper.appendChild(createSmallPersonCard(spouse));
+      });
+    }
+    
+    container.appendChild(personWrapper);
+    
+    // Anak-anak
+    if (node.children && node.children.length > 0) {
+      const childrenContainer = document.createElement('div');
+      childrenContainer.className = 'children-container';
+      childrenContainer.style.display = 'flex';
+      childrenContainer.style.gap = '20px';
+      childrenContainer.style.justifyContent = 'center';
+      childrenContainer.style.marginTop = '25px';
+      childrenContainer.style.position = 'relative';
+      
+      node.children.forEach(childNode => {
+        const childItem = document.createElement('div');
+        childItem.className = 'child-item';
+        childItem.style.position = 'relative';
+        childItem.appendChild(renderHierarchyTree(childNode, level + 1));
+        childrenContainer.appendChild(childItem);
+      });
+      
+      container.appendChild(childrenContainer);
+    }
+    
+    return container;
+  }
+  
+  function createSmallPersonCard(person) {
+    const isDead = (person.status || '').toLowerCase().includes('meninggal');
+    const card = document.createElement('div');
+    card.className = `person-card ${isDead ? 'meninggal' : ''}`;
+    card.setAttribute('data-id', person.id);
+    card.style.width = '75px';
+    card.style.padding = '5px 4px';
+    
+    let avatarHtml = '';
+    if (person.foto && person.foto !== '') {
+      avatarHtml = `<img class="avatar-sm" src="${person.foto}" onclick="event.stopPropagation(); openPopupById('${person.id}')">`;
+    } else {
+      const genderClass = person.jenis_kelamin === 'L' ? 'l' : 'p';
+      const icon = person.jenis_kelamin === 'L' ? '👨' : '👩';
+      avatarHtml = `<div class="avatar-siluet-sm ${genderClass}" onclick="event.stopPropagation(); openPopupById('${person.id}')">${icon}</div>`;
+    }
+    
+    card.innerHTML = `${avatarHtml}<div class="person-name-sm">${shortName(person.nama)}</div>`;
+    card.querySelector('.person-name-sm').onclick = (e) => { e.stopPropagation(); openPopupById(person.id); };
+    return card;
+  }
+  
+  // ========== RENDER FULL TREE (Semua Generasi 1 dengan hierarki) ==========
+  function renderFullHierarchyTree() {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
     if (!globalFamily.length) return;
-
-    let roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
+    
+    const roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
     roots.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     
-    for (let root of roots) {
-      let spouseNames = root.pasangan ? root.pasangan.split('|').map(s=>s.trim()) : [];
-      let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
-      
-      if (spouses.length === 0) {
-        createFamilyBlock(root, null, container);
-      } else {
-        for (let spouse of spouses) {
-          createFamilyBlock(root, spouse, container);
-        }
-      }
-    }
+    const treeRoot = document.createElement('div');
+    treeRoot.className = 'tree-root';
+    treeRoot.style.display = 'flex';
+    treeRoot.style.flexDirection = 'column';
+    treeRoot.style.alignItems = 'center';
+    treeRoot.style.gap = '30px';
     
-    document.getElementById('mainTitle').innerHTML = '🌳 Silsilah Keluarga';
+    roots.forEach(root => {
+      const hierarchyNode = buildHierarchyTree(root);
+      const rootBranch = renderHierarchyTree(hierarchyNode);
+      if (rootBranch) {
+        // Tambahkan garis horizontal antar pohon jika lebih dari satu
+        treeRoot.appendChild(rootBranch);
+      }
+    });
+    
+    container.appendChild(treeRoot);
+    
+    document.getElementById('mainTitle').innerHTML = '🌳 Pohon Keluarga';
     document.getElementById('backBtn').style.display = 'none';
     document.getElementById('treeViewBtn').style.display = 'inline-flex';
-    currentViewMode = 'tree';
     hideFilterInfo();
+    currentRootId = null;
   }
   
-  // ========== RENDER FILTER BY GENERASI ==========
-  function renderFilteredByGenerasi(generasi) {
-    const container = document.getElementById('treeContainer');
-    container.innerHTML = '';
-    if (!globalFamily.length) return;
-    
-    // Ambil semua orang dengan generasi yang dipilih
-    let filteredPersons = globalFamily.filter(p => p.generasi === generasi);
-    
-    if (filteredPersons.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:white; padding:40px; background:rgba(0,0,0,0.3); border-radius:30px;">
-        ⚠️ Tidak ada anggota keluarga dengan generasi ke-${generasi}
-      </div>`;
-      return;
-    }
-    
-    // Tampilkan setiap orang sebagai card terpisah (tanpa pasangan dan anak)
-    // Ini mirip dengan "daftar anggota" berdasarkan generasi
-    const gridContainer = document.createElement('div');
-    gridContainer.style.display = 'grid';
-    gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
-    gridContainer.style.gap = '20px';
-    gridContainer.style.justifyItems = 'center';
-    gridContainer.style.maxWidth = '900px';
-    gridContainer.style.margin = '0 auto';
-    
-    filteredPersons.forEach(person => {
-      gridContainer.appendChild(createPersonEl(person));
-    });
-    
-    container.appendChild(gridContainer);
-    
-    document.getElementById('mainTitle').innerHTML = `📋 Generasi ${generasi} (${filteredPersons.length} anggota)`;
-    document.getElementById('backBtn').style.display = 'inline-flex';
-    document.getElementById('treeViewBtn').style.display = 'inline-flex';
-    currentViewMode = 'filtered';
-    showFilterInfo(`Menampilkan ${filteredPersons.length} anggota dari generasi ${generasi}`);
-  }
-  
-  // ========== RENDER FILTER LANJUTAN (Hidup, Laki/Perempuan) ==========
-  function renderAdvancedFilter() {
-    const container = document.getElementById('treeContainer');
-    container.innerHTML = '';
-    if (!globalFamily.length) return;
-    
-    const hidup = currentFilterParams.hidup;
-    const laki = currentFilterParams.laki;
-    const perempuan = currentFilterParams.perempuan;
-    const generasi = currentFilterParams.generasi;
-    
-    let filteredPersons = [...globalFamily];
-    
-    // Filter generasi
-    if (generasi && generasi !== '') {
-      filteredPersons = filteredPersons.filter(p => p.generasi === generasi);
-    }
-    
-    // Filter hidup/meninggal
-    if (hidup) {
-      filteredPersons = filteredPersons.filter(p => !(p.status || '').toLowerCase().includes('meninggal'));
-    }
-    
-    // Filter gender
-    if (laki && !perempuan) {
-      filteredPersons = filteredPersons.filter(p => p.jenis_kelamin === 'L');
-    } else if (perempuan && !laki) {
-      filteredPersons = filteredPersons.filter(p => p.jenis_kelamin === 'P');
-    }
-    
-    if (filteredPersons.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:white; padding:40px; background:rgba(0,0,0,0.3); border-radius:30px;">
-        ⚠️ Tidak ada anggota keluarga yang sesuai dengan filter yang dipilih
-      </div>`;
-      return;
-    }
-    
-    // Tampilkan sebagai grid
-    const gridContainer = document.createElement('div');
-    gridContainer.style.display = 'grid';
-    gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
-    gridContainer.style.gap = '20px';
-    gridContainer.style.justifyItems = 'center';
-    gridContainer.style.maxWidth = '900px';
-    gridContainer.style.margin = '0 auto';
-    
-    filteredPersons.forEach(person => {
-      gridContainer.appendChild(createPersonEl(person));
-    });
-    
-    container.appendChild(gridContainer);
-    
-    let filterText = [];
-    if (generasi && generasi !== '') filterText.push(`Generasi ${generasi}`);
-    if (hidup) filterText.push(`Hidup`);
-    if (laki && !perempuan) filterText.push(`Laki-laki`);
-    if (perempuan && !laki) filterText.push(`Perempuan`);
-    
-    document.getElementById('mainTitle').innerHTML = `📋 Filter: ${filterText.join(', ')} (${filteredPersons.length} anggota)`;
-    document.getElementById('backBtn').style.display = 'inline-flex';
-    document.getElementById('treeViewBtn').style.display = 'inline-flex';
-    currentViewMode = 'filtered';
-    showFilterInfo(`Menampilkan ${filteredPersons.length} anggota | ${filterText.join(', ')}`);
-  }
-
-  function createFamilyBlock(root, spouse, container) {
-    const card = document.createElement('div');
-    card.className = 'family-card';
-    card.setAttribute('data-root', root.id);
-    
-    const coupleDiv = document.createElement('div');
-    coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(root));
-    if (spouse) {
-      const love = document.createElement('span');
-      love.className = 'love-badge';
-      love.innerHTML = '❤️';
-      coupleDiv.appendChild(love);
-      coupleDiv.appendChild(createPersonEl(spouse));
-    }
-    card.appendChild(coupleDiv);
-    
-    let children = [];
-    if (spouse) {
-      children = globalFamily.filter(c => 
-        (c.ayah === root.nama && c.ibu === spouse.nama) || 
-        (c.ibu === root.nama && c.ayah === spouse.nama)
-      );
-    } else {
-      children = globalFamily.filter(c => c.ayah === root.nama || c.ibu === root.nama);
-    }
-    children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
-    if (children.length) {
-      const grid = document.createElement('div');
-      grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
-      card.appendChild(grid);
-    }
-    container.appendChild(card);
-  }
-
-  // ========== DETAIL MODE (Individual) ==========
+  // ========== DETAIL MODE (Individual dengan breadcrumb) ==========
   function renderDetailMode(personId) {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
@@ -516,24 +538,33 @@
     document.getElementById('mainTitle').innerHTML = `📌 Silsilah: ${shortName(person.nama)}`;
     document.getElementById('backBtn').style.display = 'inline-flex';
     document.getElementById('treeViewBtn').style.display = 'inline-flex';
-    currentViewMode = 'detail';
     hideFilterInfo();
     
+    // Tampilkan keluarga inti orang tersebut (tanpa garis hierarki)
     const card = document.createElement('div');
     card.className = 'family-card';
+    card.style.background = 'rgba(255,255,255,0.15)';
+    card.style.padding = '15px';
+    card.style.borderRadius = '24px';
+    
     const coupleDiv = document.createElement('div');
-    coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(person));
+    coupleDiv.style.display = 'flex';
+    coupleDiv.style.justifyContent = 'center';
+    coupleDiv.style.gap = '20px';
+    coupleDiv.style.alignItems = 'center';
+    coupleDiv.style.flexWrap = 'wrap';
+    
+    coupleDiv.appendChild(createSmallPersonCard(person));
     
     let spouseNames = person.pasangan ? person.pasangan.split('|').map(s=>s.trim()) : [];
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
     if (spouses.length) {
       spouses.forEach(sp => {
         const loveSpan = document.createElement('span');
-        loveSpan.className = 'love-badge';
         loveSpan.innerHTML = '❤️';
+        loveSpan.style.fontSize = '16px';
         coupleDiv.appendChild(loveSpan);
-        coupleDiv.appendChild(createPersonEl(sp));
+        coupleDiv.appendChild(createSmallPersonCard(sp));
       });
     }
     card.appendChild(coupleDiv);
@@ -542,14 +573,18 @@
     children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     if (children.length) {
       const grid = document.createElement('div');
-      grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(80px, 1fr))';
+      grid.style.gap = '12px';
+      grid.style.marginTop = '20px';
+      grid.style.justifyItems = 'center';
+      children.forEach(ch => grid.appendChild(createSmallPersonCard(ch)));
       card.appendChild(grid);
     }
     container.appendChild(card);
     showBreadcrumb(person);
   }
-
+  
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
     if (old) old.remove();
@@ -559,236 +594,162 @@
     
     // Garis Ayah
     let ayahStack = [];
-    let currentAyah = person;
-    while (currentAyah) {
-      ayahStack.push({ id: currentAyah.id, nama: currentAyah.nama });
-      let ayahObj = globalFamily.find(p => p.nama === currentAyah.ayah);
-      if (!ayahObj) break;
-      currentAyah = ayahObj;
-    }
-    let ayahPath = ayahStack.reverse();
-    
-    // Garis Ibu
-    let ibuStack = [];
     let current = person;
-    ibuStack.push({ id: current.id, nama: current.nama });
-    
-    if (current.ibu) {
-      let ibuObj = globalFamily.find(p => p.nama === current.ibu);
-      if (ibuObj) {
-        ibuStack.push({ id: ibuObj.id, nama: ibuObj.nama });
-        current = ibuObj;
-      }
-    }
-    
     while (current) {
+      ayahStack.unshift({ id: current.id, nama: current.nama });
       let ayahObj = globalFamily.find(p => p.nama === current.ayah);
       if (!ayahObj) break;
-      ibuStack.push({ id: ayahObj.id, nama: ayahObj.nama });
       current = ayahObj;
     }
     
-    let ibuPath = ibuStack.reverse();
-    
-    const ayahHtml = ayahPath.map((p, idx) => {
-      if (idx === ayahPath.length - 1) {
-        return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
+    // Garis Ibu
+    let ibuStack = [person];
+    let currentIbu = person;
+    if (currentIbu.ibu) {
+      let ibuObj = globalFamily.find(p => p.nama === currentIbu.ibu);
+      if (ibuObj) {
+        ibuStack.push(ibuObj);
+        currentIbu = ibuObj;
       }
-      return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
-    }).join('');
+    }
+    while (currentIbu) {
+      let ayahObj = globalFamily.find(p => p.nama === currentIbu.ayah);
+      if (!ayahObj) break;
+      ibuStack.push(ayahObj);
+      currentIbu = ayahObj;
+    }
     
-    const ibuHtml = ibuPath.map((p, idx) => {
-      if (idx === ibuPath.length - 1) {
-        return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
-      }
-      return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
-    }).join('');
+    const ayahHtml = ayahStack.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ');
+    const ibuHtml = ibuStack.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ');
     
     breadDiv.innerHTML = `
-      <div class="bread-line"><strong>👨‍🦳 Garis Ayah:</strong> ${ayahHtml}</div>
-      <div class="bread-line"><strong>👩‍🦳 Garis Ibu:</strong> ${ibuHtml}</div>
+      <div class="bread-line"><strong>👨 Ayah:</strong> ${ayahHtml}</div>
+      <div class="bread-line"><strong>👩 Ibu:</strong> ${ibuHtml}</div>
     `;
     
     const hero = document.querySelector('.hero');
     hero.insertAdjacentElement('afterend', breadDiv);
-    
-    breadDiv.querySelectorAll('span[data-id]').forEach(span => {
-      span.addEventListener('click', (e) => {
-        e.stopPropagation();
-        let id = span.getAttribute('data-id');
-        if (id && id !== '0') window.location.href = `?id=${id}`;
-      });
+    breadDiv.querySelectorAll('span').forEach(span => {
+      span.onclick = () => { let id = span.getAttribute('data-id'); if(id && id !== '0') window.location.href = `?id=${id}`; };
     });
   }
-
-  function createPersonEl(p) {
-    const isDead = (p.status || '').toLowerCase().includes('meninggal');
-    const card = document.createElement('div');
-    card.className = `person-card ${isDead ? 'meninggal' : ''}`;
-    card.setAttribute('data-id', p.id);
-    
-    let avatarHtml = '';
-    if (p.foto && p.foto !== '') {
-      avatarHtml = `<img class="avatar" src="${p.foto}" onclick="event.stopPropagation(); openPopupById('${p.id}')">`;
-    } else {
-      const genderClass = p.jenis_kelamin === 'L' ? 'l' : 'p';
-      const icon = p.jenis_kelamin === 'L' ? '👨' : '👩';
-      avatarHtml = `<div class="avatar-siluet ${genderClass}" onclick="event.stopPropagation(); openPopupById('${p.id}')">${icon}</div>`;
-    }
-    card.innerHTML = `${avatarHtml}<div class="person-name">${shortName(p.nama)}</div>`;
-    card.querySelector('.person-name').onclick = (e) => { e.stopPropagation(); openPopupById(p.id); };
-    return card;
-  }
-
-  // Filter UI Helpers
-  function showFilterInfo(text) {
-    let infoDiv = document.getElementById('filterInfoContainer');
-    infoDiv.innerHTML = `<div class="filter-info">🔍 ${text}</div>`;
-  }
   
-  function hideFilterInfo() {
-    document.getElementById('filterInfoContainer').innerHTML = '';
-  }
-
-  // Popup Detail
-  function openPopupById(id) {
-    const p = globalFamily.find(x => x.id === id);
-    if (!p) return;
-    
-    document.body.classList.add('lock');
-    const headerDiv = document.getElementById('popupHeader');
-    const bodyDiv = document.getElementById('popupBody');
-    
-    let headerContent = '';
-    if (p.foto && p.foto !== '') {
-      headerContent = `<img src="${p.foto}" onclick="event.stopPropagation(); openZoom('${p.foto}')"><br><strong>${p.nama}</strong>`;
-    } else {
-      const icon = p.jenis_kelamin === 'L' ? '👨' : '👩';
-      headerContent = `<div class="popup-avatar-lg">${icon}</div><strong>${p.nama}</strong>`;
-    }
-    headerDiv.innerHTML = headerContent;
-    
-    bodyDiv.innerHTML = `
-      <div class="info-section"><div class="info-title">🧬 Biodata</div><p>Jenis Kelamin: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</p></div>
-      <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div><p>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Jumlah Anak: ${p.jumlah_anak||'-'}</p></div>
-      <div class="info-section"><div class="info-title">📍 Lahir & Domisili</div><p>Tahun: ${p.tanggal_lahir||'-'} / ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</p></div>
-      <div class="info-section"><div class="info-title">📞 Kontak</div><p>WA: ${p.wa||'-'}</p></div>
-    `;
-    
-    document.getElementById('popupWaBtn').onclick = () => { 
-      if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); 
-      else alert('No WhatsApp tidak tersedia'); 
-    };
-    document.getElementById('popupSilsilahBtn').onclick = () => { 
-      closePopup(); 
-      window.location.href = `?id=${p.id}`; 
-    };
-    document.getElementById('globalPopup').style.display = 'flex';
-  }
-  
-  function closePopup() { 
-    document.getElementById('globalPopup').style.display = 'none'; 
-    document.body.classList.remove('lock');
-  }
-  
-  function openZoom(src) { 
-    const z = document.getElementById('zoomLayer'); 
-    document.getElementById('zoomImage').src = src; 
-    z.style.display = 'flex'; 
-    document.body.classList.add('lock');
-  }
-  
-  function closeZoom() { 
-    document.getElementById('zoomLayer').style.display = 'none'; 
-    document.body.classList.remove('lock');
-  }
-  
-  // Search & Modal helpers
-  function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; document.body.classList.add('lock'); }
-  function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; document.body.classList.remove('lock'); }
-  function openFilterModal() { document.getElementById('filterModal').style.display = 'flex'; document.body.classList.add('lock'); }
-  function closeFilterModal() { document.getElementById('filterModal').style.display = 'none'; document.body.classList.remove('lock'); }
-  
-  function searchAndGo() {
-    let kw = document.getElementById('searchInput').value.trim().toLowerCase();
-    if (!kw) { alert('Masukkan nama terlebih dahulu'); return; }
-    let found = globalFamily.find(p => p.nama.toLowerCase().includes(kw));
-    if (found) { 
-      closeSearchModal(); 
-      window.location.href = `?id=${found.id}`; 
-    } else { 
-      alert('Nama tidak ditemukan dalam silsilah'); 
-    }
-  }
-  
+  // Filter functions (sederhana untuk mode pohon)
   function applyFilterAndRender() {
     const generasi = document.getElementById('filterGenerasi').value;
     const hidup = document.getElementById('filterHidup').checked;
     const laki = document.getElementById('filterLaki').checked;
     const perempuan = document.getElementById('filterPerempuan').checked;
     
-    currentFilterParams = { generasi, hidup, laki, perempuan };
+    let filtered = [...globalFamily];
+    if (generasi) filtered = filtered.filter(p => p.generasi === generasi);
+    if (hidup) filtered = filtered.filter(p => !(p.status || '').toLowerCase().includes('meninggal'));
+    if (laki && !perempuan) filtered = filtered.filter(p => p.jenis_kelamin === 'L');
+    if (perempuan && !laki) filtered = filtered.filter(p => p.jenis_kelamin === 'P');
     
-    // Jika hanya generasi yang dipilih (tanpa filter hidup/gender) dan tidak ada filter lainnya
-    const hasGenderFilter = laki || perempuan;
-    const hasStatusFilter = hidup;
-    
-    if (generasi && !hasGenderFilter && !hasStatusFilter) {
-      renderFilteredByGenerasi(generasi);
-    } else {
-      renderAdvancedFilter();
+    if (filtered.length === 0) {
+      document.getElementById('treeContainer').innerHTML = `<div style="text-align:center; color:white; padding:40px;">Tidak ada data</div>`;
+      return;
     }
+    
+    // Tampilkan sebagai grid sederhana
+    const container = document.getElementById('treeContainer');
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
+    grid.style.gap = '15px';
+    grid.style.justifyItems = 'center';
+    grid.style.maxWidth = '1000px';
+    grid.style.margin = '0 auto';
+    
+    filtered.forEach(p => grid.appendChild(createSmallPersonCard(p)));
+    container.appendChild(grid);
+    
+    let filterText = [];
+    if (generasi) filterText.push(`Gen ${generasi}`);
+    if (hidup) filterText.push('Hidup');
+    if (laki && !perempuan) filterText.push('Laki');
+    if (perempuan && !laki) filterText.push('Perempuan');
+    document.getElementById('mainTitle').innerHTML = `📋 Filter: ${filterText.join(', ')} (${filtered.length})`;
+    document.getElementById('backBtn').style.display = 'inline-flex';
+    showFilterInfo(`${filtered.length} anggota ditemukan`);
   }
   
   function resetAndGoToFullTree() {
-    // Reset checkbox dan input
     document.getElementById('filterHidup').checked = false;
     document.getElementById('filterLaki').checked = false;
     document.getElementById('filterPerempuan').checked = false;
     document.getElementById('filterGenerasi').value = '';
-    
-    currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
-    renderFullTree();
+    renderFullHierarchyTree();
+    hideFilterInfo();
   }
   
   function goToFullTree() {
-    if (detailId) {
-      window.location.href = '.';
-    } else {
-      resetAndGoToFullTree();
-    }
+    if (detailId) window.location.href = '.';
+    else resetAndGoToFullTree();
   }
   
-  // Close modal ketika klik di luar area
-  document.getElementById('searchModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSearchModal();
-  });
-  document.getElementById('filterModal').addEventListener('click', function(e) {
-    if (e.target === this) closeFilterModal();
-  });
-  document.getElementById('globalPopup').addEventListener('click', function(e) {
-    if (e.target === this) closePopup();
-  });
+  function showFilterInfo(text) {
+    document.getElementById('filterInfoContainer').innerHTML = `<div class="filter-info">🔍 ${text}</div>`;
+  }
+  function hideFilterInfo() { document.getElementById('filterInfoContainer').innerHTML = ''; }
   
-  // ========== INITIAL LOAD ==========
+  // Popup & Zoom
+  function openPopupById(id) {
+    const p = globalFamily.find(x => x.id === id);
+    if (!p) return;
+    document.body.classList.add('lock');
+    const headerDiv = document.getElementById('popupHeader');
+    const bodyDiv = document.getElementById('popupBody');
+    headerDiv.innerHTML = p.foto ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br><strong>${p.nama}</strong>` : `<div class="popup-avatar-lg" style="width:70px;height:70px;font-size:40px;margin:0 auto;">${p.jenis_kelamin==='L'?'👨':'👩'}</div><strong>${p.nama}</strong>`;
+    bodyDiv.innerHTML = `<div class="info-section"><div class="info-title">🧬 Biodata</div><p>JK: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</p></div>
+      <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div><p>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Anak: ${p.jumlah_anak||'-'}</p></div>
+      <div class="info-section"><div class="info-title">📍 Lokasi</div><p>Lahir: ${p.tanggal_lahir||'-'} ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</p></div>
+      <div class="info-section"><div class="info-title">📞 Kontak</div><p>WA: ${p.wa||'-'}</p></div>`;
+    document.getElementById('popupWaBtn').onclick = () => { if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); else alert('No WA'); };
+    document.getElementById('popupSilsilahBtn').onclick = () => { closePopup(); window.location.href = `?id=${p.id}`; };
+    document.getElementById('globalPopup').style.display = 'flex';
+  }
+  function closePopup() { document.getElementById('globalPopup').style.display = 'none'; document.body.classList.remove('lock'); }
+  function openZoom(src) { document.getElementById('zoomImage').src = src; document.getElementById('zoomLayer').style.display = 'flex'; document.body.classList.add('lock'); }
+  function closeZoom() { document.getElementById('zoomLayer').style.display = 'none'; document.body.classList.remove('lock'); }
+  
+  // Search
+  function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; document.body.classList.add('lock'); }
+  function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; document.body.classList.remove('lock'); }
+  function openFilterModal() { document.getElementById('filterModal').style.display = 'flex'; document.body.classList.add('lock'); }
+  function closeFilterModal() { document.getElementById('filterModal').style.display = 'none'; document.body.classList.remove('lock'); }
+  function searchAndGo() {
+    let kw = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!kw) { alert('Masukkan nama'); return; }
+    let found = globalFamily.find(p => p.nama.toLowerCase().includes(kw));
+    if (found) { closeSearchModal(); window.location.href = `?id=${found.id}`; }
+    else alert('Tidak ditemukan');
+  }
+  
+  // Close modal klik luar
+  document.getElementById('searchModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeSearchModal(); });
+  document.getElementById('filterModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeFilterModal(); });
+  document.getElementById('globalPopup').addEventListener('click', e => { if(e.target === e.currentTarget) closePopup(); });
+  
+  // Drag to scroll
+  const wrapper = document.getElementById('treeWrapper');
+  let isDown = false, startX, scrollLeft;
+  wrapper.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - wrapper.offsetLeft; scrollLeft = wrapper.scrollLeft; });
+  wrapper.addEventListener('mouseleave', () => { isDown = false; });
+  wrapper.addEventListener('mouseup', () => { isDown = false; });
+  wrapper.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - wrapper.offsetLeft; const walk = (x - startX) * 1; wrapper.scrollLeft = scrollLeft - walk; });
+  
+  // ========== INIT ==========
   fetch('data.json?v='+Date.now())
     .then(res => res.json())
     .then(data => {
       globalFamily = data;
-      if (detailId) {
-        renderDetailMode(detailId);
-      } else {
-        renderFullTree();
-      }
+      if (detailId) renderDetailMode(detailId);
+      else renderFullHierarchyTree();
       
-      // Event listeners
-      document.getElementById('backBtn').onclick = () => {
-        if (currentViewMode === 'detail') {
-          window.location.href = '.';
-        } else if (currentViewMode === 'filtered') {
-          renderFullTree();
-        }
-      };
+      document.getElementById('backBtn').onclick = () => { if(detailId || currentRootId) window.location.href = '.'; else renderFullHierarchyTree(); };
       document.getElementById('treeViewBtn').onclick = goToFullTree;
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
@@ -796,17 +757,10 @@
       document.getElementById('closeFilterBtn').onclick = closeFilterModal;
       document.getElementById('searchSubmitBtn').onclick = searchAndGo;
       document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchAndGo(); });
-      document.getElementById('applyFilterBtn').onclick = () => { 
-        applyFilterAndRender(); 
-        closeFilterModal(); 
-      };
-      document.getElementById('resetFilterBtn').onclick = () => { 
-        resetAndGoToFullTree(); 
-        closeFilterModal(); 
-      };
+      document.getElementById('applyFilterBtn').onclick = () => { applyFilterAndRender(); closeFilterModal(); };
+      document.getElementById('resetFilterBtn').onclick = () => { resetAndGoToFullTree(); closeFilterModal(); };
       document.getElementById('closePopupBtn').onclick = closePopup;
-    })
-    .catch(e => console.error('Gagal load JSON:', e));
+    });
 </script>
 </body>
 </html>
