@@ -233,6 +233,18 @@
     .zoom-layer img { max-width: 92%; max-height: 90%; border-radius: 20px; animation: zoomIn 0.2s ease; }
     @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     
+    /* Info filter aktif */
+    .filter-info {
+      text-align: center; margin: 5px 0 15px;
+      color: #ffd966; font-size: 0.85rem;
+      background: rgba(0,0,0,0.3); display: inline-block;
+      padding: 4px 16px; border-radius: 30px;
+      backdrop-filter: blur(4px);
+    }
+    .filter-container {
+      text-align: center;
+    }
+    
     @media (max-width: 580px) { 
       .person-card { width: 115px; } 
       .avatar, .avatar-siluet { width: 70px; height: 70px; font-size: 42px; } 
@@ -253,9 +265,12 @@
 
 <div class="toolbar">
   <button class="btn-glass" id="backBtn" style="display:none;">⬅ Kembali</button>
+  <button class="btn-glass" id="treeViewBtn">🌳 Tampilan Pohon Keluarga</button>
   <button class="btn-glass" id="searchBtn">🔍 Cari Anggota</button>
   <button class="btn-glass" id="filterBtn">📌 Filter & Generasi</button>
 </div>
+
+<div class="filter-container" id="filterInfoContainer"></div>
 
 <div id="treeContainer" class="tree"></div>
 
@@ -277,7 +292,9 @@
       <label><input type="checkbox" id="filterHidup"> ✅ Hanya yang masih hidup</label>
       <label><input type="checkbox" id="filterLaki"> 👨 Laki-laki</label>
       <label><input type="checkbox" id="filterPerempuan"> 👩 Perempuan</label>
-      <label>📊 Generasi ke-<input type="number" id="filterGenerasi" placeholder="contoh: 2" style="width:80px; display:inline-block; margin-left:8px;"></label>
+      <label>📊 Filter berdasarkan Generasi ke-
+        <input type="number" id="filterGenerasi" placeholder="1,2,3,4" style="width:100%; margin-top:8px;">
+      </label>
     </div>
     <button id="applyFilterBtn" class="btn-apply">Terapkan Filter</button>
     <button id="resetFilterBtn" class="btn-reset">Reset Semua</button>
@@ -305,12 +322,8 @@
 
 <script>
   let globalFamily = [];
-  let currentFilter = {
-    hidup: false,
-    laki: false,
-    perempuan: false,
-    generasi: ''
-  };
+  let currentViewMode = 'tree'; // 'tree' atau 'filtered'
+  let currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
   
   const urlParams = new URLSearchParams(window.location.search);
   const detailId = urlParams.get('id');
@@ -324,8 +337,8 @@
     return parts[0];
   }
 
-  // ========== RENDER UTAMA ==========
-  function renderMainTree() {
+  // ========== RENDER FULL TREE (Semua Generasi 1) ==========
+  function renderFullTree() {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
     if (!globalFamily.length) return;
@@ -346,8 +359,115 @@
       }
     }
     
-    // Terapkan filter setelah render
-    applyFiltersToDOM();
+    document.getElementById('mainTitle').innerHTML = '🌳 Silsilah Keluarga';
+    document.getElementById('backBtn').style.display = 'none';
+    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentViewMode = 'tree';
+    hideFilterInfo();
+  }
+  
+  // ========== RENDER FILTER BY GENERASI ==========
+  function renderFilteredByGenerasi(generasi) {
+    const container = document.getElementById('treeContainer');
+    container.innerHTML = '';
+    if (!globalFamily.length) return;
+    
+    // Ambil semua orang dengan generasi yang dipilih
+    let filteredPersons = globalFamily.filter(p => p.generasi === generasi);
+    
+    if (filteredPersons.length === 0) {
+      container.innerHTML = `<div style="text-align:center; color:white; padding:40px; background:rgba(0,0,0,0.3); border-radius:30px;">
+        ⚠️ Tidak ada anggota keluarga dengan generasi ke-${generasi}
+      </div>`;
+      return;
+    }
+    
+    // Tampilkan setiap orang sebagai card terpisah (tanpa pasangan dan anak)
+    // Ini mirip dengan "daftar anggota" berdasarkan generasi
+    const gridContainer = document.createElement('div');
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+    gridContainer.style.gap = '20px';
+    gridContainer.style.justifyItems = 'center';
+    gridContainer.style.maxWidth = '900px';
+    gridContainer.style.margin = '0 auto';
+    
+    filteredPersons.forEach(person => {
+      gridContainer.appendChild(createPersonEl(person));
+    });
+    
+    container.appendChild(gridContainer);
+    
+    document.getElementById('mainTitle').innerHTML = `📋 Generasi ${generasi} (${filteredPersons.length} anggota)`;
+    document.getElementById('backBtn').style.display = 'inline-flex';
+    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentViewMode = 'filtered';
+    showFilterInfo(`Menampilkan ${filteredPersons.length} anggota dari generasi ${generasi}`);
+  }
+  
+  // ========== RENDER FILTER LANJUTAN (Hidup, Laki/Perempuan) ==========
+  function renderAdvancedFilter() {
+    const container = document.getElementById('treeContainer');
+    container.innerHTML = '';
+    if (!globalFamily.length) return;
+    
+    const hidup = currentFilterParams.hidup;
+    const laki = currentFilterParams.laki;
+    const perempuan = currentFilterParams.perempuan;
+    const generasi = currentFilterParams.generasi;
+    
+    let filteredPersons = [...globalFamily];
+    
+    // Filter generasi
+    if (generasi && generasi !== '') {
+      filteredPersons = filteredPersons.filter(p => p.generasi === generasi);
+    }
+    
+    // Filter hidup/meninggal
+    if (hidup) {
+      filteredPersons = filteredPersons.filter(p => !(p.status || '').toLowerCase().includes('meninggal'));
+    }
+    
+    // Filter gender
+    if (laki && !perempuan) {
+      filteredPersons = filteredPersons.filter(p => p.jenis_kelamin === 'L');
+    } else if (perempuan && !laki) {
+      filteredPersons = filteredPersons.filter(p => p.jenis_kelamin === 'P');
+    }
+    
+    if (filteredPersons.length === 0) {
+      container.innerHTML = `<div style="text-align:center; color:white; padding:40px; background:rgba(0,0,0,0.3); border-radius:30px;">
+        ⚠️ Tidak ada anggota keluarga yang sesuai dengan filter yang dipilih
+      </div>`;
+      return;
+    }
+    
+    // Tampilkan sebagai grid
+    const gridContainer = document.createElement('div');
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+    gridContainer.style.gap = '20px';
+    gridContainer.style.justifyItems = 'center';
+    gridContainer.style.maxWidth = '900px';
+    gridContainer.style.margin = '0 auto';
+    
+    filteredPersons.forEach(person => {
+      gridContainer.appendChild(createPersonEl(person));
+    });
+    
+    container.appendChild(gridContainer);
+    
+    let filterText = [];
+    if (generasi && generasi !== '') filterText.push(`Generasi ${generasi}`);
+    if (hidup) filterText.push(`Hidup`);
+    if (laki && !perempuan) filterText.push(`Laki-laki`);
+    if (perempuan && !laki) filterText.push(`Perempuan`);
+    
+    document.getElementById('mainTitle').innerHTML = `📋 Filter: ${filterText.join(', ')} (${filteredPersons.length} anggota)`;
+    document.getElementById('backBtn').style.display = 'inline-flex';
+    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentViewMode = 'filtered';
+    showFilterInfo(`Menampilkan ${filteredPersons.length} anggota | ${filterText.join(', ')}`);
   }
 
   function createFamilyBlock(root, spouse, container) {
@@ -386,7 +506,7 @@
     container.appendChild(card);
   }
 
-  // ========== DETAIL MODE ==========
+  // ========== DETAIL MODE (Individual) ==========
   function renderDetailMode(personId) {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
@@ -395,6 +515,9 @@
     
     document.getElementById('mainTitle').innerHTML = `📌 Silsilah: ${shortName(person.nama)}`;
     document.getElementById('backBtn').style.display = 'inline-flex';
+    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentViewMode = 'detail';
+    hideFilterInfo();
     
     const card = document.createElement('div');
     card.className = 'family-card';
@@ -425,14 +548,8 @@
     }
     container.appendChild(card);
     showBreadcrumb(person);
-    
-    // Terapkan filter setelah render
-    applyFiltersToDOM();
   }
 
-  /**
-   * BREADCRUMB: dari yang paling tua ke yang paling muda
-   */
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
     if (old) old.remove();
@@ -440,7 +557,7 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // ===== GARIS AYAH =====
+    // Garis Ayah
     let ayahStack = [];
     let currentAyah = person;
     while (currentAyah) {
@@ -451,7 +568,7 @@
     }
     let ayahPath = ayahStack.reverse();
     
-    // ===== GARIS IBU =====
+    // Garis Ibu
     let ibuStack = [];
     let current = person;
     ibuStack.push({ id: current.id, nama: current.nama });
@@ -473,7 +590,6 @@
     
     let ibuPath = ibuStack.reverse();
     
-    // Render
     const ayahHtml = ayahPath.map((p, idx) => {
       if (idx === ayahPath.length - 1) {
         return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
@@ -510,9 +626,6 @@
     const card = document.createElement('div');
     card.className = `person-card ${isDead ? 'meninggal' : ''}`;
     card.setAttribute('data-id', p.id);
-    card.setAttribute('data-jenis', p.jenis_kelamin);
-    card.setAttribute('data-generasi', p.generasi);
-    card.setAttribute('data-status', p.status || '');
     
     let avatarHtml = '';
     if (p.foto && p.foto !== '') {
@@ -527,77 +640,14 @@
     return card;
   }
 
-  // ========== FILTER FUNCTION ==========
-  function applyFiltersToDOM() {
-    const hidup = document.getElementById('filterHidup').checked;
-    const laki = document.getElementById('filterLaki').checked;
-    const perempuan = document.getElementById('filterPerempuan').checked;
-    const gen = document.getElementById('filterGenerasi').value;
-    
-    // Simpan ke currentFilter
-    currentFilter = { hidup, laki, perempuan, generasi: gen };
-    
-    // Tentukan mode gender
-    let genderFilter = null;
-    if (laki && !perempuan) genderFilter = 'L';
-    if (perempuan && !laki) genderFilter = 'P';
-    
-    // Loop semua person card
-    document.querySelectorAll('.person-card').forEach(card => {
-      let id = card.getAttribute('data-id');
-      let data = globalFamily.find(x => x.id === id);
-      if (!data) return;
-      
-      let show = true;
-      
-      // Filter hidup/meninggal
-      if (hidup && (data.status || '').toLowerCase().includes('meninggal')) {
-        show = false;
-      }
-      
-      // Filter gender
-      if (genderFilter && data.jenis_kelamin !== genderFilter) {
-        show = false;
-      }
-      
-      // Filter generasi
-      if (gen && data.generasi !== gen) {
-        show = false;
-      }
-      
-      if (show) {
-        card.classList.remove('hidden-person');
-      } else {
-        card.classList.add('hidden-person');
-      }
-    });
-    
-    // Sembunyikan family card yang tidak memiliki person visible
-    document.querySelectorAll('.family-card').forEach(card => {
-      const visiblePersons = card.querySelectorAll('.person-card:not(.hidden-person)');
-      if (visiblePersons.length === 0) {
-        card.classList.add('hidden-family');
-      } else {
-        card.classList.remove('hidden-family');
-      }
-    });
+  // Filter UI Helpers
+  function showFilterInfo(text) {
+    let infoDiv = document.getElementById('filterInfoContainer');
+    infoDiv.innerHTML = `<div class="filter-info">🔍 ${text}</div>`;
   }
   
-  function resetFilters() {
-    document.getElementById('filterHidup').checked = false;
-    document.getElementById('filterLaki').checked = false;
-    document.getElementById('filterPerempuan').checked = false;
-    document.getElementById('filterGenerasi').value = '';
-    
-    // Reset semua hidden class
-    document.querySelectorAll('.person-card').forEach(card => {
-      card.classList.remove('hidden-person');
-    });
-    document.querySelectorAll('.family-card').forEach(card => {
-      card.classList.remove('hidden-family');
-    });
-    
-    currentFilter = { hidup: false, laki: false, perempuan: false, generasi: '' };
+  function hideFilterInfo() {
+    document.getElementById('filterInfoContainer').innerHTML = '';
   }
 
   // Popup Detail
@@ -671,6 +721,44 @@
     }
   }
   
+  function applyFilterAndRender() {
+    const generasi = document.getElementById('filterGenerasi').value;
+    const hidup = document.getElementById('filterHidup').checked;
+    const laki = document.getElementById('filterLaki').checked;
+    const perempuan = document.getElementById('filterPerempuan').checked;
+    
+    currentFilterParams = { generasi, hidup, laki, perempuan };
+    
+    // Jika hanya generasi yang dipilih (tanpa filter hidup/gender) dan tidak ada filter lainnya
+    const hasGenderFilter = laki || perempuan;
+    const hasStatusFilter = hidup;
+    
+    if (generasi && !hasGenderFilter && !hasStatusFilter) {
+      renderFilteredByGenerasi(generasi);
+    } else {
+      renderAdvancedFilter();
+    }
+  }
+  
+  function resetAndGoToFullTree() {
+    // Reset checkbox dan input
+    document.getElementById('filterHidup').checked = false;
+    document.getElementById('filterLaki').checked = false;
+    document.getElementById('filterPerempuan').checked = false;
+    document.getElementById('filterGenerasi').value = '';
+    
+    currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
+    renderFullTree();
+  }
+  
+  function goToFullTree() {
+    if (detailId) {
+      window.location.href = '.';
+    } else {
+      resetAndGoToFullTree();
+    }
+  }
+  
   // Close modal ketika klik di luar area
   document.getElementById('searchModal').addEventListener('click', function(e) {
     if (e.target === this) closeSearchModal();
@@ -690,11 +778,18 @@
       if (detailId) {
         renderDetailMode(detailId);
       } else {
-        renderMainTree();
+        renderFullTree();
       }
       
       // Event listeners
-      document.getElementById('backBtn').onclick = () => window.location.href = '.';
+      document.getElementById('backBtn').onclick = () => {
+        if (currentViewMode === 'detail') {
+          window.location.href = '.';
+        } else if (currentViewMode === 'filtered') {
+          renderFullTree();
+        }
+      };
+      document.getElementById('treeViewBtn').onclick = goToFullTree;
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
       document.getElementById('closeSearchBtn').onclick = closeSearchModal;
@@ -702,11 +797,11 @@
       document.getElementById('searchSubmitBtn').onclick = searchAndGo;
       document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchAndGo(); });
       document.getElementById('applyFilterBtn').onclick = () => { 
-        applyFiltersToDOM(); 
+        applyFilterAndRender(); 
         closeFilterModal(); 
       };
       document.getElementById('resetFilterBtn').onclick = () => { 
-        resetFilters(); 
+        resetAndGoToFullTree(); 
         closeFilterModal(); 
       };
       document.getElementById('closePopupBtn').onclick = closePopup;
