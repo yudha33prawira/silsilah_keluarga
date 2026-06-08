@@ -16,9 +16,7 @@
       padding-bottom: 40px;
     }
     
-    body.lock {
-      overflow: hidden;
-    }
+    body.lock { overflow: hidden; }
     
     @keyframes gradientFlow { 
       0% { background-position: 0% 50%; } 
@@ -103,25 +101,41 @@
     .avatar-siluet.p { background: #f29bc4; color: white; }
     .person-name { font-weight: 800; font-size: 1rem; margin-top: 5px; }
     
+    /* BREADCRUMB - DIPERBAIKI TAMPILANNYA */
     .breadcrumb-area {
       background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
       border-radius: 32px; padding: 12px 20px; margin: 10px auto;
-      width: fit-content; max-width: 90%; text-align: center; color: white;
+      width: fit-content; max-width: 90%; text-align: center;
+      color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    .bread-line { font-size: 0.85rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 5px 0; }
-    .bread-line span { cursor: pointer; color: #ffea9e; font-weight: 600; }
-    .bread-line span:hover { text-decoration: underline; }
+    .bread-line {
+      font-size: 0.9rem; display: flex; flex-wrap: wrap;
+      justify-content: center; align-items: center; gap: 6px; margin: 6px 0;
+    }
+    .bread-line strong { margin-right: 8px; color: #ffd966; }
+    .bread-line span {
+      cursor: pointer; color: #ffea9e; font-weight: 600;
+      background: rgba(0,0,0,0.3); padding: 4px 12px;
+      border-radius: 30px; transition: 0.2s;
+    }
+    .bread-line span:hover {
+      background: rgba(0,0,0,0.5); text-decoration: none;
+      transform: scale(1.02);
+    }
+    .bread-arrow {
+      color: rgba(255,255,255,0.6); font-size: 14px;
+    }
     
-    /* POPUP DETAIL - lebih bagus & scrollable */
+    /* POPUP DETAIL - TOMBOL LEBIH BAGUS */
     .popup-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
       z-index: 1000; align-items: center; justify-content: center;
       padding: 20px;
     }
     .popup-container {
       background: white; border-radius: 36px; max-width: 440px;
-      width: 100%; max-height: 90vh; overflow-y: auto;
+      width: 100%; max-height: 85vh; overflow-y: auto;
       animation: popFade 0.25s ease;
       box-shadow: 0 30px 50px rgba(0,0,0,0.4);
     }
@@ -130,20 +144,40 @@
     .popup-container::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
     
     @keyframes popFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 20px; text-align: center; color: white; border-radius: 36px 36px 0 0; }
-    .popup-header img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; cursor: pointer; transition: 0.2s; }
+    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 24px 20px; text-align: center; color: white; border-radius: 36px 36px 0 0; }
+    .popup-header img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid white; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
     .popup-header img:hover { transform: scale(1.05); }
-    .popup-avatar-lg { width: 100px; height: 100px; border-radius: 50%; background: #cfddee; font-size: 56px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
-    .popup-body { padding: 20px; color: #1e2a47; }
-    .info-section { margin-bottom: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 6px; font-size: 0.95rem; }
-    .popup-footer { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
-    .btn-wa { background: #25D366; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-wa:hover { background: #1da15a; transform: scale(1.02); }
-    .btn-primary { background: #2c3e66; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-primary:hover { background: #1f2f50; transform: scale(1.02); }
+    .popup-header strong { font-size: 1.3rem; display: block; margin-top: 5px; }
+    .popup-avatar-lg { width: 110px; height: 110px; border-radius: 50%; background: #cfddee; font-size: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+    .popup-body { padding: 24px; color: #1e2a47; }
+    .info-section { margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; }
+    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 8px; font-size: 1rem; display: flex; align-items: center; gap: 6px; }
+    .info-title i { font-size: 1.1rem; }
+    .info-section p { line-height: 1.5; color: #2d3748; }
     
-    /* MODAL SEARCH & FILTER - lebih bagus */
+    .popup-footer { padding: 8px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+    .btn-wa { 
+      background: #25D366; color: white; border: none; padding: 14px;
+      border-radius: 50px; font-weight: 700; font-size: 1rem;
+      cursor: pointer; transition: 0.2s; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-wa:hover { background: #1da15a; transform: scale(1.02); }
+    .btn-primary { 
+      background: #2c3e66; color: white; border: none; padding: 14px;
+      border-radius: 50px; font-weight: 700; font-size: 1rem;
+      cursor: pointer; transition: 0.2s; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { background: #1f2f50; transform: scale(1.02); }
+    .btn-close-popup {
+      background: #e2e8f0; color: #4a5568; border: none; padding: 12px;
+      border-radius: 50px; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; transition: 0.2s; margin-top: 4px;
+    }
+    .btn-close-popup:hover { background: #cbd5e1; }
+    
+    /* MODAL SEARCH & FILTER */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -179,17 +213,13 @@
     .btn-close { background: #e2e8f0; color: #333; width: 100%; margin-top: 8px; }
     .btn-close:hover { background: #cbd5e1; }
     
-    .filter-group {
-      text-align: left; margin: 16px 0;
-    }
+    .filter-group { text-align: left; margin: 16px 0; }
     .filter-group label {
       display: flex; align-items: center; gap: 10px;
       margin: 12px 0; font-size: 1rem; color: #2d3748;
       cursor: pointer;
     }
-    .filter-group input[type="checkbox"] {
-      width: 20px; height: 20px; cursor: pointer;
-    }
+    .filter-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
     .filter-group input[type="number"] {
       width: 100%; padding: 10px; border-radius: 40px;
       border: 2px solid #e0e7ff; margin-top: 8px;
@@ -264,7 +294,7 @@
     <div class="popup-footer">
       <button id="popupWaBtn" class="btn-wa">💬 WhatsApp</button>
       <button id="popupSilsilahBtn" class="btn-primary">📖 Lihat Silsilah Lengkap</button>
-      <button id="closePopupBtn" class="btn-close">Tutup</button>
+      <button id="closePopupBtn" class="btn-close-popup">Tutup</button>
     </div>
   </div>
 </div>
@@ -388,6 +418,7 @@
     showBreadcrumb(person);
   }
 
+  // BREADCRUMB YANG BENAR - LURUS KE ATAS (ayah & ibu)
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
     if (old) old.remove();
@@ -395,35 +426,54 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
+    // ===== GARIS AYAH (lurus ke atas) =====
     let ayahPath = [];
-    let cur = person;
-    while (cur) {
-      ayahPath.unshift({ id: cur.id, nama: cur.nama });
-      let ayahObj = globalFamily.find(p => p.nama === cur.ayah);
+    let currentAyah = person;
+    while (currentAyah) {
+      ayahPath.unshift({ id: currentAyah.id, nama: currentAyah.nama });
+      let ayahObj = globalFamily.find(p => p.nama === currentAyah.ayah);
       if (!ayahObj) break;
-      cur = ayahObj;
+      currentAyah = ayahObj;
     }
     
+    // ===== GARIS IBU (lurus ke atas dari sisi ibu) =====
     let ibuPath = [];
-    let curIbu = person;
-    let step = 0;
-    while (curIbu && step < 10) {
-      if (step === 0) ibuPath.unshift({ id: curIbu.id, nama: curIbu.nama });
-      let ibuObj = globalFamily.find(p => p.nama === curIbu.ibu);
-      if (!ibuObj) { if (step===0) ibuPath.unshift({ id:'0', nama:'?' }); break; }
-      ibuPath.unshift({ id: ibuObj.id, nama: ibuObj.nama });
-      let suamiIbu = globalFamily.find(p => p.pasangan && p.pasangan.includes(ibuObj.nama) && p.jenis_kelamin === 'L');
-      curIbu = suamiIbu || ibuObj;
-      step++;
+    let currentIbu = person;
+    while (currentIbu) {
+      ibuPath.unshift({ id: currentIbu.id, nama: currentIbu.nama });
+      let ibuObj = globalFamily.find(p => p.nama === currentIbu.ibu);
+      if (!ibuObj) {
+        // jika tidak ada ibu, berhenti
+        break;
+      }
+      currentIbu = ibuObj;
     }
+    
+    // Render Ayah
+    const ayahHtml = ayahPath.map((p, idx) => {
+      if (idx === ayahPath.length - 1) {
+        return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
+      }
+      return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
+    }).join('');
+    
+    // Render Ibu
+    const ibuHtml = ibuPath.map((p, idx) => {
+      if (idx === ibuPath.length - 1) {
+        return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
+      }
+      return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
+    }).join('');
     
     breadDiv.innerHTML = `
-      <div class="bread-line">👨 Garis Ayah: ${ayahPath.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ')}</div>
-      <div class="bread-line">👩 Garis Ibu: ${ibuPath.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ')}</div>
+      <div class="bread-line"><strong>👨‍🦳 Garis Ayah:</strong> ${ayahHtml}</div>
+      <div class="bread-line"><strong>👩‍🦳 Garis Ibu:</strong> ${ibuHtml}</div>
     `;
+    
     const hero = document.querySelector('.hero');
     hero.insertAdjacentElement('afterend', breadDiv);
-    breadDiv.querySelectorAll('span').forEach(span => {
+    
+    breadDiv.querySelectorAll('span[data-id]').forEach(span => {
       span.addEventListener('click', (e) => {
         e.stopPropagation();
         let id = span.getAttribute('data-id');
@@ -432,7 +482,6 @@
     });
   }
 
-  // createPersonEl dengan parameter: apakah foto bisa zoom langsung? (false = tidak zoom di halaman utama)
   function createPersonEl(p, disableZoomOnClick = false) {
     const isDead = (p.status || '').toLowerCase().includes('meninggal');
     const card = document.createElement('div');
@@ -441,7 +490,6 @@
     
     let avatarHtml = '';
     if (p.foto && p.foto !== '') {
-      // foto: klik membuka popup detail (bukan zoom langsung)
       avatarHtml = `<img class="avatar" src="${p.foto}" onclick="event.stopPropagation(); openPopupById('${p.id}')">`;
     } else {
       const genderClass = p.jenis_kelamin === 'L' ? 'l' : 'p';
@@ -453,7 +501,7 @@
     return card;
   }
 
-  // Popup Detail - foto di dalam popup bisa di-zoom
+  // Popup Detail
   function openPopupById(id) {
     const p = globalFamily.find(x => x.id === id);
     if (!p) return;
@@ -472,10 +520,10 @@
     headerDiv.innerHTML = headerContent;
     
     bodyDiv.innerHTML = `
-      <div class="info-section"><div class="info-title">🧬 Biodata</div>JK: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</div>
-      <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Anak: ${p.jumlah_anak||'-'}</div>
-      <div class="info-section"><div class="info-title">📍 Lahir & Domisili</div>Tahun: ${p.tanggal_lahir||'-'} / ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</div>
-      <div class="info-section"><div class="info-title">📞 Kontak</div>WA: ${p.wa||'-'}</div>
+      <div class="info-section"><div class="info-title">🧬 Biodata</div><p>Jenis Kelamin: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</p></div>
+      <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div><p>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Jumlah Anak: ${p.jumlah_anak||'-'}</p></div>
+      <div class="info-section"><div class="info-title">📍 Lahir & Domisili</div><p>Tahun: ${p.tanggal_lahir||'-'} / ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</p></div>
+      <div class="info-section"><div class="info-title">📞 Kontak</div><p>WA: ${p.wa||'-'}</p></div>
     `;
     
     document.getElementById('popupWaBtn').onclick = () => { 
