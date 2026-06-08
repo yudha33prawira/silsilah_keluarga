@@ -6,15 +6,25 @@
   <title>Silsilah Keluarga</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       background: linear-gradient(-45deg, #1e2a5e, #2a3f7e, #1b4f8b, #0f2b4f);
       background-size: 400% 400%;
       animation: gradientFlow 15s ease infinite;
       min-height: 100vh;
       padding-bottom: 40px;
     }
-    @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    
+    body.lock {
+      overflow: hidden;
+    }
+    
+    @keyframes gradientFlow { 
+      0% { background-position: 0% 50%; } 
+      50% { background-position: 100% 50%; } 
+      100% { background-position: 0% 50%; } 
+    }
     
     .hero { text-align: center; padding: 20px 16px 8px; }
     h1 {
@@ -23,6 +33,7 @@
       display: inline-block; padding: 8px 24px; border-radius: 50px;
       color: white; border: 1px solid rgba(255,255,255,0.2);
     }
+    
     .marquee {
       width: 100%; overflow: hidden;
       background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
@@ -48,6 +59,7 @@
       transition: 0.2s;
     }
     .btn-glass:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
+    .btn-glass:active { transform: scale(0.98); }
     
     .tree { display: flex; flex-direction: column; align-items: center; gap: 36px; padding: 10px 20px 40px; }
     .family-card {
@@ -79,11 +91,13 @@
     .avatar {
       width: 85px; height: 85px; border-radius: 50%; object-fit: cover;
       margin: 0 auto 8px; display: block; border: 3px solid white;
+      cursor: pointer;
     }
     .avatar-siluet {
       width: 85px; height: 85px; border-radius: 50%; margin: 0 auto 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 52px; background: #d9e2ec;
+      cursor: pointer;
     }
     .avatar-siluet.l { background: #7aa2f7; color: white; }
     .avatar-siluet.p { background: #f29bc4; color: white; }
@@ -98,36 +112,102 @@
     .bread-line span { cursor: pointer; color: #ffea9e; font-weight: 600; }
     .bread-line span:hover { text-decoration: underline; }
     
-    /* popup & modal */
-    .popup-overlay, .search-modal, .filter-modal {
+    /* POPUP DETAIL - lebih bagus & scrollable */
+    .popup-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
       z-index: 1000; align-items: center; justify-content: center;
       padding: 20px;
     }
-    .popup-container, .search-card, .filter-panel {
+    .popup-container {
       background: white; border-radius: 36px; max-width: 440px;
-      width: 100%; overflow: hidden; animation: popFade 0.25s ease;
+      width: 100%; max-height: 90vh; overflow-y: auto;
+      animation: popFade 0.25s ease;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.4);
     }
+    .popup-container::-webkit-scrollbar { width: 5px; }
+    .popup-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .popup-container::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+    
     @keyframes popFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 20px; text-align: center; color: white; }
-    .popup-header img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; cursor: pointer; }
+    .popup-header { background: linear-gradient(135deg, #2b3b6e, #1f4a8e); padding: 20px; text-align: center; color: white; border-radius: 36px 36px 0 0; }
+    .popup-header img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; cursor: pointer; transition: 0.2s; }
+    .popup-header img:hover { transform: scale(1.05); }
     .popup-avatar-lg { width: 100px; height: 100px; border-radius: 50%; background: #cfddee; font-size: 56px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
     .popup-body { padding: 20px; color: #1e2a47; }
     .info-section { margin-bottom: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 6px; }
+    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 6px; font-size: 0.95rem; }
     .popup-footer { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
-    .btn-wa { background: #25D366; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; }
-    .btn-primary { background: #2c3e66; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; }
-    .search-card, .filter-panel { padding: 24px; text-align: center; }
-    .search-card input, .filter-panel input { width: 100%; padding: 12px; border-radius: 60px; border: 1px solid #ccc; margin: 10px 0; }
-    .filter-row { margin: 12px 0; text-align: left; }
+    .btn-wa { background: #25D366; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-wa:hover { background: #1da15a; transform: scale(1.02); }
+    .btn-primary { background: #2c3e66; color: white; border: none; padding: 12px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-primary:hover { background: #1f2f50; transform: scale(1.02); }
+    
+    /* MODAL SEARCH & FILTER - lebih bagus */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 1100; align-items: center; justify-content: center;
+    }
+    .modal-card {
+      background: white; border-radius: 32px; padding: 28px 24px;
+      width: 90%; max-width: 360px; text-align: center;
+      animation: modalSlide 0.2s ease;
+      box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-card h3 {
+      font-size: 1.6rem; margin-bottom: 20px; color: #1e2a5e;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .modal-card input {
+      width: 100%; padding: 14px 18px; border-radius: 60px;
+      border: 2px solid #e0e7ff; font-size: 1rem; outline: none;
+      transition: 0.2s; margin-bottom: 16px;
+    }
+    .modal-card input:focus { border-color: #2a3f7e; box-shadow: 0 0 0 3px rgba(42,63,126,0.1); }
+    .modal-card button {
+      padding: 12px 20px; border-radius: 60px; font-weight: 600;
+      cursor: pointer; transition: 0.2s; border: none;
+      margin: 4px 0;
+    }
+    .btn-search { background: #2c3e66; color: white; width: 100%; }
+    .btn-search:hover { background: #1f2f50; transform: scale(1.02); }
+    .btn-close { background: #e2e8f0; color: #333; width: 100%; margin-top: 8px; }
+    .btn-close:hover { background: #cbd5e1; }
+    
+    .filter-group {
+      text-align: left; margin: 16px 0;
+    }
+    .filter-group label {
+      display: flex; align-items: center; gap: 10px;
+      margin: 12px 0; font-size: 1rem; color: #2d3748;
+      cursor: pointer;
+    }
+    .filter-group input[type="checkbox"] {
+      width: 20px; height: 20px; cursor: pointer;
+    }
+    .filter-group input[type="number"] {
+      width: 100%; padding: 10px; border-radius: 40px;
+      border: 2px solid #e0e7ff; margin-top: 8px;
+    }
+    .btn-apply { background: #2c3e66; color: white; width: 100%; margin-top: 10px; }
+    .btn-reset { background: #f59e0b; color: white; width: 100%; margin-top: 8px; }
+    
     .zoom-layer {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
       z-index: 1200; align-items: center; justify-content: center; cursor: zoom-out;
     }
-    .zoom-layer img { max-width: 92%; max-height: 90%; border-radius: 20px; }
-    @media (max-width: 580px) { .person-card { width: 115px; } .avatar, .avatar-siluet { width: 70px; height: 70px; font-size: 42px; } }
+    .zoom-layer img { max-width: 92%; max-height: 90%; border-radius: 20px; animation: zoomIn 0.2s ease; }
+    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
+    @media (max-width: 580px) { 
+      .person-card { width: 115px; } 
+      .avatar, .avatar-siluet { width: 70px; height: 70px; font-size: 42px; } 
+    }
   </style>
 </head>
 <body>
@@ -150,31 +230,33 @@
 
 <div id="treeContainer" class="tree"></div>
 
-<!-- Modal Cari -->
-<div id="searchModal" class="search-modal">
-  <div class="search-card">
-    <h3>Cari Nama</h3>
-    <input type="text" id="searchInput" placeholder="Ketik nama...">
-    <button id="searchSubmitBtn" style="background:#2c3e66; color:white; border:none; padding:10px 18px; border-radius:40px; margin-top:6px;">Cari</button>
-    <button id="closeSearchBtn" style="background:#aaa; margin-top:8px;">Tutup</button>
+<!-- MODAL SEARCH -->
+<div id="searchModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>🔍 Cari Anggota</h3>
+    <input type="text" id="searchInput" placeholder="Ketik nama lengkap..." autocomplete="off">
+    <button id="searchSubmitBtn" class="btn-search">Cari Sekarang</button>
+    <button id="closeSearchBtn" class="btn-close">Tutup</button>
   </div>
 </div>
 
-<!-- Modal Filter -->
-<div id="filterModal" class="search-modal">
-  <div class="filter-panel">
-    <h3>🎛️ Filter Keluarga</h3>
-    <div class="filter-row"><label><input type="checkbox" id="filterHidup"> Hidup saja</label></div>
-    <div class="filter-row"><label><input type="checkbox" id="filterLaki"> Laki-laki</label></div>
-    <div class="filter-row"><label><input type="checkbox" id="filterPerempuan"> Perempuan</label></div>
-    <div class="filter-row"><input type="number" id="filterGenerasi" placeholder="Generasi (1-4)"></div>
-    <button id="applyFilterBtn" style="background:#2c3e66; color:white; border:none; padding:8px; border-radius:40px; margin-top:10px;">Terapkan</button>
-    <button id="resetFilterBtn" style="background:#777; margin-top:8px;">Reset & Tampilkan Semua</button>
-    <button id="closeFilterBtn" style="background:#aaa; margin-top:8px;">Tutup</button>
+<!-- MODAL FILTER -->
+<div id="filterModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>🎛️ Filter Silsilah</h3>
+    <div class="filter-group">
+      <label><input type="checkbox" id="filterHidup"> ✅ Hanya yang masih hidup</label>
+      <label><input type="checkbox" id="filterLaki"> 👨 Laki-laki</label>
+      <label><input type="checkbox" id="filterPerempuan"> 👩 Perempuan</label>
+      <label>📊 Generasi ke-<input type="number" id="filterGenerasi" placeholder="contoh: 2" style="width:80px; display:inline-block; margin-left:8px;"></label>
+    </div>
+    <button id="applyFilterBtn" class="btn-apply">Terapkan Filter</button>
+    <button id="resetFilterBtn" class="btn-reset">Reset Semua</button>
+    <button id="closeFilterBtn" class="btn-close" style="margin-top:8px;">Tutup</button>
   </div>
 </div>
 
-<!-- Popup Detail -->
+<!-- POPUP DETAIL -->
 <div id="globalPopup" class="popup-overlay">
   <div class="popup-container">
     <div class="popup-header" id="popupHeader"></div>
@@ -182,12 +264,15 @@
     <div class="popup-footer">
       <button id="popupWaBtn" class="btn-wa">💬 WhatsApp</button>
       <button id="popupSilsilahBtn" class="btn-primary">📖 Lihat Silsilah Lengkap</button>
-      <button id="closePopupBtn" style="background:#ccc; color:#222; padding:10px; border-radius:40px;">Tutup</button>
+      <button id="closePopupBtn" class="btn-close">Tutup</button>
     </div>
   </div>
 </div>
 
-<div id="zoomLayer" class="zoom-layer"><img id="zoomImage" src=""></div>
+<!-- ZOOM LAYER -->
+<div id="zoomLayer" class="zoom-layer" onclick="closeZoom()">
+  <img id="zoomImage" src="" onclick="event.stopPropagation()">
+</div>
 
 <script>
   let globalFamily = [];
@@ -209,15 +294,11 @@
     container.innerHTML = '';
     if (!globalFamily.length) return;
 
-    // Ambil semua generasi 1 laki-laki sebagai kepala keluarga
     let roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
-    // urutkan berdasarkan tahun lahir
     roots.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     
     for (let root of roots) {
-      // cari pasangan dari root (split jika ada multiple)
-      let spouseNames = [];
-      if (root.pasangan) spouseNames = root.pasangan.split('|').map(s=>s.trim());
+      let spouseNames = root.pasangan ? root.pasangan.split('|').map(s=>s.trim()) : [];
       let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
       
       if (spouses.length === 0) {
@@ -237,17 +318,16 @@
     
     const coupleDiv = document.createElement('div');
     coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(root));
+    coupleDiv.appendChild(createPersonEl(root, false));
     if (spouse) {
       const love = document.createElement('span');
       love.className = 'love-badge';
       love.innerHTML = '❤️';
       coupleDiv.appendChild(love);
-      coupleDiv.appendChild(createPersonEl(spouse));
+      coupleDiv.appendChild(createPersonEl(spouse, false));
     }
     card.appendChild(coupleDiv);
     
-    // cari anak dari pasangan ini
     let children = [];
     if (spouse) {
       children = globalFamily.filter(c => 
@@ -261,13 +341,13 @@
     if (children.length) {
       const grid = document.createElement('div');
       grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
+      children.forEach(ch => grid.appendChild(createPersonEl(ch, false)));
       card.appendChild(grid);
     }
     container.appendChild(card);
   }
 
-  // ========== DETAIL MODE (Bila ada ?id=xxx) ==========
+  // ========== DETAIL MODE ==========
   function renderDetailMode(personId) {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
@@ -281,11 +361,9 @@
     card.className = 'family-card';
     const coupleDiv = document.createElement('div');
     coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(person));
+    coupleDiv.appendChild(createPersonEl(person, false));
     
-    // pasangan dari orang yg dilihat
-    let spouseNames = [];
-    if (person.pasangan) spouseNames = person.pasangan.split('|').map(s=>s.trim());
+    let spouseNames = person.pasangan ? person.pasangan.split('|').map(s=>s.trim()) : [];
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
     if (spouses.length) {
       spouses.forEach(sp => {
@@ -293,35 +371,30 @@
         loveSpan.className = 'love-badge';
         loveSpan.innerHTML = '❤️';
         coupleDiv.appendChild(loveSpan);
-        coupleDiv.appendChild(createPersonEl(sp));
+        coupleDiv.appendChild(createPersonEl(sp, false));
       });
     }
     card.appendChild(coupleDiv);
     
-    // anak dari person ini
     let children = globalFamily.filter(c => c.ayah === person.nama || c.ibu === person.nama);
     children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     if (children.length) {
       const grid = document.createElement('div');
       grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
+      children.forEach(ch => grid.appendChild(createPersonEl(ch, false)));
       card.appendChild(grid);
     }
     container.appendChild(card);
-    
-    // breadcrumb
     showBreadcrumb(person);
   }
 
   function showBreadcrumb(person) {
-    // hapus breadcrumb lama
     const old = document.querySelector('.breadcrumb-area');
     if (old) old.remove();
     
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // garis ayah
     let ayahPath = [];
     let cur = person;
     while (cur) {
@@ -330,7 +403,7 @@
       if (!ayahObj) break;
       cur = ayahObj;
     }
-    // garis ibu
+    
     let ibuPath = [];
     let curIbu = person;
     let step = 0;
@@ -359,7 +432,8 @@
     });
   }
 
-  function createPersonEl(p) {
+  // createPersonEl dengan parameter: apakah foto bisa zoom langsung? (false = tidak zoom di halaman utama)
+  function createPersonEl(p, disableZoomOnClick = false) {
     const isDead = (p.status || '').toLowerCase().includes('meninggal');
     const card = document.createElement('div');
     card.className = `person-card ${isDead ? 'meninggal' : ''}`;
@@ -367,7 +441,8 @@
     
     let avatarHtml = '';
     if (p.foto && p.foto !== '') {
-      avatarHtml = `<img class="avatar" src="${p.foto}" onclick="event.stopPropagation(); openZoom('${p.foto}')">`;
+      // foto: klik membuka popup detail (bukan zoom langsung)
+      avatarHtml = `<img class="avatar" src="${p.foto}" onclick="event.stopPropagation(); openPopupById('${p.id}')">`;
     } else {
       const genderClass = p.jenis_kelamin === 'L' ? 'l' : 'p';
       const icon = p.jenis_kelamin === 'L' ? '👨' : '👩';
@@ -378,33 +453,66 @@
     return card;
   }
 
-  // Popup & Zoom
+  // Popup Detail - foto di dalam popup bisa di-zoom
   function openPopupById(id) {
     const p = globalFamily.find(x => x.id === id);
     if (!p) return;
+    
+    document.body.classList.add('lock');
     const headerDiv = document.getElementById('popupHeader');
     const bodyDiv = document.getElementById('popupBody');
-    headerDiv.innerHTML = p.foto ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br><strong>${p.nama}</strong>` : `<div class="popup-avatar-lg">${p.jenis_kelamin==='L'?'👨':'👩'}</div><strong>${p.nama}</strong>`;
+    
+    let headerContent = '';
+    if (p.foto && p.foto !== '') {
+      headerContent = `<img src="${p.foto}" onclick="event.stopPropagation(); openZoom('${p.foto}')"><br><strong>${p.nama}</strong>`;
+    } else {
+      const icon = p.jenis_kelamin === 'L' ? '👨' : '👩';
+      headerContent = `<div class="popup-avatar-lg">${icon}</div><strong>${p.nama}</strong>`;
+    }
+    headerDiv.innerHTML = headerContent;
+    
     bodyDiv.innerHTML = `
       <div class="info-section"><div class="info-title">🧬 Biodata</div>JK: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</div>
       <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Anak: ${p.jumlah_anak||'-'}</div>
       <div class="info-section"><div class="info-title">📍 Lahir & Domisili</div>Tahun: ${p.tanggal_lahir||'-'} / ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</div>
       <div class="info-section"><div class="info-title">📞 Kontak</div>WA: ${p.wa||'-'}</div>
     `;
-    document.getElementById('popupWaBtn').onclick = () => { if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); else alert('No WA tidak tersedia'); };
-    document.getElementById('popupSilsilahBtn').onclick = () => { closePopup(); window.location.href = `?id=${p.id}`; };
+    
+    document.getElementById('popupWaBtn').onclick = () => { 
+      if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); 
+      else alert('No WhatsApp tidak tersedia'); 
+    };
+    document.getElementById('popupSilsilahBtn').onclick = () => { 
+      closePopup(); 
+      window.location.href = `?id=${p.id}`; 
+    };
     document.getElementById('globalPopup').style.display = 'flex';
   }
-  function closePopup() { document.getElementById('globalPopup').style.display = 'none'; }
-  function openZoom(src) { const z = document.getElementById('zoomLayer'); document.getElementById('zoomImage').src = src; z.style.display = 'flex'; }
-  function closeZoom() { document.getElementById('zoomLayer').style.display = 'none'; }
   
-  // Filter & Utils
+  function closePopup() { 
+    document.getElementById('globalPopup').style.display = 'none'; 
+    document.body.classList.remove('lock');
+  }
+  
+  function openZoom(src) { 
+    const z = document.getElementById('zoomLayer'); 
+    document.getElementById('zoomImage').src = src; 
+    z.style.display = 'flex'; 
+    document.body.classList.add('lock');
+  }
+  
+  function closeZoom() { 
+    document.getElementById('zoomLayer').style.display = 'none'; 
+    document.body.classList.remove('lock');
+  }
+  
+  // Filter functions
   function applyFilters() {
     const hidup = document.getElementById('filterHidup').checked;
     const laki = document.getElementById('filterLaki').checked;
     const perempuan = document.getElementById('filterPerempuan').checked;
     const gen = document.getElementById('filterGenerasi').value;
+    
     document.querySelectorAll('.person-card').forEach(card => {
       let id = card.getAttribute('data-id');
       let data = globalFamily.find(x => x.id === id);
@@ -416,11 +524,13 @@
       if (gen && data.generasi !== gen) show = false;
       card.style.display = show ? 'block' : 'none';
     });
+    
     document.querySelectorAll('.family-card').forEach(card => {
       let visible = card.querySelectorAll('.person-card[style="display: block"], .person-card:not([style*="display"])');
       card.style.display = visible.length ? 'block' : 'none';
     });
   }
+  
   function resetFilters() {
     document.getElementById('filterHidup').checked = false;
     document.getElementById('filterLaki').checked = false;
@@ -430,16 +540,34 @@
     document.querySelectorAll('.family-card').forEach(c => c.style.display = 'block');
   }
   
-  // Search
-  function openSearch() { document.getElementById('searchModal').style.display = 'flex'; }
-  function closeSearch() { document.getElementById('searchModal').style.display = 'none'; }
+  // Search & Modal helpers
+  function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; document.body.classList.add('lock'); }
+  function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; document.body.classList.remove('lock'); }
+  function openFilterModal() { document.getElementById('filterModal').style.display = 'flex'; document.body.classList.add('lock'); }
+  function closeFilterModal() { document.getElementById('filterModal').style.display = 'none'; document.body.classList.remove('lock'); }
+  
   function searchAndGo() {
     let kw = document.getElementById('searchInput').value.trim().toLowerCase();
-    if (!kw) { alert('Masukkan nama'); return; }
+    if (!kw) { alert('Masukkan nama terlebih dahulu'); return; }
     let found = globalFamily.find(p => p.nama.toLowerCase().includes(kw));
-    if (found) { closeSearch(); window.location.href = `?id=${found.id}`; }
-    else alert('Tidak ditemukan');
+    if (found) { 
+      closeSearchModal(); 
+      window.location.href = `?id=${found.id}`; 
+    } else { 
+      alert('Nama tidak ditemukan dalam silsilah'); 
+    }
   }
+  
+  // Close modal ketika klik di luar area
+  document.getElementById('searchModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSearchModal();
+  });
+  document.getElementById('filterModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFilterModal();
+  });
+  document.getElementById('globalPopup').addEventListener('click', function(e) {
+    if (e.target === this) closePopup();
+  });
   
   // ========== INITIAL LOAD ==========
   fetch('data.json?v='+Date.now())
@@ -449,21 +577,19 @@
       if (detailId) {
         renderDetailMode(detailId);
       } else {
-        // Halaman awal: tampilkan semua silsilah generasi 1
         renderMainTree();
       }
-      // pasang event untuk tombol
+      
       document.getElementById('backBtn').onclick = () => window.location.href = '.';
-      document.getElementById('searchBtn').onclick = openSearch;
-      document.getElementById('filterBtn').onclick = () => document.getElementById('filterModal').style.display = 'flex';
-      document.getElementById('closeSearchBtn').onclick = closeSearch;
+      document.getElementById('searchBtn').onclick = openSearchModal;
+      document.getElementById('filterBtn').onclick = openFilterModal;
+      document.getElementById('closeSearchBtn').onclick = closeSearchModal;
+      document.getElementById('closeFilterBtn').onclick = closeFilterModal;
       document.getElementById('searchSubmitBtn').onclick = searchAndGo;
       document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchAndGo(); });
-      document.getElementById('applyFilterBtn').onclick = () => { applyFilters(); document.getElementById('filterModal').style.display = 'none'; };
-      document.getElementById('resetFilterBtn').onclick = () => { resetFilters(); document.getElementById('filterModal').style.display = 'none'; };
-      document.getElementById('closeFilterBtn').onclick = () => document.getElementById('filterModal').style.display = 'none';
+      document.getElementById('applyFilterBtn').onclick = () => { applyFilters(); closeFilterModal(); };
+      document.getElementById('resetFilterBtn').onclick = () => { resetFilters(); closeFilterModal(); };
       document.getElementById('closePopupBtn').onclick = closePopup;
-      document.getElementById('zoomLayer').onclick = closeZoom;
     })
     .catch(e => console.error('Gagal load JSON:', e));
 </script>
