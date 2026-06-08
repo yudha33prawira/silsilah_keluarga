@@ -1,969 +1,840 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<body>
-
-<div class="header">
-  <h2>Silsilah Keluarga</h2>
-</div>
-
-  <div class="running-text">
-  <div class="running-track">
-    <span>⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi, dan untuk data yang belum terisi atau ada kesalahan silahkan kirim ke pengedit untuk perbaikan datanya.</span>
-    <span>⚠️ Foto merupakan hasil dari AI dan bukan foto asli, jika ada perbedaan harap dimaklumi, dan untuk data yang belum terisi atau ada kesalahan silahkan kirim ke pengedit untuk perbaikan datanya.</span>
-  </div>
-</div>
-
-<style>
-body {
-  font-family: Arial;
-  margin: 0;
-  text-align: center;
-
-  background: linear-gradient(-45deg, #6a11cb, #2575fc, #00c6ff, #6a11cb);
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
-}
-
-/* HEADER */
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-h2 {
-  margin: 0;
-  padding: 10px 20px;
-  display: inline-block;
-
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(8px);
-
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-
-  text-shadow: 0 0 10px rgba(255,255,255,0.4);
-}
-  
-/* animasi */
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.toolbar { display:flex; justify-content:center; gap:10px; margin:10px 0; }
-
-.search-btn,.filter-btn {
-  padding:10px 15px;
-  border:none;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
-}
-
-  /* RUNNING TEXT */
-.running-text {
-  width: 100%;
-  overflow: hidden;
-  margin-top: 10px;
-
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(8px);
-
-  border-top: 1px solid rgba(255,255,255,0.2);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.running-track {
-  display: flex;
-  width: max-content;
-
-  animation: scrollLoop 35s linear infinite; /* 🔥 lebih pelan */
-}
-
-.running-track span {
-  white-space: nowrap;
-  color: white;
-  font-size: 14px;
-  padding: 8px 30px; /* jarak antar teks */
-}
-
-/* animasi TANPA JEDA */
-@keyframes scrollLoop {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.running-text:hover .running-track {
-  animation-play-state: paused;
-}
-
-/* support manual pause */
-.running-track.paused {
-  animation-play-state: paused;
-}
-  
-/* TREE */
-.tree {
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:40px;
-}
-
-.family-block {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-
-  
-.couple {
-  display:flex;
-  gap:40px;
-  position:relative;
-}
-
-.love-icon {
-  position:absolute;
-  top:40px;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-/* CHILDREN */
-.children {
-  margin-top:40px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-
-/* PERSON */
-.person {
-  border:1px solid black;
-  border-radius:12px;
-  padding:10px;
-  background:white;
-}
-
-.person.meninggal {
-  background:black;
-  color:white;
-}
-
-.person img,.siluet {
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  object-fit:cover;
-  cursor:pointer;
-}
-
-.siluet {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:40px;
-}
-
-.siluet.l { background:#2193b0; color:white; }
-.siluet.p { background:#ff758c; color:white; }
-
-.name {
-  font-weight:bold;
-  margin-top:5px;
-  cursor:pointer;
-}
-
-.person, .popup-box, .search-box {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.person {
-  transition: 0.3s;
-}
-
-.person:hover {
-  transform: translateY(-5px) scale(1.05);
-}
-
-/* POPUP */
-.popup {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  z-index:999;
-  overflow-y:auto;
-}
-
-.popup-box {
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  margin:40px auto;
-  width:90%;
-  max-width:400px;
-  border-radius:15px;
-  overflow:hidden;
-  text-align:left;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-
-.popup-header {
-  text-align:center;
-  padding:20px;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:white;
-}
-
-.popup-header img,
-.popup-avatar {
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  margin-bottom:10px;
-}
-
-.popup-avatar {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:50px;
-  background:white;
-  color:black;
-}
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-  color: white;
-  cursor: pointer;
-}
-
-.popup-body {
-  padding:15px;
-  color:#222; /* 🔥 biar terbaca */
-}
-
-.section { margin-bottom:15px; }
-
-.section-title {
-  font-weight:bold;
-  margin-bottom:5px;
-  color:#2575fc;
-}
-
-.popup-footer {
-  padding:15px;
-  text-align:center;
-}
-
-.btn-wa {
-  background:#25D366;
-  color:white;
-}
-
-  /* ===== FIX POPUP BIAR SAMA DENGAN DETAIL ===== */
-.popup-box {
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(10px);
-  color: #222; /* 🔥 ini kunci biar tulisan kelihatan */
-}
-
-.popup-body {
-  color: #222;
-}
-
-.section-title {
-  color: #2575fc;
-  font-weight: bold;
-}
-
-.popup-footer button {
-  width: 100%;
-  margin-top: 5px;
-}
-
-/* tombol WA tetap hijau */
-.btn-wa {
-  background: #25D366;
-  color: white;
-}
-
-/* tombol lain biar serasi */
-.popup-footer button:not(.btn-wa) {
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-  color: white;
-}
-
-  .popup-header {
-  text-align:center;
-  padding:20px;
-  background:linear-gradient(135deg,#6a11cb,#2575fc);
-  color:white;
-}
-
-  /* ZOOM FOTO */
-.zoom-foto {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  z-index: 2000;
-
-  justify-content: center;
-  align-items: center;
-}
-
-.zoom-foto img {
-  max-width: 95%;
-  max-height: 90%;
-  border-radius: 10px;
-
-  animation: zoomIn 0.3s ease;
-}
-
-@keyframes zoomIn {
-  from { transform: scale(0.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-  .zoom-foto {
-  cursor: zoom-out;
-}
-
-/* ANIMASI BACKGROUND */
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.search-box,.popup-content {
-  background:white;
-  padding:20px;
-  margin:100px auto;
-  width:90%;
-  max-width:300px;
-  border-radius:10px;
-}
-
-.search-popup {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 999;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 15px 0;
-}
-
-.toolbar button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 12px;
-
-  background: rgba(255,255,255,0.2);
-  color: white;
-
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-
-  transition: 0.3s;
-}
-
-.toolbar button:hover {
-  background: rgba(255,255,255,0.35);
-  transform: scale(1.05);
-}
-
-.toolbar button:active {
-  transform: scale(0.95);
-}
-
-.search-box button {
-  background: linear-gradient(135deg,#6a11cb,#2575fc);
-  color: white;
-  width: 100%;
-  margin-top: 5px;
-}
-
-.search-box button:last-child {
-  background: #777;
-}
-
-  .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-h2 {
-  margin: 0;
-  padding: 10px 20px;
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  text-shadow: 0 0 10px rgba(255,255,255,0.4);
-}
-
-  .toolbar {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 15px 0;
-}
-
-.toolbar button {
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  backdrop-filter: blur(10px);
-  transition: 0.3s;
-}
-
-.toolbar button:hover {
-  background: rgba(255,255,255,0.35);
-  transform: scale(1.05);
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Silsilah Keluarga</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(-45deg, #1e2a5e, #2a3f7e, #1b4f8b, #0f2b4f);
+      background-size: 400% 400%;
+      animation: gradientFlow 15s ease infinite;
+      min-height: 100vh;
+      padding-bottom: 30px;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* header area */
+    .hero {
+      text-align: center;
+      padding: 20px 16px 8px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      display: inline-block;
+      padding: 8px 24px;
+      border-radius: 50px;
+      color: white;
+      letter-spacing: 1px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* running text */
+    .marquee {
+      width: 100%;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin: 12px 0;
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: scrollText 38s linear infinite;
+    }
+
+    .marquee-track span {
+      white-space: nowrap;
+      padding: 8px 36px;
+      color: #fff9e0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    @keyframes scrollText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* toolbar */
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 16px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-glass {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.02);
+    }
+
+    .btn-glass:active {
+      transform: scale(0.97);
+    }
+
+    /* tree container */
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 36px;
+      padding: 10px 20px 40px;
+    }
+
+    .family-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      padding: 20px 12px 12px;
+      width: 100%;
+      max-width: 750px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+
+    .couple-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 28px;
+      position: relative;
+      flex-wrap: wrap;
+    }
+
+    .love-badge {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .children-grid {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 18px;
+      justify-items: center;
+      border-top: 2px dashed rgba(255,255,240,0.4);
+      padding-top: 24px;
+    }
+
+    /* person card */
+    .person-card {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 14px 10px 10px;
+      width: 130px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .person-card.meninggal {
+      background: #2c2e3a;
+      color: #e0e0e0;
+      border-color: #555;
+    }
+
+    .person-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 22px rgba(0,0,0,0.2);
+    }
+
+    .avatar {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 8px;
+      display: block;
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      background: #f0f0f0;
+    }
+
+    .avatar-siluet {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      background: #d9e2ec;
+      color: #1e2f5e;
+    }
+
+    .avatar-siluet.l { background: #7aa2f7; color: white; }
+    .avatar-siluet.p { background: #f29bc4; color: white; }
+
+    .person-name {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-top: 5px;
+      letter-spacing: -0.3px;
+    }
+
+    /* breadcrumb special */
+    .breadcrumb-area {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      border-radius: 32px;
+      padding: 12px 20px;
+      margin: 10px auto;
+      width: fit-content;
+      max-width: 90%;
+      text-align: center;
+      color: white;
+    }
+
+    .bread-line {
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin: 5px 0;
+    }
+
+    .bread-line span {
+      cursor: pointer;
+      color: #ffea9e;
+      font-weight: 600;
+      transition: 0.1s;
+    }
+
+    .bread-line span:hover {
+      text-decoration: underline;
+      color: #ffc107;
+    }
+
+    /* popup modern */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .popup-container {
+      background: white;
+      max-width: 440px;
+      width: 100%;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 30px 40px rgba(0,0,0,0.4);
+      animation: popFade 0.25s ease;
+    }
+
+    @keyframes popFade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .popup-header {
+      background: linear-gradient(135deg, #2b3b6e, #1f4a8e);
+      padding: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .popup-header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      cursor: pointer;
+    }
+
+    .popup-avatar-lg {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #cfddee;
+      font-size: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .popup-body {
+      padding: 20px;
+      color: #1e2a47;
+    }
+
+    .info-section {
+      margin-bottom: 18px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .info-title {
+      font-weight: 800;
+      color: #1f4a8e;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .popup-footer {
+      padding: 10px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: white;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #2c3e66;
+      color: white;
+      border: none;
+    }
+
+    .popup-footer button {
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    /* zoom */
+    .zoom-layer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 1200;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    .zoom-layer img {
+      max-width: 92%;
+      max-height: 90%;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    /* search modal */
+    .search-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-card {
+      background: white;
+      border-radius: 32px;
+      padding: 24px;
+      width: 85%;
+      max-width: 340px;
+      text-align: center;
+    }
+
+    .search-card input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 60px;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+
+    /* filter panel */
+    .filter-panel {
+      background: white;
+      border-radius: 32px;
+      padding: 22px;
+      width: 280px;
+    }
+
+    .filter-row {
+      margin: 12px 0;
+    }
+
+    @media (max-width: 580px) {
+      .person-card { width: 115px; }
+      .avatar, .avatar-siluet { width: 70px; height: 70px; font-size: 42px; }
+      .children-grid { gap: 10px; }
+    }
+  </style>
 </head>
-
 <body>
-  
+
+<div class="hero">
+  <h1 id="mainTitle">🌳 Silsilah Keluarga</h1>
+</div>
+
+<div class="marquee">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>⚠️ Foto bersifat ilustrasi AI (bukan asli) — jika ada kesalahan data, hubungi pengelola.</span>
+    <span>⚠️ Foto bersifat ilustrasi AI (bukan asli) — jika ada kesalahan data, hubungi pengelola.</span>
+  </div>
+</div>
+
 <div class="toolbar">
-  <button onclick="openSearch()" class="search-btn">🔍 Cari</button>
-  <button onclick="openFilter()" class="filter-btn">📑 Filter</button>
+  <button class="btn-glass" id="backBtn" style="display:none;">⬅ Kembali</button>
+  <button class="btn-glass" id="searchBtn">🔍 Cari Anggota</button>
+  <button class="btn-glass" id="filterBtn">📌 Filter & Generasi</button>
 </div>
 
-<div class="tree" id="tree"></div>
+<div id="treeContainer" class="tree"></div>
 
-<!-- SEARCH -->
-<div id="searchPopup" class="search-popup" onclick="closeSearch()">
-  <div class="search-box" onclick="event.stopPropagation()">
-    
-    <input type="text" id="searchInput" placeholder="Cari nama..." onkeyup="searchName(event)">
-    <br><br>
-
-    <button onclick="searchName()">Cari</button>
-    <button onclick="closeSearch()">Tutup</button>
-
+<!-- SEARCH MODAL -->
+<div id="searchModal" class="search-modal">
+  <div class="search-card">
+    <h3>Cari Nama</h3>
+    <input type="text" id="searchInput" placeholder="Ketik nama...">
+    <button id="searchSubmitBtn" style="background:#2c3e66; color:white; border:none; padding:8px 18px; border-radius:40px;">Cari</button>
+    <button id="closeSearchBtn" style="background:#aaa; margin-top:8px;">Tutup</button>
   </div>
 </div>
 
-<!-- FILTER -->
-<div id="filterPopup" class="search-popup" onclick="closeFilter()">
-  <div class="search-box" onclick="event.stopPropagation()">
-
-    <p><b>Pilih Filter:</b></p>
-
-    <label>
-      <input type="checkbox" id="fHidup"> Yang masih hidup
-    </label><br><br>
-
-    <label>
-      <input type="checkbox" id="fLaki"> Laki-laki
-    </label><br><br>
-
-    <label>
-      <input type="checkbox" id="fPerempuan"> Perempuan
-    </label><br><br>
-
-    <label>
-      Generasi:
-      <input type="number" id="fGenerasi" placeholder="Contoh: 1">
-    </label><br><br>
-
-    <button onclick="applyFilter()">Terapkan</button><br><br>
-    <button onclick="resetFilter()">Reset</button>
-
+<!-- FILTER MODAL -->
+<div id="filterModal" class="search-modal">
+  <div class="filter-panel">
+    <h3>🎛️ Filter Keluarga</h3>
+    <div class="filter-row"><label><input type="checkbox" id="filterHidup"> Hidup saja</label></div>
+    <div class="filter-row"><label><input type="checkbox" id="filterLaki"> Laki-laki</label></div>
+    <div class="filter-row"><label><input type="checkbox" id="filterPerempuan"> Perempuan</label></div>
+    <div class="filter-row"><input type="number" id="filterGenerasi" placeholder="Generasi (1-4)" style="width:100%; padding:8px; border-radius:30px;"></div>
+    <button id="applyFilterBtn" style="background:#2c3e66; color:white; border:none; padding:8px; border-radius:40px; margin-top:10px;">Terapkan</button>
+    <button id="resetFilterBtn" style="background:#777; margin-top:8px;">Reset & Tampilkan Semua</button>
+    <button id="closeFilterBtn" style="background:#aaa; margin-top:8px;">Tutup</button>
   </div>
 </div>
 
-<!-- POPUP -->
-<div id="popup" class="popup" onclick="closePopup(event)">
-  <div class="popup-box" onclick="event.stopPropagation()">
-
+<!-- POPUP DETAIL -->
+<div id="globalPopup" class="popup-overlay">
+  <div class="popup-container">
     <div class="popup-header" id="popupHeader"></div>
     <div class="popup-body" id="popupBody"></div>
-
     <div class="popup-footer">
-      <button id="btnWA" class="btn-wa">📞 WhatsApp</button><br>
-      <button id="btnDetail">📄 Detail</button><br><br>
-      <button onclick="closePopup()">Tutup</button>
+      <button id="popupWaBtn" class="btn-wa">💬 WhatsApp</button>
+      <button id="popupSilsilahBtn" class="btn-primary">📖 Lihat Silsilah Lengkap</button>
+      <button id="closePopupBtn" style="background:#ccc; color:#222;">Tutup</button>
     </div>
-
   </div>
 </div>
 
-  <!-- ZOOM FOTO -->
-<div id="zoomFoto" class="zoom-foto" onclick="closeZoom()">
-  <img id="zoomImg">
+<!-- ZOOM LAYER -->
+<div id="zoomLayer" class="zoom-layer">
+  <img id="zoomImage" src="">
 </div>
 
 <script>
-// NONAKTIFKAN ALERT ERROR DI HP
-window.onerror = null;
+  let globalFamily = [];
+  let currentViewId = null;      // untuk mode detail
+  let isDetailMode = false;
 
-let globalData=[];
+  // ambil parameter id dari url (jika ada)
+  const urlParams = new URLSearchParams(window.location.search);
+  const detailId = urlParams.get('id');
 
-/* LOAD */
-fetch('data.json?v='+Date.now())
-.then(r=>r.json())
-.then(data=>{
-  globalData=data;
-  init(data);
-});
+  // ---------- helper short name ----------
+  function shortName(fullname) {
+    if (!fullname) return "?";
+    let clean = fullname.replace(/\./g, '');
+    let parts = clean.split(' ');
+    const gelar = ['h','hj','dr','drs','ir','kh','ust','habib','r','s','m'];
+    while(parts.length > 1 && gelar.includes(parts[0].toLowerCase())) {
+      parts.shift();
+    }
+    return parts[0];
+  }
 
-/* INIT + SORT */
-function init(data){
-  let roots = data
-    .filter(p=>p.generasi==="1" && p.jenis_kelamin==="L")
-    .sort((a,b)=>
-      parseInt(a.tanggal_lahir || "9999") - parseInt(b.tanggal_lahir || "9999")
-    );
+  // ---------- render tree (dinamis) ----------
+  function renderTree(rootId = null) {
+    const container = document.getElementById('treeContainer');
+    container.innerHTML = '';
+    if (!globalFamily.length) return;
 
-  roots.forEach(root=>{
-    let pasangan=data.filter(x=>root.pasangan && root.pasangan.includes(x.nama));
-
-    if(!pasangan.length){
-      createFamilyBlock(root,null);
+    if (rootId) {
+      // mode detail: tampilkan satu keluarga inti dari orang tsb
+      const person = globalFamily.find(p => p.id === rootId);
+      if (!person) return;
+      document.getElementById('mainTitle').innerText = `📌 Silsilah: ${shortName(person.nama)}`;
+      document.getElementById('backBtn').style.display = 'inline-flex';
+      isDetailMode = true;
+      buildFamilyBlockForPerson(person, container);
     } else {
-      pasangan.forEach(p=>createFamilyBlock(root,p));
+      // mode utama: generasi 1 laki2 sebagai kepala
+      document.getElementById('mainTitle').innerText = '🌳 Silsilah Keluarga';
+      document.getElementById('backBtn').style.display = 'none';
+      isDetailMode = false;
+      const roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L")
+        .sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
+      roots.forEach(root => {
+        const spouses = globalFamily.filter(s => root.pasangan && root.pasangan.split('|').map(t=>t.trim()).includes(s.nama));
+        if (spouses.length === 0) {
+          appendFamilyBlock(root, null, container);
+        } else {
+          spouses.forEach(sp => appendFamilyBlock(root, sp, container));
+        }
+      });
     }
-  });
-}
-
-function renderByGenerasi(gen){
-  const tree = document.getElementById("tree");
-  tree.innerHTML = ""; // 🔥 hapus tampilan lama
-
-  let dataGen = globalData.filter(x => x.generasi === gen);
-
-  dataGen.forEach(p=>{
-    const block = document.createElement("div");
-    block.className = "family-block";
-
-    const couple = document.createElement("div");
-    couple.className = "couple";
-
-    couple.appendChild(createPerson(p));
-
-    block.appendChild(couple);
-    tree.appendChild(block);
-  });
-}
-
-/* FAMILY */
-function createFamilyBlock(root,pasangan){
-  const tree=document.getElementById("tree");
-
-  const block=document.createElement("div");
-  block.className="family-block";
-
-  const couple=document.createElement("div");
-  couple.className="couple";
-
-  couple.appendChild(createPerson(root));
-
-  if(pasangan){
-    let love=document.createElement("div");
-    love.className="love-icon";
-    love.innerHTML="❤️";
-    couple.appendChild(love);
-    couple.appendChild(createPerson(pasangan));
+    // setelah render, terapkan filter aktif jika ada state (optional)
+    applyFiltersToDOM();
   }
 
-  block.appendChild(couple);
+  function appendFamilyBlock(root, spouse, container) {
+    const blockDiv = document.createElement('div');
+    blockDiv.className = 'family-card';
+    blockDiv.setAttribute('data-root-id', root.id);
 
-  let children=globalData.filter(x=>
-    (x.ayah===root.nama && pasangan && x.ibu===pasangan.nama) ||
-    (x.ibu===root.nama && pasangan && x.ayah===pasangan.nama)
-  );
-
-  children.sort((a,b)=>
-    parseInt(a.tanggal_lahir||9999) - parseInt(b.tanggal_lahir||9999)
-  );
-
-  if(children.length){
-    let box=document.createElement("div");
-    box.className="children";
-    children.forEach(c=>box.appendChild(createPerson(c)));
-    block.appendChild(box);
-  }
-
-  tree.appendChild(block);
-}
-
-/* ===== FIX NAMA ===== */
-function shortName(nama){
-  if(!nama) return "-";
-
-  const gelar=[
-    "h","h.","hj","hj.","dr","dr.","drs","drs.",
-    "ir","ir.","kh","kh.","ust","ust.","ustadz",
-    "habib","r","r."
-  ];
-
-  let parts=nama.trim().split(/\s+/);
-
-  for(let i=0;i<parts.length;i++){
-    let word=parts[i].toLowerCase();
-
-    if(gelar.includes(word)) continue;
-    if(parts[i].includes(".")) continue;
-
-    return parts[i];
-  }
-
-  return parts[0];
-}
-
-/* PERSON */
-function createPerson(p){
-  const isMeninggal=(p.status||"").toLowerCase().includes("meninggal");
-
-  const div=document.createElement("div");
-  div.className="person "+(isMeninggal?"meninggal":"");
-  div.setAttribute("data-id", p.id); // 🔥 WAJIB
-
-  let foto = p.foto
-    ? `<img src="${p.foto}" onclick="openPopup('${p.id}')">`
-    : `<div class="siluet ${p.jenis_kelamin==='L'?'l':'p'}" onclick="openPopup('${p.id}')">${p.jenis_kelamin==='L'?'👨':'👩'}</div>`;
-
-  div.innerHTML = `
-    ${foto}
-    <div class="name" onclick="goDetail('${p.id}')">${shortName(p.nama)}</div>
-  `;
-
-  return div;
-}
-
-/* DETAIL */
-function goDetail(id){
-  window.location.href="detail.html?id="+id;
-}
-
-/* POPUP */
-function val(v){ return v ? v : "-"; }
-
-function openPopup(id){
-  const p=globalData.find(x=>x.id===id);
-  if(!p) return;
-
-  document.getElementById("popup").style.display="block";
-  document.body.classList.add("lock");
-
-let header = p.foto
-  ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br>${p.nama}`
-    : `<div class="popup-avatar">${p.jenis_kelamin==='L'?'👨':'👩'}</div>${p.nama}`;
-
-  document.getElementById("popupHeader").innerHTML=header;
-
-  document.getElementById("popupBody").innerHTML=`
-    <div class="section">
-      <div class="section-title">👤 Biodata</div>
-      Jenis Kelamin: ${val(p.jenis_kelamin)}<br>
-      Status: ${val(p.status)}<br>
-      Pekerjaan: ${val(p.pekerjaan)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">👨‍👩‍👧 Keluarga</div>
-      Ayah: ${val(p.ayah)}<br>
-      Ibu: ${val(p.ibu)}<br>
-      Pasangan: ${val(p.pasangan)}<br>
-      Anak: ${val(p.jumlah_anak)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">📍 Lahir</div>
-      Tahun: ${val(p.tanggal_lahir)}<br>
-      Tempat: ${val(p.alamat_lahir)}<br>
-      Domisili: ${val(p.domisili)}
-    </div>
-
-    <div class="section">
-      <div class="section-title">📞 Kontak</div>
-      WA: ${val(p.wa)}
-    </div>
-  `;
-
-  document.getElementById("btnWA").onclick=()=>{
-    if(p.wa) window.open("https://wa.me/"+p.wa);
-    else alert("No WA tidak tersedia");
-  };
-
-  document.getElementById("btnDetail").onclick=()=>{
-  closePopup(); // 🔥 tutup popup dulu
-  setTimeout(()=>{
-    goDetail(p.id);
-  },200);
-};
-}
-
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-  document.body.classList.remove("lock");
-}
-
-/* SEARCH */
-function openSearch(){ document.getElementById("searchPopup").style.display="block"; }
-function closeSearch(){ document.getElementById("searchPopup").style.display="none"; }
-
-function searchName(e){
-  if(e && e.key!=="Enter") return;
-
-  let v=document.getElementById("searchInput").value.toLowerCase();
-
-  if(!v){
-    alert("Masukkan nama dulu");
-    return;
-  }
-
-  let p=globalData.find(x=>x.nama.toLowerCase().includes(v));
-
-  if(p){
-    closeSearch();
-    window.location.href="detail.html?id="+p.id;
-  } else {
-    alert("Tidak ditemukan");
-  }
-}
-
-/* FILTER */
-function openFilter(){
-  document.getElementById("filterPopup").style.display="block";
-}
-
-function closeFilter(){
-  document.getElementById("filterPopup").style.display="none";
-}
-
-function toggleFilter(){
-  let el = document.getElementById("filterPopup");
-  el.style.display = (el.style.display === "block") ? "none" : "block";
-}
-
-function applyFilter(){
-
-  const fHidup = document.getElementById("fHidup").checked;
-  const fLaki = document.getElementById("fLaki").checked;
-  const fPerempuan = document.getElementById("fPerempuan").checked;
-  const fGenerasi = document.getElementById("fGenerasi").value;
-
-  // 🔥 1. RESET TAMPILAN DULU
-  document.getElementById("tree").innerHTML = "";
-  init(globalData);
-
-  // 🔥 2. KHUSUS GENERASI → tampilkan hanya generasi itu
-  if(fGenerasi){
-    renderByGenerasi(fGenerasi);
-  }
-
-  // 🔥 3. FILTER SEMUA PERSON
-  document.querySelectorAll(".person").forEach(el=>{
-    let id = el.getAttribute("data-id");
-    let data = globalData.find(x => x.id === id);
-
-    if(!data) return;
-
-    let show = true;
-
-    // hidup
-    if(fHidup && (data.status||"").toLowerCase().includes("meninggal")){
-      show = false;
+    const coupleDiv = document.createElement('div');
+    coupleDiv.className = 'couple-row';
+    coupleDiv.appendChild(createPersonElement(root));
+    if (spouse) {
+      const loveSpan = document.createElement('span');
+      loveSpan.className = 'love-badge';
+      loveSpan.innerHTML = '❤️';
+      coupleDiv.appendChild(loveSpan);
+      coupleDiv.appendChild(createPersonElement(spouse));
     }
+    blockDiv.appendChild(coupleDiv);
 
-    // gender pintar
-    if(!(fLaki && fPerempuan)){
-      if(fLaki && data.jenis_kelamin !== "L") show = false;
-      if(fPerempuan && data.jenis_kelamin !== "P") show = false;
+    // anak-anak dari pasangan ini
+    let children = [];
+    if (spouse) {
+      children = globalFamily.filter(c => 
+        (c.ayah === root.nama && c.ibu === spouse.nama) || 
+        (c.ibu === root.nama && c.ayah === spouse.nama)
+      );
+    } else {
+      children = globalFamily.filter(c => c.ayah === root.nama || c.ibu === root.nama);
     }
-
-    // generasi (tetap dicek biar aman)
-    if(fGenerasi && data.generasi !== fGenerasi){
-      show = false;
+    children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
+    if (children.length) {
+      const childrenGrid = document.createElement('div');
+      childrenGrid.className = 'children-grid';
+      children.forEach(ch => childrenGrid.appendChild(createPersonElement(ch)));
+      blockDiv.appendChild(childrenGrid);
     }
+    container.appendChild(blockDiv);
+  }
 
-    el.style.display = show ? "block" : "none";
-  });
+  // untuk detail mode: tampilkan hanya inti dari orang tersebut (pasangan + anak)
+  function buildFamilyBlockForPerson(person, container) {
+    const blockDiv = document.createElement('div');
+    blockDiv.className = 'family-card';
+    const coupleDiv = document.createElement('div');
+    coupleDiv.className = 'couple-row';
+    coupleDiv.appendChild(createPersonElement(person));
 
-  // 🔥 4. RAPIIIN COUPLE + LOVE
-  document.querySelectorAll(".couple").forEach(couple=>{
-    let persons = couple.querySelectorAll(".person");
-    let love = couple.querySelector(".love-icon");
+    // cari pasangan dari person
+    let spouses = [];
+    if (person.pasangan) {
+      const spouseNames = person.pasangan.split('|').map(s => s.trim());
+      spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
+    }
+    if (spouses.length) {
+      spouses.forEach(sp => {
+        const loveSpan = document.createElement('span');
+        loveSpan.className = 'love-badge';
+        loveSpan.innerHTML = '❤️';
+        coupleDiv.appendChild(loveSpan);
+        coupleDiv.appendChild(createPersonElement(sp));
+      });
+    }
+    blockDiv.appendChild(coupleDiv);
 
-    let visibleCount = 0;
+    // anak-anak dari person (berdasarkan ayah/ibu)
+    let children = globalFamily.filter(c => 
+      (c.ayah === person.nama || c.ibu === person.nama)
+    );
+    children.sort((a,b)=> (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
+    if (children.length) {
+      const childGrid = document.createElement('div');
+      childGrid.className = 'children-grid';
+      children.forEach(ch => childGrid.appendChild(createPersonElement(ch)));
+      blockDiv.appendChild(childGrid);
+    }
+    container.appendChild(blockDiv);
+  }
 
-    persons.forEach(p=>{
-      if(p.style.display !== "none") visibleCount++;
+  function createPersonElement(person) {
+    const isDead = (person.status || '').toLowerCase().includes('meninggal');
+    const card = document.createElement('div');
+    card.className = `person-card ${isDead ? 'meninggal' : ''}`;
+    card.setAttribute('data-id', person.id);
+
+    let avatarHtml = '';
+    if (person.foto && person.foto !== '') {
+      avatarHtml = `<img class="avatar" src="${person.foto}" alt="foto" onclick="event.stopPropagation(); openZoomImage('${person.foto}')">`;
+    } else {
+      const genderClass = (person.jenis_kelamin === 'L') ? 'l' : 'p';
+      const icon = (person.jenis_kelamin === 'L') ? '👨' : '👩';
+      avatarHtml = `<div class="avatar-siluet ${genderClass}" onclick="event.stopPropagation(); openPopupById('${person.id}')">${icon}</div>`;
+    }
+    card.innerHTML = `
+      ${avatarHtml}
+      <div class="person-name" onclick="openPopupById('${person.id}')">${shortName(person.nama)}</div>
+    `;
+    // click foto akan zoom, click name atau area lainnya buka popup detail
+    const nameDiv = card.querySelector('.person-name');
+    if (nameDiv) nameDiv.onclick = (e) => { e.stopPropagation(); openPopupById(person.id); };
+    return card;
+  }
+
+  // breadcrumb di mode detail
+  function renderBreadcrumb(personId) {
+    const person = globalFamily.find(p => p.id === personId);
+    if (!person) return;
+    const breadDiv = document.createElement('div');
+    breadDiv.className = 'breadcrumb-area';
+    // garis ayah
+    let ayahLine = getAncestorLine(person, 'ayah');
+    let ibuLine = getIbuLineWithSpouse(person);
+    
+    breadDiv.innerHTML = `
+      <div class="bread-line">👨‍🦳 Ayah: ${ayahLine.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ')}</div>
+      <div class="bread-line">👩‍🦰 Ibu: ${ibuLine.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ')}</div>
+    `;
+    const oldBread = document.querySelector('.breadcrumb-area');
+    if (oldBread) oldBread.remove();
+    const heroDiv = document.querySelector('.hero');
+    heroDiv.insertAdjacentElement('afterend', breadDiv);
+    breadDiv.querySelectorAll('span').forEach(span => {
+      span.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = span.getAttribute('data-id');
+        if (targetId && targetId !== '0') {
+          window.location.href = `?id=${targetId}`;
+        }
+      });
     });
+  }
 
-    couple.style.display = visibleCount ? "flex" : "none";
-
-    if(love){
-      love.style.display = (visibleCount === 2) ? "block" : "none";
+  function getAncestorLine(person, parentField) {
+    let line = [];
+    let current = person;
+    while (current) {
+      line.unshift({ id: current.id, nama: current.nama });
+      let parentName = current[parentField];
+      if (!parentName) break;
+      let parentObj = globalFamily.find(p => p.nama === parentName);
+      if (!parentObj) {
+        line.unshift({ id: '0', nama: 'Tidak diketahui' });
+        break;
+      }
+      current = parentObj;
     }
-  });
-  // 🔥 SORT COUPLE
-  document.querySelectorAll(".couple").forEach(couple=>{
-  sortByUmur(couple);
-});
+    if (line.length === 0 || line[0].id !== person.id) line.unshift({ id: person.id, nama: person.nama });
+    return line;
+  }
 
-  // 🔥 5. CHILDREN + SORT UMUR
-  document.querySelectorAll(".children").forEach(childBox=>{
+  function getIbuLineWithSpouse(person) {
+    let result = [];
+    let current = person;
+    let step = 0;
+    const visited = new Set();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      if (step === 0) result.unshift({ id: current.id, nama: current.nama });
+      let ibu = globalFamily.find(p => p.nama === current.ibu);
+      if (!ibu) {
+        if (step === 0) result.unshift({ id: '0', nama: 'Tidak diketahui' });
+        break;
+      }
+      result.unshift({ id: ibu.id, nama: ibu.nama });
+      // cari suami dari ibu (untuk lanjut garis ayah)
+      let suamiIbu = globalFamily.find(p => p.pasangan && p.pasangan.includes(ibu.nama) && p.jenis_kelamin === 'L');
+      if (suamiIbu) {
+        current = suamiIbu;
+      } else {
+        current = ibu;
+      }
+      step++;
+      if (step > 12) break;
+    }
+    return result;
+  }
 
-  // 🔥 SORT
-  sortByUmur(childBox);
+  // ----- POPUP LOGIC -----
+  let currentPopupPerson = null;
+  function openPopupById(id) {
+    const person = globalFamily.find(p => p.id === id);
+    if (!person) return;
+    currentPopupPerson = person;
+    const popup = document.getElementById('globalPopup');
+    const headerDiv = document.getElementById('popupHeader');
+    const bodyDiv = document.getElementById('popupBody');
+    
+    let headerContent = '';
+    if (person.foto) {
+      headerContent = `<img src="${person.foto}" onclick="event.stopPropagation(); openZoomImage('${person.foto}')"><br><strong>${person.nama}</strong>`;
+    } else {
+      const icon = person.jenis_kelamin === 'L' ? '👨' : '👩';
+      headerContent = `<div class="popup-avatar-lg">${icon}</div><strong>${person.nama}</strong>`;
+    }
+    headerDiv.innerHTML = headerContent;
 
-  let visibleChild = 0;
+    bodyDiv.innerHTML = `
+      <div class="info-section"><div class="info-title">🧬 Biodata</div>JK: ${person.jenis_kelamin || '-'}<br>Status: ${person.status || '-'}<br>Pekerjaan: ${person.pekerjaan || '-'}</div>
+      <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div>Ayah: ${person.ayah || '-'}<br>Ibu: ${person.ibu || '-'}<br>Pasangan: ${person.pasangan || '-'}<br>Jumlah Anak: ${person.jumlah_anak || '-'}</div>
+      <div class="info-section"><div class="info-title">📍 Lahir & Domisili</div>Lahir: ${person.tanggal_lahir || '-'} / ${person.alamat_lahir || '-'}<br>Domisili: ${person.domisili || '-'}</div>
+      <div class="info-section"><div class="info-title">📞 Kontak</div>WA: ${person.wa || '-'}</div>
+    `;
+    const waBtn = document.getElementById('popupWaBtn');
+    waBtn.onclick = () => {
+      if (person.wa) window.open(`https://wa.me/${person.wa.replace(/\D/g,'')}`);
+      else alert('Nomor WhatsApp tidak tersedia');
+    };
+    document.getElementById('popupSilsilahBtn').onclick = () => {
+      closePopup();
+      window.location.href = `?id=${person.id}`;
+    };
+    popup.style.display = 'flex';
+  }
 
-  childBox.querySelectorAll(".person").forEach(p=>{
-    if(p.style.display !== "none") visibleChild++;
-  });
+  function closePopup() { document.getElementById('globalPopup').style.display = 'none'; }
+  function openZoomImage(src) {
+    const zoom = document.getElementById('zoomLayer');
+    const img = document.getElementById('zoomImage');
+    img.src = src;
+    zoom.style.display = 'flex';
+  }
+  function closeZoom() { document.getElementById('zoomLayer').style.display = 'none'; }
 
-  childBox.style.display = visibleChild ? "grid" : "none";
-});
+  // ----- Filter & UI ------
+  function applyFiltersToDOM() {
+    const filterHidup = document.getElementById('filterHidup').checked;
+    const filterLaki = document.getElementById('filterLaki').checked;
+    const filterPerempuan = document.getElementById('filterPerempuan').checked;
+    const filterGen = document.getElementById('filterGenerasi').value;
+    
+    document.querySelectorAll('.person-card').forEach(card => {
+      let id = card.getAttribute('data-id');
+      let p = globalFamily.find(x => x.id === id);
+      if (!p) return;
+      let show = true;
+      if (filterHidup && (p.status || '').toLowerCase().includes('meninggal')) show = false;
+      if (filterLaki && !filterPerempuan && p.jenis_kelamin !== 'L') show = false;
+      if (filterPerempuan && !filterLaki && p.jenis_kelamin !== 'P') show = false;
+      if (filterGen && p.generasi !== filterGen) show = false;
+      card.style.display = show ? 'block' : 'none';
+    });
+    // sembunyikan keluarga card jika semua person didalamnya hilang
+    document.querySelectorAll('.family-card').forEach(card => {
+      const visiblePeople = card.querySelectorAll('.person-card[style="display: block"], .person-card:not([style*="display"])');
+      card.style.display = visiblePeople.length ? 'block' : 'none';
+    });
+  }
 
-  // 🔥 6. FAMILY BLOCK
-  document.querySelectorAll(".family-block").forEach(block=>{
-    let visible = block.querySelectorAll(".person:not([style*='display: none'])");
-    block.style.display = visible.length ? "flex" : "none";
-  });
+  function resetAllFilters() {
+    document.getElementById('filterHidup').checked = false;
+    document.getElementById('filterLaki').checked = false;
+    document.getElementById('filterPerempuan').checked = false;
+    document.getElementById('filterGenerasi').value = '';
+    document.querySelectorAll('.person-card').forEach(c => c.style.display = 'block');
+    document.querySelectorAll('.family-card').forEach(c => c.style.display = 'block');
+  }
 
-  sortTreeByUmur();
+  // search
+  function searchAndGo() {
+    const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!keyword) { alert('Masukkan nama'); return; }
+    const found = globalFamily.find(p => p.nama.toLowerCase().includes(keyword));
+    if (found) {
+      closeSearchModal();
+      window.location.href = `?id=${found.id}`;
+    } else {
+      alert('Nama tidak ditemukan');
+    }
+  }
 
-  closeFilter(); // 🔥 auto close
-}
+  function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
+  function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; }
+  function openFilterModal() { document.getElementById('filterModal').style.display = 'flex'; }
+  function closeFilterModal() { document.getElementById('filterModal').style.display = 'none'; }
 
-function sortByUmur(container){
-
-  let persons = Array.from(container.querySelectorAll(".person"));
-
-  persons.sort((a,b)=>{
-    let idA = a.getAttribute("data-id");
-    let idB = b.getAttribute("data-id");
-
-    let dataA = globalData.find(x=>x.id===idA);
-    let dataB = globalData.find(x=>x.id===idB);
-
-    let thA = parseInt(dataA?.tanggal_lahir);
-    let thB = parseInt(dataB?.tanggal_lahir);
-
-    // 🔥 kalau kosong → taruh paling bawah
-    if(!thA) return 1;
-    if(!thB) return -1;
-
-    return thA - thB; // dari tua ke muda
-  });
-
-  // 🔥 tempel ulang urutan
-  persons.forEach(p => container.appendChild(p));
-}
-
-function sortTreeByUmur(){
-
-  const tree = document.getElementById("tree");
-
-  let blocks = Array.from(tree.querySelectorAll(".family-block"));
-
-  blocks.sort((a,b)=>{
-
-    let personA = a.querySelector(".person");
-    let personB = b.querySelector(".person");
-
-    let idA = personA?.getAttribute("data-id");
-    let idB = personB?.getAttribute("data-id");
-
-    let dataA = globalData.find(x=>x.id===idA);
-    let dataB = globalData.find(x=>x.id===idB);
-
-    let thA = parseInt(dataA?.tanggal_lahir);
-    let thB = parseInt(dataB?.tanggal_lahir);
-
-    if(!thA) return 1;
-    if(!thB) return -1;
-
-    return thA - thB; // tua ke muda
-  });
-
-  blocks.forEach(b => tree.appendChild(b));
-}
-
-function resetFilter(){
-  document.querySelectorAll(".person").forEach(el=>{
-    el.style.display="block";
-  });
-
-  document.querySelectorAll(".couple").forEach(el=>{
-    el.style.display="flex"; // 🔥 penting
-  });
-
-  document.getElementById("fHidup").checked=false;
-  document.getElementById("fLaki").checked=false;
-  document.getElementById("fPerempuan").checked=false;
-  document.getElementById("fGenerasi").value="";
-  document.getElementById("tree").innerHTML = "";
-  init(globalData); // 🔥 kembali ke tampilan awal
-
-  closeFilter();
-}
-
-const running = document.querySelector(".running-track");
-
-if(running){
-  // saat disentuh → pause
-  running.addEventListener("touchstart", () => {
-    running.classList.add("paused");
-  });
-
-  // saat dilepas → jalan lagi
-  running.addEventListener("touchend", () => {
-    running.classList.remove("paused");
-  });
-}
-
-  function openZoom(src){
-  const z = document.getElementById("zoomFoto");
-  const img = document.getElementById("zoomImg");
-
-  img.src = src;
-  z.style.display = "flex";
-}
-
-function closeZoom(){
-  document.getElementById("zoomFoto").style.display = "none";
-}
-  
+  // ---- initial load & routing ----
+  fetch('data.json?v='+Date.now())
+    .then(res => res.json())
+    .then(data => {
+      globalFamily = data;
+      if (detailId) {
+        renderTree(detailId);
+        renderBreadcrumb(detailId);
+      } else {
+        renderTree(null);
+      }
+      // tambahkan event listener filter after render
+      document.getElementById('applyFilterBtn').onclick = () => { applyFiltersToDOM(); closeFilterModal(); };
+      document.getElementById('resetFilterBtn').onclick = () => { resetAllFilters(); closeFilterModal(); };
+      document.getElementById('filterBtn').onclick = openFilterModal;
+      document.getElementById('closeFilterBtn').onclick = closeFilterModal;
+      document.getElementById('searchBtn').onclick = openSearchModal;
+      document.getElementById('closeSearchBtn').onclick = closeSearchModal;
+      document.getElementById('searchSubmitBtn').onclick = searchAndGo;
+      document.getElementById('searchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchAndGo(); });
+      document.getElementById('backBtn').onclick = () => { window.location.href = '.'; };
+      document.getElementById('closePopupBtn').onclick = closePopup;
+      document.getElementById('zoomLayer').onclick = closeZoom;
+    })
+    .catch(e => console.warn(e));
 </script>
-
 </body>
 </html>
