@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Silsilah Keluarga - Pohon Keluarga</title>
+  <title>Silsilah Keluarga</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -22,31 +22,6 @@
       0% { background-position: 0% 50%; } 
       50% { background-position: 100% 50%; } 
       100% { background-position: 0% 50%; } 
-    }
-    
-    /* SCROLLABLE TREE CONTAINER - horizontal scroll langsung terlihat */
-    .tree-wrapper {
-      overflow-x: auto;
-      overflow-y: visible;
-      padding: 20px 30px 40px;
-      cursor: grab;
-      min-height: 80vh;
-    }
-    .tree-wrapper:active {
-      cursor: grabbing;
-    }
-    
-    /* Webkit scrollbar styling */
-    .tree-wrapper::-webkit-scrollbar {
-      height: 10px;
-    }
-    .tree-wrapper::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.2);
-      border-radius: 10px;
-    }
-    .tree-wrapper::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.4);
-      border-radius: 10px;
     }
     
     .hero { text-align: center; padding: 12px 16px 4px; }
@@ -83,47 +58,127 @@
     }
     .btn-glass:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
     
-    /* ===== TREE STYLES - HIERARCHICAL ===== */
+    /* ===== TAMPILAN DEFAULT (FAMILY BLOCK) ===== */
+    .tree-default {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 20px;
+    }
+    .family-block {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 24px;
+      padding: 20px 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .couple-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .love-icon {
+      font-size: 24px;
+    }
+    .children-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+      justify-items: center;
+      border-top: 2px dashed rgba(255,255,240,0.3);
+      padding-top: 20px;
+    }
+    .person-card {
+      background: rgba(255,255,255,0.92);
+      border-radius: 20px;
+      padding: 10px 8px;
+      width: 110px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .person-card.meninggal { background: #2c2e3a; color: #ccc; }
+    .person-card:hover { transform: translateY(-4px); }
+    
+    .avatar-md {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 6px;
+      display: block;
+      border: 2px solid white;
+    }
+    .avatar-siluet-md {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      background: #d9e2ec;
+    }
+    .avatar-siluet-md.l { background: #7aa2f7; color: white; }
+    .avatar-siluet-md.p { background: #f29bc4; color: white; }
+    .person-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    
+    /* ===== TAMPILAN POHON HIERARKIS (KHUSUS MENU POHON) ===== */
+    .tree-wrapper {
+      overflow-x: auto;
+      overflow-y: visible;
+      padding: 20px 30px 40px;
+      cursor: grab;
+      min-height: 80vh;
+    }
+    .tree-wrapper:active { cursor: grabbing; }
+    .tree-wrapper::-webkit-scrollbar { height: 10px; }
+    .tree-wrapper::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .tree-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 10px; }
+    
     .tree {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       min-width: max-content;
     }
-    
-    .tree-root {
+    .family-tree {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-bottom: 50px;
     }
-    
-    /* Setiap root (kakek) bisa ditampilkan horizontal */
-    .roots-container {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      gap: 60px;
-      flex-wrap: wrap;
+    .family-separator {
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,200,0.5), transparent);
+      margin: 20px auto;
     }
-    
-    /* Tree branch */
     .tree-branch {
-      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    
-    /* Container untuk anak-anak */
     .children-container {
       display: flex;
       justify-content: center;
-      gap: 25px;
+      gap: 30px;
+      margin-top: 35px;
+      padding-top: 25px;
       position: relative;
-      margin-top: 30px;
-      padding-top: 20px;
     }
-    
-    /* Garis vertikal dari orang tua ke anak-anak (garis utama) */
     .children-container::before {
       content: '';
       position: absolute;
@@ -131,47 +186,35 @@
       left: 50%;
       transform: translateX(-50%);
       width: 2px;
-      height: 20px;
+      height: 25px;
       background: rgba(255,255,200,0.6);
     }
-    
     .child-item {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    
-    /* Garis vertikal dari garis horizontal ke setiap anak */
     .child-item::before {
       content: '';
       position: absolute;
-      top: -20px;
+      top: -25px;
       left: 50%;
       transform: translateX(-50%);
       width: 2px;
-      height: 20px;
+      height: 25px;
       background: rgba(255,255,200,0.6);
     }
-    
-    /* Garis horizontal penghubung antar saudara */
-    /* Hanya tampil jika ada lebih dari 1 anak */
-    .children-container:has(> :nth-child(2))::after {
+    .children-container:has(> .child-item:nth-child(2))::after {
       content: '';
       position: absolute;
-      top: -11px;
+      top: -13px;
       left: 0;
       right: 0;
       height: 2px;
       background: rgba(255,255,200,0.5);
       z-index: 0;
     }
-    
-    /* Perbaiki child pertama dan terakhir tidak perlu garis dobel */
-    .child-item:first-child::before {
-      left: 50%;
-    }
-    
     .couple-group {
       display: flex;
       gap: 8px;
@@ -180,27 +223,7 @@
       border-radius: 20px;
       padding: 4px 12px;
     }
-    .love-icon-sm {
-      font-size: 12px;
-      color: #ff99cc;
-    }
-    
-    /* Person card lebih kecil */
-    .person-card {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(4px);
-      border-radius: 16px;
-      padding: 6px 8px;
-      width: 80px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s ease;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.5);
-    }
-    .person-card.meninggal { background: #2c2e3a; color: #ccc; }
-    .person-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
-    
+    .love-icon-sm { font-size: 12px; color: #ff99cc; }
     .avatar-sm {
       width: 48px;
       height: 48px;
@@ -209,7 +232,6 @@
       margin: 0 auto 4px;
       display: block;
       border: 2px solid white;
-      cursor: pointer;
     }
     .avatar-siluet-sm {
       width: 48px;
@@ -221,34 +243,28 @@
       justify-content: center;
       font-size: 28px;
       background: #d9e2ec;
-      cursor: pointer;
     }
     .avatar-siluet-sm.l { background: #7aa2f7; color: white; }
     .avatar-siluet-sm.p { background: #f29bc4; color: white; }
-    
     .person-name-sm {
       font-weight: 700;
-      font-size: 0.7rem;
-      margin-top: 3px;
-      white-space: nowrap;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
+      font-size: 0.65rem;
     }
     
     /* BREADCRUMB */
     .breadcrumb-area {
       background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
       border-radius: 24px; padding: 6px 15px; margin: 6px auto;
-      width: fit-content; max-width: 90%; text-align: center;
+      width: fit-content; max-width: 90%;
       color: white;
     }
     .bread-line {
       font-size: 0.7rem; display: flex; flex-wrap: wrap;
       justify-content: center; align-items: center; gap: 4px;
     }
-    .bread-line strong { margin-right: 4px; color: #ffd966; font-size: 0.7rem; }
+    .bread-line strong { margin-right: 4px; color: #ffd966; }
     .bread-line span {
-      cursor: pointer; color: #ffea9e; font-weight: 500;
+      cursor: pointer; color: #ffea9e;
       background: rgba(0,0,0,0.3); padding: 2px 8px;
       border-radius: 20px;
     }
@@ -268,7 +284,7 @@
     .popup-header img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; cursor: pointer; }
     .popup-body { padding: 16px; color: #1e2a47; font-size: 0.85rem; }
     .info-section { margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 4px; font-size: 0.85rem; }
+    .info-title { font-weight: 800; color: #1f4a8e; margin-bottom: 4px; }
     .popup-footer { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
     .btn-wa, .btn-primary, .btn-close-popup {
       padding: 8px; border-radius: 40px; font-weight: 600; font-size: 0.8rem;
@@ -302,22 +318,12 @@
       padding: 2px 12px; border-radius: 20px;
     }
     .filter-container { text-align: center; }
-    
-    /* Family card untuk mode detail */
-    .family-card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      border-radius: 24px;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 600px;
-    }
   </style>
 </head>
 <body>
 
 <div class="hero">
-  <h1 id="mainTitle">🌳 Pohon Keluarga</h1>
+  <h1 id="mainTitle">🌳 Silsilah Keluarga</h1>
 </div>
 <div class="marquee">
   <div class="marquee-track">
@@ -329,15 +335,14 @@
 <div class="toolbar">
   <button class="btn-glass" id="backBtn" style="display:none;">⬅ Kembali</button>
   <button class="btn-glass" id="treeViewBtn">🌳 Tampilan Pohon</button>
+  <button class="btn-glass" id="defaultViewBtn">🏠 Tampilan Default</button>
   <button class="btn-glass" id="searchBtn">🔍 Cari</button>
   <button class="btn-glass" id="filterBtn">📌 Filter</button>
 </div>
 
 <div class="filter-container" id="filterInfoContainer"></div>
 
-<div class="tree-wrapper" id="treeWrapper">
-  <div id="treeContainer" class="tree"></div>
-</div>
+<div id="mainContainer"></div>
 
 <!-- MODAL SEARCH -->
 <div id="searchModal" class="modal-overlay">
@@ -384,6 +389,9 @@
 
 <script>
   let globalFamily = [];
+  let currentMode = 'default'; // 'default', 'tree', 'detail', 'filter'
+  let currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
+  
   const urlParams = new URLSearchParams(window.location.search);
   const detailId = urlParams.get('id');
 
@@ -396,7 +404,89 @@
     return parts[0];
   }
 
-  // ========== MEMBANGUN POHON HIERARKIS dengan urutan anak yang benar ==========
+  // ========== TAMPILAN DEFAULT (FAMILY BLOCK) ==========
+  function renderDefaultView() {
+    const container = document.getElementById('mainContainer');
+    container.innerHTML = '';
+    container.className = 'tree-default';
+    
+    const roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
+    roots.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
+    
+    roots.forEach(root => {
+      const spouseNames = root.pasangan ? root.pasangan.split('|').map(s=>s.trim()) : [];
+      const spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
+      
+      if (spouses.length === 0) {
+        createFamilyBlockDefault(root, null, container);
+      } else {
+        spouses.forEach(spouse => createFamilyBlockDefault(root, spouse, container));
+      }
+    });
+    
+    document.getElementById('mainTitle').innerHTML = '🌳 Silsilah Keluarga';
+    document.getElementById('backBtn').style.display = 'none';
+    currentMode = 'default';
+    hideFilterInfo();
+  }
+  
+  function createFamilyBlockDefault(root, spouse, container) {
+    const block = document.createElement('div');
+    block.className = 'family-block';
+    
+    const coupleDiv = document.createElement('div');
+    coupleDiv.className = 'couple-row';
+    coupleDiv.appendChild(createPersonCardDefault(root));
+    
+    if (spouse) {
+      const love = document.createElement('span');
+      love.className = 'love-icon';
+      love.innerHTML = '❤️';
+      coupleDiv.appendChild(love);
+      coupleDiv.appendChild(createPersonCardDefault(spouse));
+    }
+    block.appendChild(coupleDiv);
+    
+    let children = [];
+    if (spouse) {
+      children = globalFamily.filter(c => 
+        (c.ayah === root.nama && c.ibu === spouse.nama) || 
+        (c.ibu === root.nama && c.ayah === spouse.nama)
+      );
+    } else {
+      children = globalFamily.filter(c => c.ayah === root.nama || c.ibu === root.nama);
+    }
+    children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
+    
+    if (children.length) {
+      const grid = document.createElement('div');
+      grid.className = 'children-grid';
+      children.forEach(ch => grid.appendChild(createPersonCardDefault(ch)));
+      block.appendChild(grid);
+    }
+    container.appendChild(block);
+  }
+  
+  function createPersonCardDefault(person) {
+    const isDead = (person.status || '').toLowerCase().includes('meninggal');
+    const card = document.createElement('div');
+    card.className = `person-card ${isDead ? 'meninggal' : ''}`;
+    card.setAttribute('data-id', person.id);
+    
+    let avatarHtml = '';
+    if (person.foto && person.foto !== '') {
+      avatarHtml = `<img class="avatar-md" src="${person.foto}" onclick="event.stopPropagation(); openPopupById('${person.id}')">`;
+    } else {
+      const genderClass = person.jenis_kelamin === 'L' ? 'l' : 'p';
+      const icon = person.jenis_kelamin === 'L' ? '👨' : '👩';
+      avatarHtml = `<div class="avatar-siluet-md ${genderClass}" onclick="event.stopPropagation(); openPopupById('${person.id}')">${icon}</div>`;
+    }
+    card.innerHTML = `${avatarHtml}<div class="person-name">${shortName(person.nama)}</div>`;
+    card.querySelector('.person-name').onclick = (e) => { e.stopPropagation(); openPopupById(person.id); };
+    return card;
+  }
+  
+  // ========== TAMPILAN POHON HIERARKIS ==========
   function buildHierarchyTree(rootPerson) {
     const node = {
       person: rootPerson,
@@ -404,14 +494,11 @@
       children: []
     };
     
-    // Cari pasangan root
     let spouseNames = rootPerson.pasangan ? rootPerson.pasangan.split('|').map(s=>s.trim()) : [];
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
     node.spouses = spouses;
     
-    // Cari anak-anak dari root dan pasangan, urutkan dari tertua ke termuda (kiri ke kanan)
     let allChildren = [];
-    
     if (spouses.length > 0) {
       spouses.forEach(spouse => {
         let children = globalFamily.filter(c => 
@@ -425,85 +512,64 @@
       allChildren.push(...children);
     }
     
-    // Hapus duplikat berdasarkan id
     allChildren = allChildren.filter((child, index, self) => 
       index === self.findIndex(c => c.id === child.id)
     );
+    allChildren.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     
-    // Urutkan dari yang tertua (tanggal lahir terkecil) ke termuda
-    allChildren.sort((a,b) => {
-      const tahunA = parseInt(a.tanggal_lahir) || 9999;
-      const tahunB = parseInt(b.tanggal_lahir) || 9999;
-      return tahunA - tahunB;
-    });
-    
-    // Rekursif untuk setiap anak
     node.children = allChildren.map(child => buildHierarchyTree(child));
-    
     return node;
   }
   
   function renderHierarchyTree(node) {
     if (!node) return null;
-    
     const container = document.createElement('div');
     container.className = 'tree-branch';
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
     
-    // Tampilkan person dan pasangan dalam satu baris
     const personWrapper = document.createElement('div');
     personWrapper.className = 'couple-group';
+    personWrapper.appendChild(createPersonCardTree(node.person));
     
-    // Person utama
-    personWrapper.appendChild(createSmallPersonCard(node.person));
-    
-    // Pasangan (diletakkan setelah person utama)
     if (node.spouses && node.spouses.length > 0) {
       node.spouses.forEach(spouse => {
         const loveSpan = document.createElement('span');
         loveSpan.className = 'love-icon-sm';
         loveSpan.innerHTML = '❤️';
-        loveSpan.style.margin = '0 4px';
         personWrapper.appendChild(loveSpan);
-        personWrapper.appendChild(createSmallPersonCard(spouse));
+        personWrapper.appendChild(createPersonCardTree(spouse));
       });
     }
-    
     container.appendChild(personWrapper);
     
-    // Anak-anak (sudah terurut dari tertua ke termuda = kiri ke kanan)
     if (node.children && node.children.length > 0) {
       const childrenContainer = document.createElement('div');
       childrenContainer.className = 'children-container';
       childrenContainer.style.display = 'flex';
-      childrenContainer.style.gap = '25px';
+      childrenContainer.style.gap = '30px';
       childrenContainer.style.justifyContent = 'center';
-      childrenContainer.style.marginTop = '30px';
-      childrenContainer.style.position = 'relative';
+      childrenContainer.style.marginTop = '35px';
       
       node.children.forEach(childNode => {
         const childItem = document.createElement('div');
         childItem.className = 'child-item';
-        childItem.style.position = 'relative';
         childItem.appendChild(renderHierarchyTree(childNode));
         childrenContainer.appendChild(childItem);
       });
-      
       container.appendChild(childrenContainer);
     }
-    
     return container;
   }
   
-  function createSmallPersonCard(person) {
+  function createPersonCardTree(person) {
     const isDead = (person.status || '').toLowerCase().includes('meninggal');
     const card = document.createElement('div');
     card.className = `person-card ${isDead ? 'meninggal' : ''}`;
     card.setAttribute('data-id', person.id);
-    card.style.width = '80px';
-    card.style.padding = '6px 4px';
+    card.style.width = '75px';
+    card.style.padding = '5px 4px';
     
     let avatarHtml = '';
     if (person.foto && person.foto !== '') {
@@ -513,78 +579,72 @@
       const icon = person.jenis_kelamin === 'L' ? '👨' : '👩';
       avatarHtml = `<div class="avatar-siluet-sm ${genderClass}" onclick="event.stopPropagation(); openPopupById('${person.id}')">${icon}</div>`;
     }
-    
-    card.innerHTML = `${avatarHtml}<div class="person-name-sm" title="${person.nama}">${shortName(person.nama)}</div>`;
+    card.innerHTML = `${avatarHtml}<div class="person-name-sm">${shortName(person.nama)}</div>`;
     card.querySelector('.person-name-sm').onclick = (e) => { e.stopPropagation(); openPopupById(person.id); };
     return card;
   }
   
-  // ========== RENDER FULL TREE ==========
-  function renderFullHierarchyTree() {
-    const container = document.getElementById('treeContainer');
+  function renderTreeView() {
+    const container = document.getElementById('mainContainer');
     container.innerHTML = '';
-    if (!globalFamily.length) return;
+    container.className = '';
     
-    // Ambil semua generasi 1 laki-laki sebagai akar pohon
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tree-wrapper';
+    const treeDiv = document.createElement('div');
+    treeDiv.className = 'tree';
+    
     const roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
     roots.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     
-    // Container untuk semua pohon (bisa multiple roots)
-    const rootsContainer = document.createElement('div');
-    rootsContainer.className = 'roots-container';
-    rootsContainer.style.display = 'flex';
-    rootsContainer.style.flexDirection = 'row';
-    rootsContainer.style.justifyContent = 'center';
-    rootsContainer.style.gap = '60px';
-    rootsContainer.style.flexWrap = 'wrap';
-    
-    roots.forEach(root => {
+    roots.forEach((root, index) => {
+      const familyDiv = document.createElement('div');
+      familyDiv.className = 'family-tree';
       const hierarchyNode = buildHierarchyTree(root);
       const rootBranch = renderHierarchyTree(hierarchyNode);
-      if (rootBranch) {
-        rootsContainer.appendChild(rootBranch);
+      if (rootBranch) familyDiv.appendChild(rootBranch);
+      treeDiv.appendChild(familyDiv);
+      if (index < roots.length - 1) {
+        const separator = document.createElement('div');
+        separator.className = 'family-separator';
+        treeDiv.appendChild(separator);
       }
     });
     
-    container.appendChild(rootsContainer);
+    wrapper.appendChild(treeDiv);
+    container.appendChild(wrapper);
     
-    document.getElementById('mainTitle').innerHTML = '🌳 Pohon Keluarga';
+    document.getElementById('mainTitle').innerHTML = '🌳 Pohon Keluarga (Hierarkis)';
     document.getElementById('backBtn').style.display = 'none';
-    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentMode = 'tree';
     hideFilterInfo();
     
-    // Scroll ke tengah secara horizontal
     setTimeout(() => {
-      const wrapper = document.getElementById('treeWrapper');
-      if (wrapper.scrollWidth > wrapper.clientWidth) {
-        wrapper.scrollLeft = (wrapper.scrollWidth - wrapper.clientWidth) / 2;
-      }
+      const w = document.querySelector('.tree-wrapper');
+      if (w) w.scrollLeft = 0;
     }, 100);
   }
   
   // ========== DETAIL MODE ==========
   function renderDetailMode(personId) {
-    const container = document.getElementById('treeContainer');
+    const container = document.getElementById('mainContainer');
     container.innerHTML = '';
+    container.className = 'tree-default';
+    
     const person = globalFamily.find(p => p.id === personId);
     if (!person) return;
     
     document.getElementById('mainTitle').innerHTML = `📌 Silsilah: ${shortName(person.nama)}`;
     document.getElementById('backBtn').style.display = 'inline-flex';
-    document.getElementById('treeViewBtn').style.display = 'inline-flex';
+    currentMode = 'detail';
     hideFilterInfo();
     
-    const card = document.createElement('div');
-    card.className = 'family-card';
+    const block = document.createElement('div');
+    block.className = 'family-block';
     
     const coupleDiv = document.createElement('div');
-    coupleDiv.style.display = 'flex';
-    coupleDiv.style.justifyContent = 'center';
-    coupleDiv.style.gap = '20px';
-    coupleDiv.style.alignItems = 'center';
-    coupleDiv.style.flexWrap = 'wrap';
-    
-    coupleDiv.appendChild(createSmallPersonCard(person));
+    coupleDiv.className = 'couple-row';
+    coupleDiv.appendChild(createPersonCardDefault(person));
     
     let spouseNames = person.pasangan ? person.pasangan.split('|').map(s=>s.trim()) : [];
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
@@ -592,26 +652,22 @@
       spouses.forEach(sp => {
         const loveSpan = document.createElement('span');
         loveSpan.innerHTML = '❤️';
-        loveSpan.style.fontSize = '16px';
+        loveSpan.style.fontSize = '24px';
         coupleDiv.appendChild(loveSpan);
-        coupleDiv.appendChild(createSmallPersonCard(sp));
+        coupleDiv.appendChild(createPersonCardDefault(sp));
       });
     }
-    card.appendChild(coupleDiv);
+    block.appendChild(coupleDiv);
     
     let children = globalFamily.filter(c => c.ayah === person.nama || c.ibu === person.nama);
     children.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     if (children.length) {
       const grid = document.createElement('div');
-      grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(85px, 1fr))';
-      grid.style.gap = '12px';
-      grid.style.marginTop = '20px';
-      grid.style.justifyItems = 'center';
-      children.forEach(ch => grid.appendChild(createSmallPersonCard(ch)));
-      card.appendChild(grid);
+      grid.className = 'children-grid';
+      children.forEach(ch => grid.appendChild(createPersonCardDefault(ch)));
+      block.appendChild(grid);
     }
-    container.appendChild(card);
+    container.appendChild(block);
     showBreadcrumb(person);
   }
   
@@ -622,7 +678,6 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // Garis Ayah
     let ayahStack = [];
     let current = person;
     while (current) {
@@ -632,7 +687,6 @@
       current = ayahObj;
     }
     
-    // Garis Ibu
     let ibuStack = [person];
     let currentIbu = person;
     if (currentIbu.ibu) {
@@ -664,7 +718,7 @@
     });
   }
   
-  // Filter functions
+  // ========== FILTER (grid sederhana) ==========
   function applyFilterAndRender() {
     const generasi = document.getElementById('filterGenerasi').value;
     const hidup = document.getElementById('filterHidup').checked;
@@ -677,23 +731,24 @@
     if (laki && !perempuan) filtered = filtered.filter(p => p.jenis_kelamin === 'L');
     if (perempuan && !laki) filtered = filtered.filter(p => p.jenis_kelamin === 'P');
     
-    if (filtered.length === 0) {
-      document.getElementById('treeContainer').innerHTML = `<div style="text-align:center; color:white; padding:40px;">Tidak ada anggota yang sesuai filter</div>`;
-      return;
-    }
-    
-    const container = document.getElementById('treeContainer');
+    const container = document.getElementById('mainContainer');
     container.innerHTML = '';
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
-    grid.style.gap = '15px';
-    grid.style.justifyItems = 'center';
-    grid.style.maxWidth = '1000px';
-    grid.style.margin = '0 auto';
+    container.className = 'tree-default';
     
-    filtered.forEach(p => grid.appendChild(createSmallPersonCard(p)));
-    container.appendChild(grid);
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align:center; color:white; padding:40px;">Tidak ada anggota yang sesuai filter</div>`;
+    } else {
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+      grid.style.gap = '20px';
+      grid.style.justifyItems = 'center';
+      grid.style.maxWidth = '1000px';
+      grid.style.margin = '0 auto';
+      grid.style.padding = '20px';
+      filtered.forEach(p => grid.appendChild(createPersonCardDefault(p)));
+      container.appendChild(grid);
+    }
     
     let filterText = [];
     if (generasi) filterText.push(`Gen ${generasi}`);
@@ -702,21 +757,26 @@
     if (perempuan && !laki) filterText.push('Perempuan');
     document.getElementById('mainTitle').innerHTML = `📋 Filter: ${filterText.join(', ')} (${filtered.length})`;
     document.getElementById('backBtn').style.display = 'inline-flex';
+    currentMode = 'filter';
     showFilterInfo(`${filtered.length} anggota ditemukan`);
   }
   
-  function resetAndGoToFullTree() {
+  function resetFilters() {
     document.getElementById('filterHidup').checked = false;
     document.getElementById('filterLaki').checked = false;
     document.getElementById('filterPerempuan').checked = false;
     document.getElementById('filterGenerasi').value = '';
-    renderFullHierarchyTree();
-    hideFilterInfo();
+    renderDefaultView();
   }
   
-  function goToFullTree() {
+  function goToDefaultView() {
     if (detailId) window.location.href = '.';
-    else resetAndGoToFullTree();
+    else renderDefaultView();
+  }
+  
+  function goToTreeView() {
+    if (detailId) window.location.href = '.';
+    else renderTreeView();
   }
   
   function showFilterInfo(text) {
@@ -757,18 +817,10 @@
     else alert('Nama tidak ditemukan');
   }
   
-  // Close modal klik luar
+  // Event klik luar modal
   document.getElementById('searchModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeSearchModal(); });
   document.getElementById('filterModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeFilterModal(); });
   document.getElementById('globalPopup').addEventListener('click', e => { if(e.target === e.currentTarget) closePopup(); });
-  
-  // Drag to scroll horizontal
-  const wrapper = document.getElementById('treeWrapper');
-  let isDown = false, startX, scrollLeft;
-  wrapper.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - wrapper.offsetLeft; scrollLeft = wrapper.scrollLeft; });
-  wrapper.addEventListener('mouseleave', () => { isDown = false; });
-  wrapper.addEventListener('mouseup', () => { isDown = false; });
-  wrapper.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - wrapper.offsetLeft; const walk = (x - startX) * 1; wrapper.scrollLeft = scrollLeft - walk; });
   
   // ========== INIT ==========
   fetch('data.json?v='+Date.now())
@@ -776,10 +828,11 @@
     .then(data => {
       globalFamily = data;
       if (detailId) renderDetailMode(detailId);
-      else renderFullHierarchyTree();
+      else renderDefaultView();
       
-      document.getElementById('backBtn').onclick = () => { if(detailId) window.location.href = '.'; else renderFullHierarchyTree(); };
-      document.getElementById('treeViewBtn').onclick = goToFullTree;
+      document.getElementById('backBtn').onclick = () => { if(detailId) window.location.href = '.'; else renderDefaultView(); };
+      document.getElementById('treeViewBtn').onclick = goToTreeView;
+      document.getElementById('defaultViewBtn').onclick = goToDefaultView;
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
       document.getElementById('closeSearchBtn').onclick = closeSearchModal;
@@ -787,7 +840,7 @@
       document.getElementById('searchSubmitBtn').onclick = searchAndGo;
       document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchAndGo(); });
       document.getElementById('applyFilterBtn').onclick = () => { applyFilterAndRender(); closeFilterModal(); };
-      document.getElementById('resetFilterBtn').onclick = () => { resetAndGoToFullTree(); closeFilterModal(); };
+      document.getElementById('resetFilterBtn').onclick = () => { resetFilters(); closeFilterModal(); };
       document.getElementById('closePopupBtn').onclick = closePopup;
     });
 </script>
