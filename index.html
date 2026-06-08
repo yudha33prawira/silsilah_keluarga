@@ -64,7 +64,9 @@
       background: rgba(255,255,255,0.1); backdrop-filter: blur(4px);
       border-radius: 32px; padding: 20px 12px 12px;
       width: 100%; max-width: 800px; box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+      transition: 0.2s;
     }
+    .family-card.hidden-family { display: none; }
     .couple-row {
       display: flex; justify-content: center; align-items: center;
       gap: 28px; position: relative; flex-wrap: wrap;
@@ -86,6 +88,7 @@
     }
     .person-card.meninggal { background: #2c2e3a; color: #e0e0e0; border-color: #555; }
     .person-card:hover { transform: translateY(-6px); box-shadow: 0 14px 22px rgba(0,0,0,0.2); }
+    .person-card.hidden-person { display: none; }
     .avatar {
       width: 85px; height: 85px; border-radius: 50%; object-fit: cover;
       margin: 0 auto 8px; display: block; border: 3px solid white;
@@ -302,6 +305,13 @@
 
 <script>
   let globalFamily = [];
+  let currentFilter = {
+    hidup: false,
+    laki: false,
+    perempuan: false,
+    generasi: ''
+  };
+  
   const urlParams = new URLSearchParams(window.location.search);
   const detailId = urlParams.get('id');
 
@@ -335,6 +345,9 @@
         }
       }
     }
+    
+    // Terapkan filter setelah render
+    applyFiltersToDOM();
   }
 
   function createFamilyBlock(root, spouse, container) {
@@ -344,13 +357,13 @@
     
     const coupleDiv = document.createElement('div');
     coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(root, false));
+    coupleDiv.appendChild(createPersonEl(root));
     if (spouse) {
       const love = document.createElement('span');
       love.className = 'love-badge';
       love.innerHTML = '❤️';
       coupleDiv.appendChild(love);
-      coupleDiv.appendChild(createPersonEl(spouse, false));
+      coupleDiv.appendChild(createPersonEl(spouse));
     }
     card.appendChild(coupleDiv);
     
@@ -367,7 +380,7 @@
     if (children.length) {
       const grid = document.createElement('div');
       grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch, false)));
+      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
       card.appendChild(grid);
     }
     container.appendChild(card);
@@ -387,7 +400,7 @@
     card.className = 'family-card';
     const coupleDiv = document.createElement('div');
     coupleDiv.className = 'couple-row';
-    coupleDiv.appendChild(createPersonEl(person, false));
+    coupleDiv.appendChild(createPersonEl(person));
     
     let spouseNames = person.pasangan ? person.pasangan.split('|').map(s=>s.trim()) : [];
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
@@ -397,7 +410,7 @@
         loveSpan.className = 'love-badge';
         loveSpan.innerHTML = '❤️';
         coupleDiv.appendChild(loveSpan);
-        coupleDiv.appendChild(createPersonEl(sp, false));
+        coupleDiv.appendChild(createPersonEl(sp));
       });
     }
     card.appendChild(coupleDiv);
@@ -407,23 +420,18 @@
     if (children.length) {
       const grid = document.createElement('div');
       grid.className = 'children-grid';
-      children.forEach(ch => grid.appendChild(createPersonEl(ch, false)));
+      children.forEach(ch => grid.appendChild(createPersonEl(ch)));
       card.appendChild(grid);
     }
     container.appendChild(card);
     showBreadcrumb(person);
+    
+    // Terapkan filter setelah render
+    applyFiltersToDOM();
   }
 
   /**
-   * BREADCRUMB YANG BENAR:
-   * Kedua garis (Ayah dan Ibu) ditampilkan dari YANG PALING TUA ke YANG PALING MUDA
-   * 
-   * - Garis Ayah: kakek buyut → kakek → ayah → orang
-   * - Garis Ibu: (ayah dari ibu dari ...) → ibu → orang
-   * 
-   * Contoh untuk Yudha:
-   * - Garis Ayah: Sumadi → Oyo → Yudha
-   * - Garis Ibu: Ngadiman → Yuliarsih → Yudha
+   * BREADCRUMB: dari yang paling tua ke yang paling muda
    */
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
@@ -432,43 +440,30 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // ===== GARIS AYAH (dari tua ke muda) =====
-    let ayahPath = []; // dari yang paling tua ke yang paling muda
-    let currentAyah = person;
+    // ===== GARIS AYAH =====
     let ayahStack = [];
-    
-    // kumpulkan dari bawah ke atas (dari orang ke leluhur)
+    let currentAyah = person;
     while (currentAyah) {
       ayahStack.push({ id: currentAyah.id, nama: currentAyah.nama });
       let ayahObj = globalFamily.find(p => p.nama === currentAyah.ayah);
       if (!ayahObj) break;
       currentAyah = ayahObj;
     }
-    // balik stack agar dari tua ke muda
-    ayahPath = ayahStack.reverse();
+    let ayahPath = ayahStack.reverse();
     
-    // ===== GARIS IBU (dari tua ke muda) =====
-    // Pola: (ayah dari ibu) → ibu → orang
-    // Kita kumpulkan dari orang ke atas, lalu balik
-    
+    // ===== GARIS IBU =====
     let ibuStack = [];
-    
-    // Step 1: mulai dari orang
     let current = person;
     ibuStack.push({ id: current.id, nama: current.nama });
     
-    // Step 2: tambahkan ibu (jika ada)
     if (current.ibu) {
       let ibuObj = globalFamily.find(p => p.nama === current.ibu);
       if (ibuObj) {
         ibuStack.push({ id: ibuObj.id, nama: ibuObj.nama });
         current = ibuObj;
-      } else {
-        ibuStack.push({ id: '0', nama: '?' });
       }
     }
     
-    // Step 3: telusuri AYAH dari current (dan seterusnya) sampai habis
     while (current) {
       let ayahObj = globalFamily.find(p => p.nama === current.ayah);
       if (!ayahObj) break;
@@ -476,10 +471,9 @@
       current = ayahObj;
     }
     
-    // balik ibuStack agar dari yang paling tua ke yang paling muda
     let ibuPath = ibuStack.reverse();
     
-    // Render Garis Ayah
+    // Render
     const ayahHtml = ayahPath.map((p, idx) => {
       if (idx === ayahPath.length - 1) {
         return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
@@ -487,7 +481,6 @@
       return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
     }).join('');
     
-    // Render Garis Ibu
     const ibuHtml = ibuPath.map((p, idx) => {
       if (idx === ibuPath.length - 1) {
         return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
@@ -512,11 +505,14 @@
     });
   }
 
-  function createPersonEl(p, disableZoomOnClick = false) {
+  function createPersonEl(p) {
     const isDead = (p.status || '').toLowerCase().includes('meninggal');
     const card = document.createElement('div');
     card.className = `person-card ${isDead ? 'meninggal' : ''}`;
     card.setAttribute('data-id', p.id);
+    card.setAttribute('data-jenis', p.jenis_kelamin);
+    card.setAttribute('data-generasi', p.generasi);
+    card.setAttribute('data-status', p.status || '');
     
     let avatarHtml = '';
     if (p.foto && p.foto !== '') {
@@ -529,6 +525,79 @@
     card.innerHTML = `${avatarHtml}<div class="person-name">${shortName(p.nama)}</div>`;
     card.querySelector('.person-name').onclick = (e) => { e.stopPropagation(); openPopupById(p.id); };
     return card;
+  }
+
+  // ========== FILTER FUNCTION ==========
+  function applyFiltersToDOM() {
+    const hidup = document.getElementById('filterHidup').checked;
+    const laki = document.getElementById('filterLaki').checked;
+    const perempuan = document.getElementById('filterPerempuan').checked;
+    const gen = document.getElementById('filterGenerasi').value;
+    
+    // Simpan ke currentFilter
+    currentFilter = { hidup, laki, perempuan, generasi: gen };
+    
+    // Tentukan mode gender
+    let genderFilter = null;
+    if (laki && !perempuan) genderFilter = 'L';
+    if (perempuan && !laki) genderFilter = 'P';
+    
+    // Loop semua person card
+    document.querySelectorAll('.person-card').forEach(card => {
+      let id = card.getAttribute('data-id');
+      let data = globalFamily.find(x => x.id === id);
+      if (!data) return;
+      
+      let show = true;
+      
+      // Filter hidup/meninggal
+      if (hidup && (data.status || '').toLowerCase().includes('meninggal')) {
+        show = false;
+      }
+      
+      // Filter gender
+      if (genderFilter && data.jenis_kelamin !== genderFilter) {
+        show = false;
+      }
+      
+      // Filter generasi
+      if (gen && data.generasi !== gen) {
+        show = false;
+      }
+      
+      if (show) {
+        card.classList.remove('hidden-person');
+      } else {
+        card.classList.add('hidden-person');
+      }
+    });
+    
+    // Sembunyikan family card yang tidak memiliki person visible
+    document.querySelectorAll('.family-card').forEach(card => {
+      const visiblePersons = card.querySelectorAll('.person-card:not(.hidden-person)');
+      if (visiblePersons.length === 0) {
+        card.classList.add('hidden-family');
+      } else {
+        card.classList.remove('hidden-family');
+      }
+    });
+  }
+  
+  function resetFilters() {
+    document.getElementById('filterHidup').checked = false;
+    document.getElementById('filterLaki').checked = false;
+    document.getElementById('filterPerempuan').checked = false;
+    document.getElementById('filterGenerasi').value = '';
+    
+    // Reset semua hidden class
+    document.querySelectorAll('.person-card').forEach(card => {
+      card.classList.remove('hidden-person');
+    });
+    document.querySelectorAll('.family-card').forEach(card => {
+      card.classList.remove('hidden-family');
+    });
+    
+    currentFilter = { hidup: false, laki: false, perempuan: false, generasi: '' };
   }
 
   // Popup Detail
@@ -584,40 +653,6 @@
     document.body.classList.remove('lock');
   }
   
-  // Filter functions
-  function applyFilters() {
-    const hidup = document.getElementById('filterHidup').checked;
-    const laki = document.getElementById('filterLaki').checked;
-    const perempuan = document.getElementById('filterPerempuan').checked;
-    const gen = document.getElementById('filterGenerasi').value;
-    
-    document.querySelectorAll('.person-card').forEach(card => {
-      let id = card.getAttribute('data-id');
-      let data = globalFamily.find(x => x.id === id);
-      if (!data) return;
-      let show = true;
-      if (hidup && (data.status||'').toLowerCase().includes('meninggal')) show = false;
-      if (laki && !perempuan && data.jenis_kelamin !== 'L') show = false;
-      if (perempuan && !laki && data.jenis_kelamin !== 'P') show = false;
-      if (gen && data.generasi !== gen) show = false;
-      card.style.display = show ? 'block' : 'none';
-    });
-    
-    document.querySelectorAll('.family-card').forEach(card => {
-      let visible = card.querySelectorAll('.person-card[style="display: block"], .person-card:not([style*="display"])');
-      card.style.display = visible.length ? 'block' : 'none';
-    });
-  }
-  
-  function resetFilters() {
-    document.getElementById('filterHidup').checked = false;
-    document.getElementById('filterLaki').checked = false;
-    document.getElementById('filterPerempuan').checked = false;
-    document.getElementById('filterGenerasi').value = '';
-    document.querySelectorAll('.person-card').forEach(c => c.style.display = 'block');
-    document.querySelectorAll('.family-card').forEach(c => c.style.display = 'block');
-  }
-  
   // Search & Modal helpers
   function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; document.body.classList.add('lock'); }
   function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; document.body.classList.remove('lock'); }
@@ -658,6 +693,7 @@
         renderMainTree();
       }
       
+      // Event listeners
       document.getElementById('backBtn').onclick = () => window.location.href = '.';
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
@@ -665,8 +701,14 @@
       document.getElementById('closeFilterBtn').onclick = closeFilterModal;
       document.getElementById('searchSubmitBtn').onclick = searchAndGo;
       document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchAndGo(); });
-      document.getElementById('applyFilterBtn').onclick = () => { applyFilters(); closeFilterModal(); };
-      document.getElementById('resetFilterBtn').onclick = () => { resetFilters(); closeFilterModal(); };
+      document.getElementById('applyFilterBtn').onclick = () => { 
+        applyFiltersToDOM(); 
+        closeFilterModal(); 
+      };
+      document.getElementById('resetFilterBtn').onclick = () => { 
+        resetFilters(); 
+        closeFilterModal(); 
+      };
       document.getElementById('closePopupBtn').onclick = closePopup;
     })
     .catch(e => console.error('Gagal load JSON:', e));
