@@ -24,14 +24,29 @@
       100% { background-position: 0% 50%; } 
     }
     
-    /* SCROLLABLE TREE CONTAINER */
+    /* SCROLLABLE TREE CONTAINER - horizontal scroll langsung terlihat */
     .tree-wrapper {
       overflow-x: auto;
-      padding: 20px 30px;
+      overflow-y: visible;
+      padding: 20px 30px 40px;
       cursor: grab;
+      min-height: 80vh;
     }
     .tree-wrapper:active {
       cursor: grabbing;
+    }
+    
+    /* Webkit scrollbar styling */
+    .tree-wrapper::-webkit-scrollbar {
+      height: 10px;
+    }
+    .tree-wrapper::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    .tree-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.4);
+      border-radius: 10px;
     }
     
     .hero { text-align: center; padding: 12px 16px 4px; }
@@ -75,23 +90,22 @@
       min-width: max-content;
     }
     
-    /* Root level */
     .tree-root {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     
-    /* Generasi 1 (kakek/nenek) */
-    .gen-1 {
+    /* Setiap root (kakek) bisa ditampilkan horizontal */
+    .roots-container {
       display: flex;
+      flex-direction: row;
       justify-content: center;
-      gap: 30px;
-      margin-bottom: 20px;
-      position: relative;
+      gap: 60px;
+      flex-wrap: wrap;
     }
     
-    /* Garis vertikal dari generasi ke generasi */
+    /* Tree branch */
     .tree-branch {
       position: relative;
       display: flex;
@@ -99,16 +113,17 @@
       align-items: center;
     }
     
+    /* Container untuk anak-anak */
     .children-container {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 25px;
       position: relative;
-      margin-top: 25px;
-      padding-top: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
     }
     
-    /* Garis penghubung vertikal */
+    /* Garis vertikal dari orang tua ke anak-anak (garis utama) */
     .children-container::before {
       content: '';
       position: absolute;
@@ -116,13 +131,8 @@
       left: 50%;
       transform: translateX(-50%);
       width: 2px;
-      height: 15px;
-      background: rgba(255,255,200,0.5);
-    }
-    
-    /* Garis horizontal antar saudara */
-    .children-container {
-      position: relative;
+      height: 20px;
+      background: rgba(255,255,200,0.6);
     }
     
     .child-item {
@@ -132,35 +142,47 @@
       align-items: center;
     }
     
-    /* Garis horizontal penghubung antar saudara */
-    .children-container:not(:has(> :only-child))::after {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: rgba(255,255,200,0.4);
-      z-index: 0;
-    }
-    
-    /* Garis vertikal ke setiap anak */
+    /* Garis vertikal dari garis horizontal ke setiap anak */
     .child-item::before {
       content: '';
       position: absolute;
-      top: -23px;
+      top: -20px;
       left: 50%;
       transform: translateX(-50%);
       width: 2px;
-      height: 23px;
-      background: rgba(255,255,200,0.5);
-      z-index: 1;
+      height: 20px;
+      background: rgba(255,255,200,0.6);
     }
     
-    /* Hapus garis pertama yang dobel */
+    /* Garis horizontal penghubung antar saudara */
+    /* Hanya tampil jika ada lebih dari 1 anak */
+    .children-container:has(> :nth-child(2))::after {
+      content: '';
+      position: absolute;
+      top: -11px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255,255,200,0.5);
+      z-index: 0;
+    }
+    
+    /* Perbaiki child pertama dan terakhir tidak perlu garis dobel */
     .child-item:first-child::before {
       left: 50%;
-      width: 2px;
+    }
+    
+    .couple-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    .love-icon-sm {
+      font-size: 12px;
+      color: #ff99cc;
     }
     
     /* Person card lebih kecil */
@@ -169,7 +191,7 @@
       backdrop-filter: blur(4px);
       border-radius: 16px;
       padding: 6px 8px;
-      width: 85px;
+      width: 80px;
       text-align: center;
       cursor: pointer;
       transition: 0.2s ease;
@@ -213,20 +235,6 @@
       text-overflow: ellipsis;
     }
     
-    /* Couple (pasangan) diletakkan berdekatan */
-    .couple-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      background: rgba(0,0,0,0.2);
-      border-radius: 20px;
-      padding: 4px 12px;
-    }
-    .love-icon-sm {
-      font-size: 12px;
-      color: #ff99cc;
-    }
-    
     /* BREADCRUMB */
     .breadcrumb-area {
       background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
@@ -245,7 +253,7 @@
       border-radius: 20px;
     }
     
-    /* MODAL & POPUP (sama seperti sebelumnya) */
+    /* MODAL & POPUP */
     .popup-overlay, .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
@@ -294,6 +302,16 @@
       padding: 2px 12px; border-radius: 20px;
     }
     .filter-container { text-align: center; }
+    
+    /* Family card untuk mode detail */
+    .family-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+    }
   </style>
 </head>
 <body>
@@ -366,7 +384,6 @@
 
 <script>
   let globalFamily = [];
-  let currentRootId = null;
   const urlParams = new URLSearchParams(window.location.search);
   const detailId = urlParams.get('id');
 
@@ -379,9 +396,8 @@
     return parts[0];
   }
 
-  // ========== MEMBANGUN POHON HIERARKIS ==========
+  // ========== MEMBANGUN POHON HIERARKIS dengan urutan anak yang benar ==========
   function buildHierarchyTree(rootPerson) {
-    // Buat node untuk root
     const node = {
       person: rootPerson,
       spouses: [],
@@ -393,8 +409,8 @@
     let spouses = globalFamily.filter(s => spouseNames.includes(s.nama));
     node.spouses = spouses;
     
-    // Cari anak-anak dari root dan pasangan
-    let allChildrenIds = new Set();
+    // Cari anak-anak dari root dan pasangan, urutkan dari tertua ke termuda (kiri ke kanan)
+    let allChildren = [];
     
     if (spouses.length > 0) {
       spouses.forEach(spouse => {
@@ -402,23 +418,32 @@
           (c.ayah === rootPerson.nama && c.ibu === spouse.nama) ||
           (c.ibu === rootPerson.nama && c.ayah === spouse.nama)
         );
-        children.forEach(ch => allChildrenIds.add(ch.id));
+        allChildren.push(...children);
       });
     } else {
       let children = globalFamily.filter(c => c.ayah === rootPerson.nama || c.ibu === rootPerson.nama);
-      children.forEach(ch => allChildrenIds.add(ch.id));
+      allChildren.push(...children);
     }
     
+    // Hapus duplikat berdasarkan id
+    allChildren = allChildren.filter((child, index, self) => 
+      index === self.findIndex(c => c.id === child.id)
+    );
+    
+    // Urutkan dari yang tertua (tanggal lahir terkecil) ke termuda
+    allChildren.sort((a,b) => {
+      const tahunA = parseInt(a.tanggal_lahir) || 9999;
+      const tahunB = parseInt(b.tanggal_lahir) || 9999;
+      return tahunA - tahunB;
+    });
+    
     // Rekursif untuk setiap anak
-    node.children = Array.from(allChildrenIds).map(id => {
-      let childPerson = globalFamily.find(p => p.id === id);
-      return childPerson ? buildHierarchyTree(childPerson) : null;
-    }).filter(c => c);
+    node.children = allChildren.map(child => buildHierarchyTree(child));
     
     return node;
   }
   
-  function renderHierarchyTree(node, level = 0) {
+  function renderHierarchyTree(node) {
     if (!node) return null;
     
     const container = document.createElement('div');
@@ -434,7 +459,7 @@
     // Person utama
     personWrapper.appendChild(createSmallPersonCard(node.person));
     
-    // Pasangan
+    // Pasangan (diletakkan setelah person utama)
     if (node.spouses && node.spouses.length > 0) {
       node.spouses.forEach(spouse => {
         const loveSpan = document.createElement('span');
@@ -448,21 +473,21 @@
     
     container.appendChild(personWrapper);
     
-    // Anak-anak
+    // Anak-anak (sudah terurut dari tertua ke termuda = kiri ke kanan)
     if (node.children && node.children.length > 0) {
       const childrenContainer = document.createElement('div');
       childrenContainer.className = 'children-container';
       childrenContainer.style.display = 'flex';
-      childrenContainer.style.gap = '20px';
+      childrenContainer.style.gap = '25px';
       childrenContainer.style.justifyContent = 'center';
-      childrenContainer.style.marginTop = '25px';
+      childrenContainer.style.marginTop = '30px';
       childrenContainer.style.position = 'relative';
       
       node.children.forEach(childNode => {
         const childItem = document.createElement('div');
         childItem.className = 'child-item';
         childItem.style.position = 'relative';
-        childItem.appendChild(renderHierarchyTree(childNode, level + 1));
+        childItem.appendChild(renderHierarchyTree(childNode));
         childrenContainer.appendChild(childItem);
       });
       
@@ -477,8 +502,8 @@
     const card = document.createElement('div');
     card.className = `person-card ${isDead ? 'meninggal' : ''}`;
     card.setAttribute('data-id', person.id);
-    card.style.width = '75px';
-    card.style.padding = '5px 4px';
+    card.style.width = '80px';
+    card.style.padding = '6px 4px';
     
     let avatarHtml = '';
     if (person.foto && person.foto !== '') {
@@ -489,46 +514,55 @@
       avatarHtml = `<div class="avatar-siluet-sm ${genderClass}" onclick="event.stopPropagation(); openPopupById('${person.id}')">${icon}</div>`;
     }
     
-    card.innerHTML = `${avatarHtml}<div class="person-name-sm">${shortName(person.nama)}</div>`;
+    card.innerHTML = `${avatarHtml}<div class="person-name-sm" title="${person.nama}">${shortName(person.nama)}</div>`;
     card.querySelector('.person-name-sm').onclick = (e) => { e.stopPropagation(); openPopupById(person.id); };
     return card;
   }
   
-  // ========== RENDER FULL TREE (Semua Generasi 1 dengan hierarki) ==========
+  // ========== RENDER FULL TREE ==========
   function renderFullHierarchyTree() {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
     if (!globalFamily.length) return;
     
+    // Ambil semua generasi 1 laki-laki sebagai akar pohon
     const roots = globalFamily.filter(p => p.generasi === "1" && p.jenis_kelamin === "L");
     roots.sort((a,b) => (parseInt(a.tanggal_lahir)||9999) - (parseInt(b.tanggal_lahir)||9999));
     
-    const treeRoot = document.createElement('div');
-    treeRoot.className = 'tree-root';
-    treeRoot.style.display = 'flex';
-    treeRoot.style.flexDirection = 'column';
-    treeRoot.style.alignItems = 'center';
-    treeRoot.style.gap = '30px';
+    // Container untuk semua pohon (bisa multiple roots)
+    const rootsContainer = document.createElement('div');
+    rootsContainer.className = 'roots-container';
+    rootsContainer.style.display = 'flex';
+    rootsContainer.style.flexDirection = 'row';
+    rootsContainer.style.justifyContent = 'center';
+    rootsContainer.style.gap = '60px';
+    rootsContainer.style.flexWrap = 'wrap';
     
     roots.forEach(root => {
       const hierarchyNode = buildHierarchyTree(root);
       const rootBranch = renderHierarchyTree(hierarchyNode);
       if (rootBranch) {
-        // Tambahkan garis horizontal antar pohon jika lebih dari satu
-        treeRoot.appendChild(rootBranch);
+        rootsContainer.appendChild(rootBranch);
       }
     });
     
-    container.appendChild(treeRoot);
+    container.appendChild(rootsContainer);
     
     document.getElementById('mainTitle').innerHTML = '🌳 Pohon Keluarga';
     document.getElementById('backBtn').style.display = 'none';
     document.getElementById('treeViewBtn').style.display = 'inline-flex';
     hideFilterInfo();
-    currentRootId = null;
+    
+    // Scroll ke tengah secara horizontal
+    setTimeout(() => {
+      const wrapper = document.getElementById('treeWrapper');
+      if (wrapper.scrollWidth > wrapper.clientWidth) {
+        wrapper.scrollLeft = (wrapper.scrollWidth - wrapper.clientWidth) / 2;
+      }
+    }, 100);
   }
   
-  // ========== DETAIL MODE (Individual dengan breadcrumb) ==========
+  // ========== DETAIL MODE ==========
   function renderDetailMode(personId) {
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
@@ -540,12 +574,8 @@
     document.getElementById('treeViewBtn').style.display = 'inline-flex';
     hideFilterInfo();
     
-    // Tampilkan keluarga inti orang tersebut (tanpa garis hierarki)
     const card = document.createElement('div');
     card.className = 'family-card';
-    card.style.background = 'rgba(255,255,255,0.15)';
-    card.style.padding = '15px';
-    card.style.borderRadius = '24px';
     
     const coupleDiv = document.createElement('div');
     coupleDiv.style.display = 'flex';
@@ -574,7 +604,7 @@
     if (children.length) {
       const grid = document.createElement('div');
       grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(80px, 1fr))';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(85px, 1fr))';
       grid.style.gap = '12px';
       grid.style.marginTop = '20px';
       grid.style.justifyItems = 'center';
@@ -623,8 +653,8 @@
     const ibuHtml = ibuStack.map(p => `<span data-id="${p.id}">${shortName(p.nama)}</span>`).join(' → ');
     
     breadDiv.innerHTML = `
-      <div class="bread-line"><strong>👨 Ayah:</strong> ${ayahHtml}</div>
-      <div class="bread-line"><strong>👩 Ibu:</strong> ${ibuHtml}</div>
+      <div class="bread-line"><strong>👨 Garis Ayah:</strong> ${ayahHtml}</div>
+      <div class="bread-line"><strong>👩 Garis Ibu:</strong> ${ibuHtml}</div>
     `;
     
     const hero = document.querySelector('.hero');
@@ -634,7 +664,7 @@
     });
   }
   
-  // Filter functions (sederhana untuk mode pohon)
+  // Filter functions
   function applyFilterAndRender() {
     const generasi = document.getElementById('filterGenerasi').value;
     const hidup = document.getElementById('filterHidup').checked;
@@ -648,11 +678,10 @@
     if (perempuan && !laki) filtered = filtered.filter(p => p.jenis_kelamin === 'P');
     
     if (filtered.length === 0) {
-      document.getElementById('treeContainer').innerHTML = `<div style="text-align:center; color:white; padding:40px;">Tidak ada data</div>`;
+      document.getElementById('treeContainer').innerHTML = `<div style="text-align:center; color:white; padding:40px;">Tidak ada anggota yang sesuai filter</div>`;
       return;
     }
     
-    // Tampilkan sebagai grid sederhana
     const container = document.getElementById('treeContainer');
     container.innerHTML = '';
     const grid = document.createElement('div');
@@ -702,12 +731,12 @@
     document.body.classList.add('lock');
     const headerDiv = document.getElementById('popupHeader');
     const bodyDiv = document.getElementById('popupBody');
-    headerDiv.innerHTML = p.foto ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br><strong>${p.nama}</strong>` : `<div class="popup-avatar-lg" style="width:70px;height:70px;font-size:40px;margin:0 auto;">${p.jenis_kelamin==='L'?'👨':'👩'}</div><strong>${p.nama}</strong>`;
+    headerDiv.innerHTML = p.foto ? `<img src="${p.foto}" onclick="openZoom('${p.foto}')"><br><strong>${p.nama}</strong>` : `<div style="width:70px;height:70px;border-radius:50%;background:#cfddee;font-size:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">${p.jenis_kelamin==='L'?'👨':'👩'}</div><strong>${p.nama}</strong>`;
     bodyDiv.innerHTML = `<div class="info-section"><div class="info-title">🧬 Biodata</div><p>JK: ${p.jenis_kelamin||'-'}<br>Status: ${p.status||'-'}<br>Pekerjaan: ${p.pekerjaan||'-'}</p></div>
       <div class="info-section"><div class="info-title">👨‍👩‍👧 Keluarga</div><p>Ayah: ${p.ayah||'-'}<br>Ibu: ${p.ibu||'-'}<br>Pasangan: ${p.pasangan||'-'}<br>Anak: ${p.jumlah_anak||'-'}</p></div>
       <div class="info-section"><div class="info-title">📍 Lokasi</div><p>Lahir: ${p.tanggal_lahir||'-'} ${p.alamat_lahir||'-'}<br>Domisili: ${p.domisili||'-'}</p></div>
       <div class="info-section"><div class="info-title">📞 Kontak</div><p>WA: ${p.wa||'-'}</p></div>`;
-    document.getElementById('popupWaBtn').onclick = () => { if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); else alert('No WA'); };
+    document.getElementById('popupWaBtn').onclick = () => { if(p.wa) window.open(`https://wa.me/${p.wa.replace(/\D/g,'')}`); else alert('No WA tersedia'); };
     document.getElementById('popupSilsilahBtn').onclick = () => { closePopup(); window.location.href = `?id=${p.id}`; };
     document.getElementById('globalPopup').style.display = 'flex';
   }
@@ -715,7 +744,7 @@
   function openZoom(src) { document.getElementById('zoomImage').src = src; document.getElementById('zoomLayer').style.display = 'flex'; document.body.classList.add('lock'); }
   function closeZoom() { document.getElementById('zoomLayer').style.display = 'none'; document.body.classList.remove('lock'); }
   
-  // Search
+  // Search & Modal
   function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; document.body.classList.add('lock'); }
   function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; document.body.classList.remove('lock'); }
   function openFilterModal() { document.getElementById('filterModal').style.display = 'flex'; document.body.classList.add('lock'); }
@@ -725,7 +754,7 @@
     if (!kw) { alert('Masukkan nama'); return; }
     let found = globalFamily.find(p => p.nama.toLowerCase().includes(kw));
     if (found) { closeSearchModal(); window.location.href = `?id=${found.id}`; }
-    else alert('Tidak ditemukan');
+    else alert('Nama tidak ditemukan');
   }
   
   // Close modal klik luar
@@ -733,7 +762,7 @@
   document.getElementById('filterModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeFilterModal(); });
   document.getElementById('globalPopup').addEventListener('click', e => { if(e.target === e.currentTarget) closePopup(); });
   
-  // Drag to scroll
+  // Drag to scroll horizontal
   const wrapper = document.getElementById('treeWrapper');
   let isDown = false, startX, scrollLeft;
   wrapper.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - wrapper.offsetLeft; scrollLeft = wrapper.scrollLeft; });
@@ -749,7 +778,7 @@
       if (detailId) renderDetailMode(detailId);
       else renderFullHierarchyTree();
       
-      document.getElementById('backBtn').onclick = () => { if(detailId || currentRootId) window.location.href = '.'; else renderFullHierarchyTree(); };
+      document.getElementById('backBtn').onclick = () => { if(detailId) window.location.href = '.'; else renderFullHierarchyTree(); };
       document.getElementById('treeViewBtn').onclick = goToFullTree;
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
