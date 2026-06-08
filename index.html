@@ -135,7 +135,7 @@
       font-size: 0.85rem;
     }
     
-    /* ===== TAMPILAN POHON HIERARKIS (KHUSUS MENU POHON) ===== */
+    /* ===== TAMPILAN POHON HIERARKIS ===== */
     .tree-wrapper {
       overflow-x: auto;
       overflow-y: visible;
@@ -334,8 +334,7 @@
 
 <div class="toolbar">
   <button class="btn-glass" id="backBtn" style="display:none;">⬅ Kembali</button>
-  <button class="btn-glass" id="treeViewBtn">🌳 Tampilan Pohon</button>
-  <button class="btn-glass" id="defaultViewBtn">🏠 Tampilan Default</button>
+  <button class="btn-glass" id="toggleTreeBtn">🌳 Tampilan Pohon</button>
   <button class="btn-glass" id="searchBtn">🔍 Cari</button>
   <button class="btn-glass" id="filterBtn">📌 Filter</button>
 </div>
@@ -389,7 +388,8 @@
 
 <script>
   let globalFamily = [];
-  let currentMode = 'default'; // 'default', 'tree', 'detail', 'filter'
+  let isTreeMode = false; // false = default mode, true = tree mode
+  let currentFilterActive = false;
   let currentFilterParams = { generasi: '', hidup: false, laki: false, perempuan: false };
   
   const urlParams = new URLSearchParams(window.location.search);
@@ -426,7 +426,9 @@
     
     document.getElementById('mainTitle').innerHTML = '🌳 Silsilah Keluarga';
     document.getElementById('backBtn').style.display = 'none';
-    currentMode = 'default';
+    document.getElementById('toggleTreeBtn').innerHTML = '🌳 Tampilan Pohon';
+    isTreeMode = false;
+    currentFilterActive = false;
     hideFilterInfo();
   }
   
@@ -616,13 +618,23 @@
     
     document.getElementById('mainTitle').innerHTML = '🌳 Pohon Keluarga (Hierarkis)';
     document.getElementById('backBtn').style.display = 'none';
-    currentMode = 'tree';
+    document.getElementById('toggleTreeBtn').innerHTML = '🏠 Tampilan Default';
+    isTreeMode = true;
+    currentFilterActive = false;
     hideFilterInfo();
     
     setTimeout(() => {
       const w = document.querySelector('.tree-wrapper');
       if (w) w.scrollLeft = 0;
     }, 100);
+  }
+  
+  function toggleTreeView() {
+    if (isTreeMode) {
+      renderDefaultView();
+    } else {
+      renderTreeView();
+    }
   }
   
   // ========== DETAIL MODE ==========
@@ -636,7 +648,8 @@
     
     document.getElementById('mainTitle').innerHTML = `📌 Silsilah: ${shortName(person.nama)}`;
     document.getElementById('backBtn').style.display = 'inline-flex';
-    currentMode = 'detail';
+    document.getElementById('toggleTreeBtn').style.display = 'inline-flex';
+    isTreeMode = false;
     hideFilterInfo();
     
     const block = document.createElement('div');
@@ -757,7 +770,9 @@
     if (perempuan && !laki) filterText.push('Perempuan');
     document.getElementById('mainTitle').innerHTML = `📋 Filter: ${filterText.join(', ')} (${filtered.length})`;
     document.getElementById('backBtn').style.display = 'inline-flex';
-    currentMode = 'filter';
+    document.getElementById('toggleTreeBtn').style.display = 'inline-flex';
+    isTreeMode = false;
+    currentFilterActive = true;
     showFilterInfo(`${filtered.length} anggota ditemukan`);
   }
   
@@ -769,14 +784,14 @@
     renderDefaultView();
   }
   
-  function goToDefaultView() {
-    if (detailId) window.location.href = '.';
-    else renderDefaultView();
-  }
-  
-  function goToTreeView() {
-    if (detailId) window.location.href = '.';
-    else renderTreeView();
+  function goBack() {
+    if (detailId) {
+      window.location.href = '.';
+    } else if (currentFilterActive) {
+      renderDefaultView();
+    } else {
+      renderDefaultView();
+    }
   }
   
   function showFilterInfo(text) {
@@ -822,6 +837,18 @@
   document.getElementById('filterModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeFilterModal(); });
   document.getElementById('globalPopup').addEventListener('click', e => { if(e.target === e.currentTarget) closePopup(); });
   
+  // Drag to scroll untuk tree mode
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrapper = document.querySelector('.tree-wrapper');
+    if (wrapper) {
+      let isDown = false, startX, scrollLeft;
+      wrapper.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - wrapper.offsetLeft; scrollLeft = wrapper.scrollLeft; });
+      wrapper.addEventListener('mouseleave', () => { isDown = false; });
+      wrapper.addEventListener('mouseup', () => { isDown = false; });
+      wrapper.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - wrapper.offsetLeft; const walk = (x - startX) * 1; wrapper.scrollLeft = scrollLeft - walk; });
+    }
+  });
+  
   // ========== INIT ==========
   fetch('data.json?v='+Date.now())
     .then(res => res.json())
@@ -830,9 +857,8 @@
       if (detailId) renderDetailMode(detailId);
       else renderDefaultView();
       
-      document.getElementById('backBtn').onclick = () => { if(detailId) window.location.href = '.'; else renderDefaultView(); };
-      document.getElementById('treeViewBtn').onclick = goToTreeView;
-      document.getElementById('defaultViewBtn').onclick = goToDefaultView;
+      document.getElementById('backBtn').onclick = goBack;
+      document.getElementById('toggleTreeBtn').onclick = toggleTreeView;
       document.getElementById('searchBtn').onclick = openSearchModal;
       document.getElementById('filterBtn').onclick = openFilterModal;
       document.getElementById('closeSearchBtn').onclick = closeSearchModal;
