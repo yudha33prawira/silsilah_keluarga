@@ -119,12 +119,9 @@
       border-radius: 30px; transition: 0.2s;
     }
     .bread-line span:hover {
-      background: rgba(0,0,0,0.5); text-decoration: none;
-      transform: scale(1.02);
+      background: rgba(0,0,0,0.5); transform: scale(1.02);
     }
-    .bread-arrow {
-      color: rgba(255,255,255,0.6); font-size: 14px;
-    }
+    .bread-arrow { color: rgba(255,255,255,0.5); font-size: 14px; margin: 0 2px; }
     
     /* POPUP DETAIL */
     .popup-overlay {
@@ -176,7 +173,7 @@
     }
     .btn-close-popup:hover { background: #cbd5e1; }
     
-    /* MODAL SEARCH & FILTER */
+    /* MODAL */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -417,9 +414,11 @@
     showBreadcrumb(person);
   }
 
-  // ===== BREADCRUMB YANG BENAR =====
-  // Garis Ayah: orang → ayah → ayah dari ayah → ...
-  // Garis Ibu: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ...
+  /**
+   * BREADCRUMB YANG BENAR:
+   * - Garis Ayah: orang → ayah → ayah dari ayah → ... (lurus via ayah)
+   * - Garis Ibu: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ... (lurus via ayah dari garis ibu)
+   */
   function showBreadcrumb(person) {
     const old = document.querySelector('.breadcrumb-area');
     if (old) old.remove();
@@ -427,78 +426,48 @@
     const breadDiv = document.createElement('div');
     breadDiv.className = 'breadcrumb-area';
     
-    // ===== GARIS AYAH (lurus ke atas via ayah) =====
+    // ===== GARIS AYAH =====
     let ayahPath = [];
     let currentAyah = person;
-    let visitedAyah = new Set();
-    
-    while (currentAyah && !visitedAyah.has(currentAyah.id)) {
-      visitedAyah.add(currentAyah.id);
+    while (currentAyah) {
       ayahPath.unshift({ id: currentAyah.id, nama: currentAyah.nama });
-      
       let ayahObj = globalFamily.find(p => p.nama === currentAyah.ayah);
-      if (!ayahObj || !ayahObj.nama) break;
+      if (!ayahObj) break;
       currentAyah = ayahObj;
     }
     
     // ===== GARIS IBU =====
-    // Aturan: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ...
+    // Path: orang → ibu → ayah dari ibu → ayah dari ayah ibu → ...
     let ibuPath = [];
-    let current = person;
-    let step = 0;
-    let visited = new Set();
     
-    while (current && !visited.has(current.id) && step < 15) {
-      visited.add(current.id);
-      
-      // Tambahkan current ke path
-      if (ibuPath.length === 0 || ibuPath[ibuPath.length-1].id !== current.id) {
-        ibuPath.push({ id: current.id, nama: current.nama });
-      }
-      
-      if (step === 0) {
-        // Langkah 0: cari ibu dari orang tersebut
-        let ibuObj = globalFamily.find(p => p.nama === current.ibu);
-        if (!ibuObj || !ibuObj.nama) break;
+    // Step 1: mulai dari orang
+    let current = person;
+    
+    // Step 2: tambahkan ibu (jika ada)
+    if (current.ibu) {
+      let ibuObj = globalFamily.find(p => p.nama === current.ibu);
+      if (ibuObj) {
+        ibuPath.push(ibuObj);
         current = ibuObj;
-        step = 1;
-        continue;
+      } else {
+        ibuPath.push({ id: '0', nama: '?' });
       }
-      
-      if (step === 1) {
-        // Langkah 1: setelah ibu, cari ayah dari ibu (suami dari ibu)
-        let suamiIbu = globalFamily.find(p => 
-          p.jenis_kelamin === "L" && 
-          p.pasangan && p.pasangan.split('|').map(s=>s.trim()).includes(current.nama)
-        );
-        
-        if (suamiIbu && suamiIbu.nama) {
-          current = suamiIbu;
-          step = 2;
-          continue;
-        } else {
-          // jika tidak ada suami, coba cari ayah dari ibu langsung?
-          let ayahIbu = globalFamily.find(p => p.nama === current.ayah);
-          if (ayahIbu && ayahIbu.nama) {
-            current = ayahIbu;
-            step = 2;
-            continue;
-          }
-          break;
-        }
-      }
-      
-      if (step >= 2) {
-        // Langkah selanjutnya: terus ke atas via ayah (patrilineal)
-        let ayahObj = globalFamily.find(p => p.nama === current.ayah);
-        if (!ayahObj || !ayahObj.nama) break;
-        current = ayahObj;
-        step++;
-        continue;
-      }
-      
-      break;
     }
+    
+    // Step 3: selanjutnya telusuri AYAH dari current (bukan ibu lagi)
+    while (current) {
+      let ayahObj = globalFamily.find(p => p.nama === current.ayah);
+      if (!ayahObj) break;
+      ibuPath.push(ayahObj);
+      current = ayahObj;
+    }
+    
+    // Balik agar dari yang paling tua ke yang paling muda (orang ada di akhir)
+    // Tapi kita ingin tampil: Orang → Ibu → AyahIbu → AyahAyahIbu → ...
+    // Jadi tidak perlu dibalik, urutan sudah benar dari bawah ke atas
+    // Kita buat array final: [orang, ibu, ayah1, ayah2, ...]
+    let finalIbuPath = [person];
+    finalIbuPath.push(...ibuPath);
     
     // Render Garis Ayah
     const ayahHtml = ayahPath.map((p, idx) => {
@@ -509,16 +478,16 @@
     }).join('');
     
     // Render Garis Ibu
-    const ibuHtml = ibuPath.map((p, idx) => {
-      if (idx === ibuPath.length - 1) {
+    const ibuHtml = finalIbuPath.map((p, idx) => {
+      if (idx === finalIbuPath.length - 1) {
         return `<span data-id="${p.id}">${shortName(p.nama)}</span>`;
       }
       return `<span data-id="${p.id}">${shortName(p.nama)}</span><span class="bread-arrow"> → </span>`;
     }).join('');
     
     breadDiv.innerHTML = `
-      <div class="bread-line"><strong>👨‍🦳 Garis Ayah (Patrilineal):</strong> ${ayahHtml}</div>
-      <div class="bread-line"><strong>👩‍🦳 Garis Ibu (Matrilineal → Patrilineal):</strong> ${ibuHtml}</div>
+      <div class="bread-line"><strong>👨‍🦳 Garis Ayah:</strong> ${ayahHtml}</div>
+      <div class="bread-line"><strong>👩‍🦳 Garis Ibu:</strong> ${ibuHtml}</div>
     `;
     
     const hero = document.querySelector('.hero');
